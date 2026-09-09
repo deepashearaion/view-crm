@@ -1,0 +1,140 @@
+.analytics-actions {
+    display: flex;
+    align-items: center;
+}
+
+.view-toggle {
+    display: flex;
+    background-color: #F3F4F6;
+    border-radius: 8px;
+    padding: 4px;
+}
+
+.view-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    color: #6B7280;
+    font-weight: 500;
+}
+
+.view-btn.active {
+    background-color: white;
+    color: #1E29FF;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.alpha-filter {
+    position: relative;
+    user-select: none;
+}
+
+.alpha-circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #8B5CF6;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+.custom-dropdown-menu {
+    position: absolute;
+    top: 40px;
+    left: 90px;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    z-index: 10;
+    width: 140px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+.dropdown-item:hover {
+    background-color: #F8FAFC;
+}
+
+.call-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.call-stat-box {
+    background-color: #F8FAFC;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.call-stat-label {
+    font-size: 0.85rem;
+    color: #6B7280;
+    margin-bottom: 8px;
+}
+
+.call-stat-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.call-metrics-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.call-metrics-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.metric-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.metric-icon-wrap {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.metric-name {
+    font-size: 0.9rem;
+    color: #4B5563;
+    font-weight: 500;
+}
+
+.metric-val {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
