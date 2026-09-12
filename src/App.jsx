@@ -1,6 +1,10 @@
 import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import DashboardLayout from './components/layout/DashboardLayout';
+import SignIn from './pages/Auth/SignIn';
+import SignUp from './pages/Auth/SignUp';
+import ForgotPassword from './pages/Auth/ForgotPassword';
 import Home from './pages/Home';
 import Deals from './pages/Deals';
 import Activities from './pages/Activities';
@@ -9,7 +13,12 @@ import Contacts from './pages/Contacts';
 import Companies from './pages/Companies';
 import { ArrowLeft, Rocket } from 'lucide-react';
 
-function App() {
+function ProtectedRoute({ children }) {
+  const isAuthenticated = localStorage.getItem('currentUser');
+  return isAuthenticated ? children : <Navigate to="/signin" replace />;
+}
+
+function MainDashboard() {
   const [currentPage, setCurrentPage] = useState('Home');
 
   return (
@@ -50,6 +59,27 @@ function App() {
         </div>
       )}
     </DashboardLayout>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Navigate to="/signin" replace />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route
+          path="/dashboard/*"
+          element={
+            <ProtectedRoute>
+              <MainDashboard />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </Router>
   );
 }
 
