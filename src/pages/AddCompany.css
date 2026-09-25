@@ -1,0 +1,522 @@
+/* ==========================================================================
+   Add New Company Right Slide-Over Drawer Styles (Exact match to 3 Screenshots)
+   ========================================================================== */
+
+/* Darkened overlay for the left side of the dashboard */
+.add-company-drawer-overlay {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(17, 24, 39, 0.22);
+    z-index: 99;
+    display: flex;
+    justify-content: flex-end;
+    animation: fadeInOverlay 0.2s ease-out;
+}
+
+@keyframes fadeInOverlay {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* ---------------- Slide-Over Panel ---------------- */
+.add-company-drawer-panel {
+    width: clamp(500px, 48vw, 740px);
+    height: calc(100vh - 64px);
+    background-color: #FFFFFF;
+    box-shadow: -6px 0 30px rgba(0, 0, 0, 0.14);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    animation: slideDrawerFromRight 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+}
+
+@keyframes slideDrawerFromRight {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+/* ---------------- Drawer Header (Sticky Top) ---------------- */
+.add-company-drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 18px 28px;
+    border-bottom: 1px solid #E5E7EB;
+    background-color: #FFFFFF;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+.add-company-drawer-header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.add-company-drawer-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+    letter-spacing: -0.2px;
+}
+
+.add-company-drawer-subtitle {
+    font-size: 13px;
+    color: #6B7280;
+    margin: 0;
+}
+
+.add-company-drawer-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.add-company-drawer-save-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #1D4ED8;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 6px;
+    padding: 7px 20px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.add-company-drawer-save-btn:hover {
+    background-color: #1E40AF;
+}
+
+.add-company-drawer-save-btn:active {
+    transform: translateY(1px);
+}
+
+.add-company-drawer-close-btn {
+    background-color: #FEE2E2;
+    color: #EF4444;
+    border: none;
+    border-radius: 6px;
+    padding: 7px 20px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.add-company-drawer-close-btn:hover {
+    background-color: #FECACA;
+}
+
+/* ---------------- Drawer Scrollable Body ---------------- */
+.add-company-drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 22px 28px 48px 28px;
+    box-sizing: border-box;
+}
+
+.add-company-drawer-form {
+    width: 100%;
+}
+
+.add-company-drawer-section {
+    margin-bottom: 28px;
+}
+
+.drawer-section-heading {
+    font-size: 16.5px;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 16px 0;
+}
+
+/* ---------------- 2-Column Grid ---------------- */
+.drawer-form-grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 24px;
+    row-gap: 18px;
+}
+
+.drawer-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.drawer-field-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+    display: flex;
+    align-items: center;
+}
+
+.required-red-star {
+    color: #EF4444;
+    margin-left: 2px;
+    font-weight: 700;
+}
+
+/* ---------------- Text & Tel Inputs ---------------- */
+.drawer-text-input {
+    width: 100%;
+    height: 42px;
+    border: 1px solid #D1D5DB;
+    border-radius: 7px;
+    padding: 0 13px;
+    font-size: 13.5px;
+    color: #111827;
+    background-color: #FFFFFF;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.drawer-text-input::placeholder {
+    color: #9CA3AF;
+}
+
+.drawer-text-input:focus {
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* ---------------- Mobile Compound Input ---------------- */
+.drawer-mobile-compound {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.drawer-country-picker-wrap {
+    position: relative;
+}
+
+.drawer-country-picker-btn {
+    height: 42px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 10px;
+    background-color: #FFFFFF;
+    border: 1px solid #D1D5DB;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #111827;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease;
+}
+
+.drawer-country-picker-btn:hover {
+    border-color: #9CA3AF;
+}
+
+.drawer-flag-icon {
+    font-size: 16px;
+    line-height: 1;
+}
+
+.drawer-code-text {
+    font-size: 13.5px;
+    color: #374151;
+    font-weight: 500;
+}
+
+.drawer-country-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    width: 220px;
+    max-height: 240px;
+    overflow-y: auto;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+    padding: 4px;
+}
+
+.drawer-country-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #374151;
+    transition: background-color 0.12s ease;
+}
+
+.drawer-country-option:hover {
+    background-color: #F3F4F6;
+}
+
+.drawer-country-option.selected {
+    background-color: #EFF6FF;
+    color: #2563EB;
+    font-weight: 500;
+}
+
+.drawer-country-name {
+    flex: 1;
+}
+
+.drawer-country-code-pill {
+    color: #6B7280;
+    font-size: 12px;
+}
+
+.drawer-mobile-input {
+    flex: 1;
+    height: 42px;
+    border: 1px solid #D1D5DB;
+    border-radius: 7px;
+    padding: 0 13px;
+    font-size: 13.5px;
+    color: #111827;
+    background-color: #FFFFFF;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.drawer-mobile-input::placeholder {
+    color: #9CA3AF;
+}
+
+.drawer-mobile-input:focus {
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* ---------------- Custom Dropdowns ---------------- */
+.drawer-custom-dropdown {
+    position: relative;
+    width: 100%;
+}
+
+.drawer-dropdown-trigger {
+    width: 100%;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #FFFFFF;
+    border: 1px solid #D1D5DB;
+    border-radius: 7px;
+    padding: 0 13px;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.drawer-dropdown-trigger:hover {
+    border-color: #9CA3AF;
+}
+
+.drawer-dropdown-trigger:focus {
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.drawer-status-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid transparent;
+}
+
+.drawer-owner-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.drawer-owner-avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
+.drawer-owner-name {
+    font-size: 13.5px;
+    color: #111827;
+    font-weight: 500;
+}
+
+.drawer-placeholder-text {
+    font-size: 13.5px;
+    color: #9CA3AF;
+}
+
+.drawer-selected-text {
+    font-size: 13.5px;
+    color: #111827;
+    font-weight: 500;
+}
+
+.drawer-dropdown-popover {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    width: 100%;
+    max-height: 220px;
+    overflow-y: auto;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+    padding: 4px;
+}
+
+.drawer-dropdown-option {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #374151;
+    transition: background-color 0.12s ease;
+}
+
+.drawer-dropdown-option:hover {
+    background-color: #F3F4F6;
+}
+
+.drawer-dropdown-option.selected {
+    background-color: #EFF6FF;
+    color: #2563EB;
+    font-weight: 500;
+}
+
+/* ---------------- Checkbox Card Boxes (Email Opt Out, SMS Opt Out) ---------------- */
+.drawer-checkbox-box {
+    width: 100%;
+    height: 42px;
+    border: 1px solid #D1D5DB;
+    border-radius: 7px;
+    padding: 0 13px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #FFFFFF;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+    user-select: none;
+}
+
+.drawer-checkbox-box:hover {
+    border-color: #9CA3AF;
+    background-color: #F9FAFB;
+}
+
+.drawer-checkbox-box.active {
+    border-color: #3B82F6;
+    background-color: #F8FAFC;
+}
+
+.drawer-square-check {
+    width: 17px;
+    height: 17px;
+    border: 2px solid #374151;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #FFFFFF;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+
+.drawer-square-check.checked {
+    border-color: #2563EB;
+    background-color: #2563EB;
+}
+
+.drawer-checkbox-label {
+    font-size: 13.5px;
+    color: #374151;
+    font-weight: 400;
+}
+
+/* ---------------- Bottom Centered "+ Create Company" Button ---------------- */
+.drawer-bottom-action-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 36px;
+    margin-bottom: 20px;
+}
+
+.drawer-create-company-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: #1D4ED8;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    padding: 11px 34px;
+    font-size: 14.5px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(29, 78, 216, 0.2);
+    transition: background-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.drawer-create-company-btn:hover {
+    background-color: #1E40AF;
+    box-shadow: 0 6px 10px -1px rgba(29, 78, 216, 0.25);
+}
+
+.drawer-create-company-btn:active {
+    transform: translateY(1px);
+}
+
+/* ---------------- Responsive ---------------- */
+@media (max-width: 768px) {
+    .add-company-drawer-panel {
+        width: 100vw;
+    }
+
+    .drawer-form-grid-2col {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+}

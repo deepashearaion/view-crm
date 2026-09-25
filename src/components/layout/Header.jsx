@@ -41,19 +41,45 @@ const Header = ({ title = 'Home' }) => {
 
                 <div className="notifications" style={{ position: 'relative' }}>
                     <Bell size={20} className="bell-icon" />
-                    <span style={{ position: 'absolute', top: '-5px', right: '-5px', background: '#EF4444', color: 'white', borderRadius: '50%', fontSize: '10px', width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>31</span>
+                    <span className="notif-badge">31</span>
                 </div>
 
-                <div className="user-profile" ref={dropdownRef} onClick={() => setDropdownOpen(!dropdownOpen)} style={{ cursor: 'pointer', position: 'relative' }}>
-                    <div className="avatar" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        <img src="https://ui-avatars.com/api/?name=Arun&background=1E29FF&color=fff" alt="User" />
-                        <ChevronDown size={14} color="#6B7280" />
+                <div
+                    className="user-profile"
+                    ref={dropdownRef}
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                    style={{ cursor: 'pointer', position: 'relative' }}
+                    title="Account options"
+                >
+                    <div className="avatar">
+                        <div className="header-avatar-circle">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M12 2L4 6v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V6l-8-4z"
+                                    fill="#1D4ED8"
+                                    stroke="#60A5FA"
+                                    strokeWidth="1.2"
+                                />
+                                <path
+                                    d="M9 12l2 2 4-4"
+                                    stroke="#FFFFFF"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                            </svg>
+                        </div>
                     </div>
 
                     {dropdownOpen && (
                         <div className="profile-menu">
                             <div className="profile-menu-header">
-                                <img src="https://ui-avatars.com/api/?name=Ivory&background=1E29FF&color=fff" alt="Ivory" />
+                                <div className="header-avatar-circle" style={{ width: 36, height: 36 }}>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                        <path d="M12 2L4 6v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V6l-8-4z" fill="#1D4ED8" />
+                                        <path d="M9 12l2 2 4-4" stroke="#FFF" strokeWidth="2" strokeLinecap="round" />
+                                    </svg>
+                                </div>
                                 <div>
                                     <div className="company-name">Ivory Holidays</div>
                                     <div className="view-account">Go to my account</div>

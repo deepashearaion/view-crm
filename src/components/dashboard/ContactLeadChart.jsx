@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ChartWidget from './ChartWidget';
 import { ResponsiveContainer, AreaChart, XAxis, YAxis, CartesianGrid, Area } from 'recharts';
-import { Calendar, ChevronDown } from 'lucide-react';
+import DateFilter from './DateFilter';
 import OwnerFilter from './OwnerFilter';
 import './ContactLeadChart.css';
 
@@ -34,34 +34,33 @@ const fullStatuses = [
 const ContactLeadChart = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const headerFilters = (
-        <div className="dashboard-filters" style={{ display: 'flex', gap: '12px', position: 'relative' }}>
-            <div className="filter-dropdown date-filter" style={{ display: 'flex', justifyContent: 'space-between', borderRadius: '6px', padding: '8px 12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <Calendar size={14} className="filter-icon-left" />
-                    <span style={{ fontSize: '0.8rem' }}>Today ☆</span>
-                </div>
-                <ChevronDown size={14} className="filter-icon-right" />
-            </div>
-            <OwnerFilter defaultLabel="All Lead Owners" />
-        </div>
-    );
-
     return (
         <>
-            <ChartWidget title="Contact Lead Status" headerRight={headerFilters}>
+            <ChartWidget title="Contact Lead Status">
+                <div className="card-filter-row">
+                    <DateFilter defaultValue="Today" />
+                    <div style={{ minWidth: '150px' }}>
+                        <OwnerFilter defaultLabel="All Lead Owners" />
+                    </div>
+                </div>
+
                 <div className="contact-chart-container">
-                    <ResponsiveContainer width="100%" height={260}>
-                        <AreaChart data={emptyData} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                            <XAxis dataKey="name" axisLine={true} tickLine={false} tick={{ fontSize: 10 }} tickMargin={10} minTickGap={5} />
+                    <ResponsiveContainer width="100%" height={240}>
+                        <AreaChart data={emptyData} margin={{ top: 10, right: 10, left: -20, bottom: 5 }}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                            <XAxis
+                                dataKey="name"
+                                axisLine={{ stroke: '#E5E7EB' }}
+                                tickLine={false}
+                                tick={{ fontSize: 10, fill: '#9CA3AF' }}
+                                tickMargin={8}
+                            />
                             <YAxis
-                                axisLine={true}
+                                axisLine={{ stroke: '#E5E7EB' }}
                                 tickLine={false}
                                 ticks={[0, 2, 4, 6, 8, 10]}
-                                tick={{ fontSize: 10 }}
-                                tickMargin={10}
-                                label={{ value: 'Count', angle: -90, position: 'insideLeft', offset: -15, style: { textAnchor: 'middle', fontSize: 11, fill: '#6B7280' } }}
+                                tick={{ fontSize: 10, fill: '#9CA3AF' }}
+                                tickMargin={8}
                             />
                             <Area type="monotone" dataKey="uv" stroke="transparent" fill="transparent" />
                         </AreaChart>

@@ -1,3 +1,11 @@
+.card-filter-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    gap: 12px;
+}
+
 .contact-chart-container {
     margin-bottom: 20px;
 }

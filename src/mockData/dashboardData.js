@@ -21,7 +21,7 @@ export const kpiData = [
         trend: 'up'
     },
     {
-        title: 'Total New Custom...',
+        title: 'Total New Customers',
         value: '0',
         percentage: '+0%',
         addon: '+ 0.00',

@@ -27,11 +27,25 @@ const OwnerFilter = ({ defaultLabel = 'All Owners', onSelect }) => {
         <div ref={dropdownRef} style={{ position: 'relative', flex: 1, display: 'flex' }}>
             <div
                 className="filter-dropdown owner-filter"
-                style={{ flex: 1, justifyContent: 'space-between', borderRadius: '6px', padding: '8px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', border: '1px solid #E5E7EB', backgroundColor: '#fff' }}
+                style={{
+                    flex: 1,
+                    justifyContent: 'space-between',
+                    borderRadius: '20px',
+                    padding: '6px 14px',
+                    height: '34px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    border: '1px solid #E5E7EB',
+                    backgroundColor: '#fff',
+                    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.02)',
+                    whiteSpace: 'nowrap',
+                    gap: '8px'
+                }}
                 onClick={() => setIsOpen(!isOpen)}
             >
-                <span style={{ fontSize: '0.85rem' }}>{selectedLabel}</span>
-                <ChevronDown size={14} className="filter-icon-right" style={{ color: '#6B7280' }} />
+                <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#374151' }}>{selectedLabel}</span>
+                <ChevronDown size={14} className="filter-icon-right" style={{ color: '#6B7280', transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none' }} />
             </div>
 
             {isOpen && (

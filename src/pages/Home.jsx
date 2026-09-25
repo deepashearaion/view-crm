@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import './Home.css';
-import { LayoutGrid, RefreshCw, Calendar, ChevronDown, SlidersHorizontal } from 'lucide-react';
+import { TrendingUp, RefreshCw, ChevronDown, SlidersHorizontal } from 'lucide-react';
 import KPICard from '../components/dashboard/KPICard';
 import { kpiData } from '../mockData/dashboardData';
 
+import DateFilter from '../components/dashboard/DateFilter';
+import OwnerFilter from '../components/dashboard/OwnerFilter';
 import ContactLeadChart from '../components/dashboard/ContactLeadChart';
 import ARRMRRChart from '../components/dashboard/ARRMRRChart';
 import CallAnalytics from '../components/dashboard/CallAnalytics';
@@ -11,55 +13,61 @@ import TaskAnalytics from '../components/dashboard/TaskAnalytics';
 import EmailStats from '../components/dashboard/EmailStats';
 import MeetingDashboard from '../components/dashboard/MeetingDashboard';
 import TBasedCallAnalytics from '../components/dashboard/TBasedCallAnalytics';
-import OwnerFilter from '../components/dashboard/OwnerFilter';
 
 const Home = ({ setCurrentPage }) => {
     const [refresh, setRefresh] = useState(false);
+
     return (
         <div className="home-container">
-            {/* Dashboard Headline & Filters */}
-            <div className="dashboard-header-row">
-                <div className="dashboard-title-group">
-                    <div className="dashboard-icon-bg">
-                        <LayoutGrid size={24} className="dashboard-icon" />
-                    </div>
-                    <h2 className="dashboard-main-title">Dashboard</h2>
+            {/* Sales Dashboard Sub-Header & Controls */}
+            <div className="dashboard-subnav-row">
+                <div className="dashboard-tab-active">
+                    <TrendingUp size={19} className="dashboard-tab-icon" />
+                    <span className="dashboard-tab-title">Sales Dashboard</span>
+                    <ChevronDown size={16} className="dashboard-tab-chevron" />
+                    <div className="dashboard-tab-indicator" />
                 </div>
 
-                <div className="dashboard-filters">
-                    <button className="icon-btn outline" style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: '#F8FAFC', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setRefresh(!refresh)}>
-                        <RefreshCw size={14} color="#6B7280" />
+                <div className="dashboard-subnav-actions">
+                    <button
+                        type="button"
+                        className="subnav-btn refresh-circle-btn"
+                        onClick={() => setRefresh(!refresh)}
+                        title="Refresh Data"
+                    >
+                        <RefreshCw size={15} color="#4B5563" className={refresh ? 'spin' : ''} />
                     </button>
 
-                    <div className="filter-dropdown date-filter">
-                        <Calendar size={14} className="filter-icon-left" />
-                        <span style={{ fontSize: '0.85rem' }}>Today ☆</span>
-                        <ChevronDown size={14} className="filter-icon-right" />
-                    </div>
+                    <DateFilter defaultValue="Today" />
 
                     <div style={{ minWidth: '150px' }}>
                         <OwnerFilter defaultLabel="All Lead Owners" />
                     </div>
 
-                    <button className="icon-btn outline" style={{ backgroundColor: '#F8FAFC', padding: 6 }}>
-                        <SlidersHorizontal size={14} color="#6B7280" style={{ transform: 'rotate(90deg)' }} />
+                    <button
+                        type="button"
+                        className="subnav-btn sliders-square-btn"
+                        title="Filter Options"
+                    >
+                        <SlidersHorizontal size={15} color="#4B5563" style={{ transform: 'rotate(90deg)' }} />
                     </button>
                 </div>
             </div>
 
-            {/* KPI Row */}
+            {/* KPI Grid */}
             <div className="kpi-grid">
                 {kpiData.map((kpi, idx) => (
                     <KPICard key={idx} {...kpi} />
                 ))}
             </div>
 
-            {/* Content Grids */}
+            {/* Top Charts Grid */}
             <div className="charts-grid-row">
                 <ContactLeadChart />
                 <ARRMRRChart />
             </div>
 
+            {/* Secondary Analytics */}
             <div className="charts-grid-row">
                 <CallAnalytics setCurrentPage={setCurrentPage} />
                 <TaskAnalytics />
@@ -72,7 +80,7 @@ const Home = ({ setCurrentPage }) => {
 
             <div className="charts-grid-row">
                 <TBasedCallAnalytics />
-                <div style={{ flex: 1 }}></div> {/* Empty column filler */}
+                <div style={{ flex: 1 }}></div>
             </div>
         </div>
     );

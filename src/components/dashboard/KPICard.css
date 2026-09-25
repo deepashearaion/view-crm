@@ -1,27 +1,32 @@
 .kpi-card {
-    background-color: var(--card-bg);
+    background-color: #ffffff;
     border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    padding: 22px 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    border: 1px solid var(--border-color);
-    min-height: 130px;
+    border: 1px solid #E5E7EB;
+    min-height: 135px;
 }
 
 .kpi-title {
     font-size: 0.95rem;
-    color: #4B5563;
+    color: #1F2937;
     font-weight: 500;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .kpi-value {
-    font-size: 1.8rem;
+    font-size: 2rem;
     font-weight: 700;
-    color: var(--text-dark);
+    color: #111827;
     margin-bottom: 16px;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
 }
 
 .kpi-footer {
@@ -31,17 +36,18 @@
 }
 
 .kpi-badge {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    padding: 4px 8px;
+    gap: 3px;
+    padding: 3px 8px;
     border-radius: 12px;
     font-size: 0.75rem;
     font-weight: 600;
 }
 
 .kpi-badge.positive {
-    background-color: #D1FAE5;
-    color: #059669;
+    background-color: #DCFCE7;
+    color: #15803D;
 }
 
 .kpi-badge.negative {
@@ -52,6 +58,5 @@
 .kpi-addon {
     font-size: 0.85rem;
     font-weight: 500;
-    color: #059669;
-    /* Green text for +0.00 */
+    color: #15803D;
 }

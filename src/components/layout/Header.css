@@ -1,7 +1,7 @@
 .header {
-    height: 70px;
+    height: 64px;
     background-color: #ffffff;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid #E5E7EB;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -11,38 +11,36 @@
 .header-title {
     font-size: 1.25rem;
     font-weight: 600;
-    color: var(--text-dark);
+    color: #111827;
+    letter-spacing: -0.01em;
 }
 
 .header-right {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 18px;
 }
 
 .helpdesk-info {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    margin-right: 12px;
+    display: none;
 }
 
 .helpdesk-text {
     font-size: 0.8rem;
-    color: var(--text-dark);
+    color: #1F2937;
     font-weight: 500;
 }
 
 .helpdesk-subtext {
-    font-size: 0.75rem;
-    color: #9CA3AF;
-    margin-top: 2px;
+    font-size: 0.72rem;
+    color: #6B7280;
+    margin-top: 1px;
 }
 
 .welcome-msg {
-    font-weight: 500;
+    font-weight: 600;
     font-size: 0.95rem;
-    color: var(--text-dark);
+    color: #111827;
 }
 
 .notifications {
@@ -51,37 +49,51 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
 }
 
 .bell-icon {
-    color: var(--primary-blue);
+    color: #2563EB;
 }
 
 .notif-badge {
     position: absolute;
-    top: 4px;
-    right: 4px;
-    background-color: var(--danger-color);
+    top: 2px;
+    right: 2px;
+    background-color: #EF4444;
     color: white;
-    font-size: 0.65rem;
-    font-weight: bold;
-    padding: 2px 5px;
-    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 700;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border: 2px solid white;
 }
 
 .user-profile {
     cursor: pointer;
+    position: relative;
 }
 
-.avatar img {
+.header-avatar-circle {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    object-fit: cover;
-    border: 1px solid var(--border-color);
+    background-color: #0A1C3F;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid #E2E8F0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: transform 0.15s ease;
+}
+
+.header-avatar-circle:hover {
+    transform: scale(1.04);
 }
 
 .profile-menu {
@@ -90,9 +102,9 @@
     right: 0;
     width: 260px;
     background: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
     border-radius: 8px;
-    border: 1px solid var(--border-color);
+    border: 1px solid #E5E7EB;
     z-index: 100;
     padding: 10px 0;
 }
@@ -101,24 +113,18 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 0 16px 12px;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.profile-menu-header img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+    padding: 4px 16px 12px;
+    border-bottom: 1px solid #E5E7EB;
 }
 
 .company-name {
     font-weight: 600;
     font-size: 0.95rem;
-    color: var(--text-dark);
+    color: #111827;
 }
 
 .view-account {
-    color: #1E29FF;
+    color: #2563EB;
     font-size: 0.8rem;
     margin-top: 2px;
 }
@@ -133,12 +139,12 @@
     gap: 12px;
     padding: 10px 16px;
     font-size: 0.9rem;
-    color: var(--text-dark);
-    transition: background 0.2s;
+    color: #374151;
+    transition: background 0.15s;
 }
 
 .menu-item:hover {
-    background: var(--bg-color);
+    background: #F8FAFC;
 }
 
 .check-in-btn {
@@ -146,7 +152,7 @@
 }
 
 .check-in-btn:hover {
-    background: #ecfdf5;
+    background: #ECFDF5;
 }
 
 .breaks-dropdown {
@@ -163,16 +169,16 @@
 }
 
 .logout-btn {
-    color: var(--danger-color);
+    color: #EF4444;
 }
 
 .logout-btn:hover {
-    background: #fef2f2;
+    background: #FEF2F2;
 }
 
 .menu-divider {
     height: 1px;
-    background: var(--border-color);
+    background: #E5E7EB;
     margin: 4px 0;
 }
 

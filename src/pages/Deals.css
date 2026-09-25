@@ -2,11 +2,13 @@
     display: flex;
     flex-direction: column;
     margin: -1.5rem;
-    height: calc(100vh - 70px);
+    height: calc(100vh - 64px);
     background-color: #FFFFFF;
     overflow: hidden;
+    position: relative;
 }
 
+/* Main Deals Toolbar */
 .deals-toolbar {
     display: flex;
     align-items: center;
@@ -14,6 +16,7 @@
     padding: 12px 24px;
     background-color: #FFFFFF;
     border-bottom: 1px solid #E5E7EB;
+    gap: 16px;
 }
 
 .toolbar-left,
@@ -29,24 +32,26 @@
     align-items: center;
     gap: 8px;
     border: 1px solid #E5E7EB;
-    padding: 6px 12px;
+    padding: 6px 14px;
     border-radius: 20px;
     font-size: 0.85rem;
     font-weight: 500;
     color: #111827;
     cursor: pointer;
+    background-color: #FFFFFF;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 .pipeline-icon {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     background-color: #E0E7FF;
     color: #4F46E5;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     font-weight: bold;
 }
 
@@ -59,19 +64,28 @@
     align-items: center;
     gap: 6px;
     background-color: #ECFDF5;
-    border: 1px solid #D1FAE5;
+    border: 1px solid #A7F3D0;
     padding: 6px 12px;
     border-radius: 6px;
     font-size: 0.75rem;
     color: #065F46;
 }
 
+.scroll-tip-label {
+    font-weight: 500;
+}
+
 .key-hint {
     background-color: #FFFFFF;
-    padding: 2px 6px;
+    padding: 2px 7px;
     border-radius: 4px;
     border: 1px solid #D1FAE5;
-    margin: 0 4px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: #047857;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
 }
 
 .owner-filter-wrapper {
@@ -82,53 +96,65 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
-    background-color: #F3F4F6;
-    border: none;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
     color: #4B5563;
     cursor: pointer;
+    transition: background 0.15s;
 }
 
 .icon-action-btn:hover {
-    background-color: #E5E7EB;
+    background-color: #F8FAFC;
+    border-color: #D1D5DB;
 }
 
 .add-stage-btn {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 16px;
-    border-radius: 20px;
+    padding: 7px 14px;
+    border-radius: 6px;
     border: 1px solid #E5E7EB;
     background-color: #FFFFFF;
     font-size: 0.85rem;
     font-weight: 500;
     color: #111827;
     cursor: pointer;
+    transition: all 0.15s;
+}
+
+.add-stage-btn:hover,
+.reorder-btn:hover {
+    background-color: #F8FAFC;
+    border-color: #CBD5E1;
 }
 
 .reorder-btn {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 16px;
-    border-radius: 20px;
+    padding: 7px 14px;
+    border-radius: 6px;
     border: 1px solid #E5E7EB;
-    background-color: #F9FAFB;
+    background-color: #FFFFFF;
     font-size: 0.85rem;
     font-weight: 500;
     color: #111827;
     cursor: pointer;
+    transition: all 0.15s;
 }
 
+/* Sub-toolbar */
 .deals-sub-toolbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 24px;
+    padding: 10px 24px;
     background-color: #FFFFFF;
+    border-bottom: 1px solid #F1F5F9;
 }
 
 .filters-left,
@@ -143,21 +169,21 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 12px;
+    padding: 6px 14px;
     border-radius: 20px;
     border: 1px solid #E5E7EB;
     background-color: #FFFFFF;
     font-size: 0.85rem;
     font-weight: 500;
-    color: #4B5563;
+    color: #374151;
     cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 .icon-text {
     display: flex;
     align-items: center;
     gap: 6px;
-    color: #3B82F6;
 }
 
 .dropdown-menu {
@@ -167,243 +193,239 @@
     min-width: 150px;
     background: #FFFFFF;
     border: 1px solid #E5E7EB;
-    border-radius: 6px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
     z-index: 1000;
     padding: 4px 0;
+}
+
+/* Priority Dropdown (Image 5) */
+.priority-menu {
+    width: 165px;
+    padding: 0;
+    overflow: hidden;
+}
+
+.priority-header-item {
+    background-color: #E5E7EB;
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #111827;
+    user-select: none;
 }
 
 .menu-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
+    gap: 10px;
+    padding: 9px 14px;
     font-size: 0.85rem;
-    color: #4B5563;
+    color: #111827;
+    cursor: pointer;
+    transition: background 0.15s;
 }
 
 .menu-item:hover {
-    background-color: #F3F4F6;
+    background-color: #F8FAFC;
 }
 
-.flag {
-    font-size: 1.1rem;
+/* All Time Dropdown (Image 4) */
+.tall-dropdown {
+    width: 175px;
+    max-height: 380px;
+    overflow-y: auto;
+    padding: 4px 0;
 }
 
-.flag.low {
-    color: #EF4444;
+.tall-dropdown::-webkit-scrollbar {
+    width: 5px;
 }
 
-.flag.med {
-    color: #F59E0B;
+.tall-dropdown::-webkit-scrollbar-thumb {
+    background-color: #E2E8F0;
+    border-radius: 4px;
 }
 
-.flag.high {
-    color: #EF4444;
+.time-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px;
+    font-size: 0.85rem;
+    color: #111827;
+}
+
+.active-time-item {
+    background-color: #E5E7EB;
+    font-weight: 500;
 }
 
 .deals-count {
-    padding: 6px 12px;
-    border-radius: 20px;
-    border: 1px solid #E5E7EB;
     background-color: #F3F4F6;
+    border: 1px solid #E5E7EB;
+    color: #374151;
+    padding: 4px 10px;
+    border-radius: 6px;
     font-size: 0.85rem;
     font-weight: 500;
 }
 
 .deals-value {
-    padding: 6px 12px;
-    border-radius: 20px;
     background-color: #FEE2E2;
-    color: #EF4444;
+    border: 1px solid #FECACA;
+    color: #111827;
+    padding: 4px 12px;
+    border-radius: 6px;
     font-size: 0.85rem;
     font-weight: 600;
 }
 
-/* Pipeline Board Scroll behavior */
-.pipeline-board {
+/* ================================================= */
+/* KANBAN PIPELINE BOARD (Matching media_1790327064584.png) */
+/* ================================================= */
+.pipeline-board-container {
+    position: relative;
     flex: 1;
     display: flex;
-    gap: 16px;
-    padding: 0 24px 24px 24px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    align-items: stretch;
+    overflow: hidden;
+    height: 100%;
+    background-color: #FFFFFF;
 }
 
-.pipeline-column {
-    background-color: #FFF7ED;
-    /* Base background for varying columns */
-    border-radius: 8px;
-    min-width: 250px;
-    max-width: 250px;
+.pipeline-board {
+    display: flex;
+    gap: 16px;
+    padding: 16px 24px;
+    overflow-x: auto;
+    align-items: stretch;
+    height: calc(100vh - 200px);
+}
+
+.pipeline-column-wrapper {
+    width: 290px;
+    min-width: 290px;
     display: flex;
     flex-direction: column;
-    /* This makes the column itself control its max height */
-    max-height: 100%;
+    flex-shrink: 0;
+}
+
+/* The colored box */
+.column-box {
+    border-radius: 14px;
+    padding: 16px 16px 18px 16px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .column-header {
-    padding: 12px 16px;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-    border-top: 4px solid transparent;
+    padding: 0 0 10px 0;
 }
 
 .col-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
-.col-top h3 {
-    margin: 0;
-    font-size: 1rem;
+.col-title {
+    font-size: 1.05rem;
     font-weight: 600;
     color: #111827;
+    margin: 0;
+    letter-spacing: -0.01em;
 }
 
 .col-count {
-    color: #3B82F6;
-    font-size: 0.9rem;
-    font-weight: 600;
+    font-size: 1.05rem;
+    font-weight: 700;
 }
 
 .col-stats {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.85rem;
+}
+
+.col-stats .amount {
+    font-size: 0.95rem;
+    font-weight: 700;
     color: #111827;
-    font-weight: 600;
 }
 
 .col-stats .deals {
+    font-size: 0.88rem;
+    color: #111827;
     font-weight: 500;
-    color: #4B5563;
 }
 
-/* Header border colors */
-.column-header.qual {
-    border-top-color: #F59E0B;
+/* Colored horizontal divider strip under header */
+.column-color-divider {
+    height: 4.5px;
+    width: 100%;
+    border-radius: 2px;
+    margin: 8px 0 16px 0;
 }
 
-.column-header.needs {
-    border-top-color: #3B82F6;
-}
-
-.column-header.prop {
-    border-top-color: #A855F7;
-}
-
-.column-header.neg {
-    border-top-color: #14B8A6;
-}
-
-.column-header.won {
-    border-top-color: #10B981;
-    background-color: #ECFDF5;
-}
-
-.pipeline-column.won {
-    background-color: #ECFDF5;
-}
-
-.column-header.lost {
-    border-top-color: #EF4444;
-    background-color: #FEF2F2;
-}
-
-.pipeline-column.lost {
-    background-color: #FEF2F2;
-}
-
-/* The scrollable area for a specific column */
-.column-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    scrollbar-width: thin;
-}
-
-.column-body::-webkit-scrollbar {
-    width: 6px;
-}
-
-.column-body::-webkit-scrollbar-thumb {
-    background-color: #CBD5E1;
-    border-radius: 8px;
-}
-
-.empty-state {
+/* In Pipeline Progress Ring & Info */
+.column-progress-row {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px;
-    background-color: transparent;
+    margin-bottom: 8px;
 }
 
-.small-state {
-    padding: 0 4px;
-}
-
-.ring {
-    width: 40px;
-    height: 40px;
+.progress-ring {
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: #4B5563;
-    border: 3px solid;
-    border-top-color: transparent;
-    transform: rotate(45deg);
+    flex-shrink: 0;
 }
 
-.ring.qual-ring {
-    border-color: #F59E0B;
-    border-top-color: transparent;
+.progress-ring-inner {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: #111827;
 }
 
-.ring.needs-ring {
-    border-color: #3B82F6;
-    border-top-color: transparent;
-}
-
-.ring.prop-ring {
-    border-color: #A855F7;
-    border-top-color: transparent;
-}
-
-.ring.neg-ring {
-    border-color: #14B8A6;
-    border-top-color: transparent;
-}
-
-.ring.won-ring {
-    border-color: #10B981;
-}
-
-.ring.lost-ring {
-    border-color: #EF4444;
-}
-
-.empty-text {
+.progress-text-block {
     display: flex;
     flex-direction: column;
+    gap: 2px;
+}
+
+.progress-status-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #1F2937;
+}
+
+.progress-activity-subtitle {
     font-size: 0.75rem;
     color: #6B7280;
 }
 
-.empty-text strong {
-    color: #111827;
-    font-size: 0.85rem;
+/* Deal Cards inside column */
+.column-cards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    margin-top: 10px;
+    flex: 1;
 }
 
 .deal-card {
@@ -411,7 +433,7 @@
     border: 1px solid #E5E7EB;
     border-radius: 8px;
     padding: 12px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .deal-title-row {
@@ -424,7 +446,7 @@
 .deal-title {
     color: #2563EB;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
 }
 
 .deal-owner {
@@ -436,8 +458,8 @@
 .deal-meta {
     font-size: 0.8rem;
     color: #111827;
-    font-weight: 500;
-    margin-bottom: 12px;
+    font-weight: 600;
+    margin-bottom: 10px;
 }
 
 .dot {
@@ -446,12 +468,13 @@
 }
 
 .deal-date {
-    color: #4B5563;
+    color: #6B7280;
+    font-weight: 400;
 }
 
 .deal-divider {
     height: 1px;
-    background-color: #E5E7EB;
+    background-color: #F1F5F9;
     margin: 0 -12px 8px -12px;
 }
 
@@ -459,8 +482,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-top: none;
-    padding-top: 4px;
 }
 
 .action-icons {
@@ -470,15 +491,16 @@
 }
 
 .avatar-circle {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     background-color: #3B82F6;
     color: white;
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-weight: bold;
 }
 
 .icon-circle {
@@ -490,25 +512,846 @@
     justify-content: center;
 }
 
-.icon-circle.check {
-    background-color: #EF4444;
-}
+.icon-circle.check { background-color: #EF4444; }
 
-
-.column-footer {
+/* The + Add Deal button on the white canvas below each box */
+.column-add-deal-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: 12px;
+    gap: 8px;
+    padding: 14px 0 10px 0;
+    color: #111827;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.15s;
+    user-select: none;
+}
+
+.column-add-deal-btn:hover {
+    color: #2563EB;
+}
+
+/* ================================================= */
+/* MODAL BACKDROP (Shared)                           */
+/* ================================================= */
+.deals-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-badge-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-badge-icon.purple-badge {
+    background-color: #EEF2FF;
+}
+
+.modal-main-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+}
+
+/* ================================================= */
+/* 1. MANAGE PIPELINE STAGES MODAL (Image 1)         */
+/* ================================================= */
+.manage-stages-modal {
+    background-color: #FFFFFF;
+    border-radius: 16px;
+    width: 540px;
+    max-width: 90vw;
+    padding: 24px 28px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    animation: popUp 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes popUp {
+    from { transform: scale(0.96); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.modal-top-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.modal-title-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.modal-form-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.modal-input-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.section-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.stage-name-input-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #E2E8F0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    background-color: #FFFFFF;
+}
+
+.modal-text-input {
+    border: none;
+    outline: none;
+    font-size: 0.9rem;
+    color: #111827;
+    width: 100%;
+}
+
+.stage-type-toggle-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid #E2E8F0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    background-color: #FFFFFF;
+}
+
+.stage-type-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.stage-type-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.open-type-pill {
+    background-color: #EFF6FF;
+    color: #2563EB;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 500;
+}
+
+.type-toggle-switch {
+    width: 44px;
+    height: 24px;
+    border-radius: 12px;
+    background-color: #93C5FD;
+    position: relative;
+    cursor: pointer;
+}
+
+.toggle-circle {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: #1D4ED8;
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    transition: all 0.2s;
+}
+
+/* Open Stages Chips Section */
+.open-stages-section {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.open-stages-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.blue-bar-indicator {
+    width: 3.5px;
+    height: 16px;
+    background-color: #1E29FF;
+    border-radius: 2px;
+}
+
+.open-stages-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.stage-count-badge {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #EEF2FF;
+    color: #4F46E5;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stages-chips-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 16px;
+}
+
+.stage-chip-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #DBEAFE;
+    border-radius: 8px;
+    padding: 8px 14px;
+    background-color: #FFFFFF;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #1E293B;
+}
+
+.delete-chip-btn {
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: #EF4444;
+    border: 2px solid #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.modal-footer-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.modal-cancel-btn {
     color: #4B5563;
+    font-size: 0.88rem;
+    font-weight: 500;
+    padding: 8px 16px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    transition: color 0.15s;
+}
+
+.modal-cancel-btn:hover {
+    color: #111827;
+}
+
+.modal-submit-blue-btn {
+    background-color: #1E29FF;
+    color: #FFFFFF;
+    border-radius: 8px;
+    padding: 9px 20px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    transition: background 0.15s;
+}
+
+.modal-submit-blue-btn:hover {
+    background-color: #1A24D8;
+}
+
+/* ================================================= */
+/* 2. REORDER STAGES MODAL (Image 2 & Image 3)       */
+/* ================================================= */
+.reorder-stages-modal {
+    background-color: #FFFFFF;
+    border-radius: 16px;
+    width: 560px;
+    max-width: 90vw;
+    max-height: 85vh;
+    padding: 24px 28px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: popUp 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reorder-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.reorder-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.reorder-close-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background-color: #EEF2FF;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.reorder-close-btn:hover {
+    background-color: #E0E7FF;
+}
+
+.reorder-body {
+    overflow-y: auto;
+    padding: 16px 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.reorder-group-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.reorder-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.group-header-left-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.active-pill-badge {
+    background-color: #EFF6FF;
+    color: #2563EB;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.won-pill-badge {
+    background-color: #ECFDF5;
+    color: #059669;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.lost-pill-badge {
+    background-color: #FEF2F2;
+    color: #DC2626;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.reorder-items-box {
+    border: 1px solid #F1F5F9;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.reorder-stage-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid #F1F5F9;
+    background-color: #FFFFFF;
+}
+
+.reorder-stage-row:last-child {
+    border-bottom: none;
+}
+
+.reorder-stage-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.equal-handle-badge {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background-color: #EEF2FF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.equal-handle-badge.green-badge {
+    background-color: #ECFDF5;
+}
+
+.equal-handle-badge.red-badge {
+    background-color: #FEF2F2;
+}
+
+.reorder-stage-name {
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: #111827;
+}
+
+/* Open stages toggle switch */
+.reorder-toggle-switch {
+    width: 38px;
+    height: 22px;
+    border-radius: 11px;
+    background-color: #EEF2FF;
+    border: 1.5px solid #111827;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.reorder-toggle-switch.enabled {
+    background-color: #EEF2FF;
+}
+
+.reorder-toggle-knob {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: #111827;
+    position: absolute;
+    top: 2.5px;
+    right: 3px;
+    transition: all 0.2s;
+}
+
+.reorder-toggle-switch.disabled .reorder-toggle-knob {
+    right: auto;
+    left: 3px;
+    background-color: #9CA3AF;
+}
+
+.reorder-toggle-switch.disabled {
+    border-color: #9CA3AF;
+}
+
+/* Closed won toggle (Image 3) */
+.reorder-won-toggle {
+    width: 38px;
+    height: 22px;
+    border-radius: 11px;
+    background-color: #ECFDF5;
+    border: 1.5px solid #111827;
+    position: relative;
+    cursor: pointer;
+}
+
+.won-knob-circle {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #10B981;
+    position: absolute;
+    top: 1.5px;
+    right: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Closed lost toggle (Image 3) */
+.reorder-lost-toggle {
+    width: 38px;
+    height: 22px;
+    border-radius: 11px;
+    background-color: #FEF2F2;
+    border: 1.5px solid #111827;
+    position: relative;
+    cursor: pointer;
+}
+
+.lost-knob-circle {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #EF4444;
+    position: absolute;
+    top: 1.5px;
+    right: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.reorder-footer-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid #F1F5F9;
+}
+
+.reorder-cancel-btn {
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #374151;
+    background: #FFFFFF;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.reorder-cancel-btn:hover {
+    background-color: #F8FAFC;
+}
+
+.reorder-save-btn {
+    background-color: #1E29FF;
+    color: #FFFFFF;
+    border-radius: 8px;
+    padding: 8px 24px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: background 0.15s;
+}
+
+.reorder-save-btn:hover {
+    background-color: #1A24D8;
+}
+
+/* ================================================= */
+/* 3. CREATE NEW DEAL DRAWER (Image 2 from before)   */
+/* ================================================= */
+.create-deal-drawer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 580px;
+    max-width: 90vw;
+    background-color: #FFFFFF;
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+    border-left: 1px solid #E5E7EB;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 24px 32px;
+    animation: drawerSlide 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes drawerSlide {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+.drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.drawer-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+}
+
+.drawer-subtitle {
+    font-size: 0.85rem;
+    color: #6B7280;
+    margin: 4px 0 0 0;
+}
+
+.drawer-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.drawer-create-top-btn {
+    background-color: #1E29FF;
+    color: #FFFFFF;
+    border-radius: 6px;
+    padding: 7px 18px;
     font-size: 0.85rem;
     font-weight: 500;
     cursor: pointer;
-    border-top: 1px solid transparent;
-    /* just for spacing */
+    transition: background-color 0.15s;
+    border: none;
 }
 
-.column-footer:hover {
+.drawer-create-top-btn:hover {
+    background-color: #1A24D8;
+}
+
+.drawer-close-top-btn {
+    background-color: #EF4444;
+    color: #FFFFFF;
+    border-radius: 6px;
+    padding: 7px 18px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.15s;
+    border: none;
+}
+
+.drawer-close-top-btn:hover {
+    background-color: #DC2626;
+}
+
+.drawer-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.form-section-title {
+    font-size: 0.95rem;
+    font-weight: 600;
     color: #111827;
+    margin: 22px 0 16px 0;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-label {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.required-star {
+    color: #EF4444;
+    margin-left: 2px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    color: #111827;
+    background-color: #FFFFFF;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.form-input:focus,
+.form-select:focus {
+    border-color: #2563EB;
+}
+
+.select-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.form-select {
+    width: 100%;
+    padding: 9px 30px 9px 12px;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    color: #374151;
+    background-color: #FFFFFF;
+    appearance: none;
+    outline: none;
+    cursor: pointer;
+}
+
+.select-chevron {
+    position: absolute;
+    right: 12px;
+    color: #6B7280;
+    pointer-events: none;
+}
+
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-cal-icon {
+    position: absolute;
+    right: 12px;
+    color: #6B7280;
+    pointer-events: none;
+}
+
+.owner-select-box,
+.stage-select-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 7px 12px;
+    background-color: #FFFFFF;
+    cursor: pointer;
+    position: relative;
+}
+
+.owner-chip,
+.stage-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.owner-avatar-letter {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background-color: #14B8A6;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.owner-chip-name,
+.stage-chip-name {
+    font-size: 0.88rem;
+    color: #111827;
+    font-weight: 500;
+}
+
+.stage-letter-badge {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background-color: #8B5CF6;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.stage-hidden-select {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+}
+
+.create-deal-main-btn {
+    background-color: #1E29FF;
+    color: #FFFFFF;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 10px 28px;
+    cursor: pointer;
+    border: none;
+    margin-top: 28px;
+    width: fit-content;
+    transition: background-color 0.15s;
+}
+
+.create-deal-main-btn:hover {
+    background-color: #1A24D8;
 }

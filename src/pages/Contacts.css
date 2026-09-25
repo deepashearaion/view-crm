@@ -1,0 +1,1559 @@
+/* Contacts.css - DealConverter CRM Contacts View */
+
+.contacts-container {
+    background-color: #FFFFFF;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: #111827;
+}
+
+/* ---------------- Top Actions Bar 1 ---------------- */
+.contacts-top-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 24px;
+    border-bottom: 1px solid #E5E7EB;
+    background-color: #FFFFFF;
+    position: relative;
+    z-index: 20;
+}
+
+.contacts-top-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.contacts-dropdown-trigger {
+    display: flex;
+    align-items: center;
+    padding: 7px 12px;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    gap: 8px;
+    background-color: #FFFFFF;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #1F2937;
+    transition: all 0.15s ease;
+    user-select: none;
+}
+
+.contacts-dropdown-trigger:hover {
+    border-color: #9CA3AF;
+    background-color: #F9FAFB;
+}
+
+.contacts-dropdown-trigger.active {
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.date-filter-trigger {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 12px;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    background-color: #FFFFFF;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: #374151;
+    font-weight: 500;
+    transition: all 0.15s ease;
+}
+
+.date-filter-trigger:hover {
+    border-color: #9CA3AF;
+    background-color: #F9FAFB;
+}
+
+.date-filter-trigger.active {
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.funnel-filter-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    background-color: #FFFFFF;
+    cursor: pointer;
+    color: #2563EB;
+    transition: all 0.15s ease;
+    position: relative;
+}
+
+.funnel-filter-btn:hover {
+    border-color: #3B82F6;
+    background-color: #EFF6FF;
+}
+
+.funnel-filter-btn.active {
+    background-color: #EFF6FF;
+    border-color: #3B82F6;
+    color: #1D4ED8;
+}
+
+.filter-active-dot {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: #EF4444;
+}
+
+.lead-type-tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    background-color: #FFFFFF;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #1F2937;
+    transition: all 0.15s ease;
+}
+
+.lead-type-tab:hover {
+    background-color: #F9FAFB;
+    border-color: #9CA3AF;
+}
+
+.lead-type-tab.active {
+    background-color: #F3F4F6;
+    border-color: #3B82F6;
+    color: #1D4ED8;
+}
+
+.contacts-top-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+}
+
+.column-settings-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: #E5E7EB;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #4B5563;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.column-settings-btn:hover {
+    background-color: #D1D5DB;
+    color: #1F2937;
+}
+
+.column-settings-btn.active {
+    background-color: #D1D5DB;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.add-contacts-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    background-color: #1D4ED8;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: background-color 0.15s ease;
+}
+
+.add-contacts-btn:hover {
+    background-color: #1E40AF;
+}
+
+/* ---------------- Filter Bar 2 ---------------- */
+.contacts-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 24px;
+    border-bottom: 1px solid #E5E7EB;
+    background-color: #FAFAFA;
+}
+
+.contacts-search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    background-color: #FFFFFF;
+    width: 250px;
+    transition: border-color 0.15s ease;
+    position: relative;
+}
+
+.contacts-search-box:focus-within {
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.contacts-search-box input {
+    border: none;
+    outline: none;
+    font-size: 0.85rem;
+    width: 100%;
+    color: #111827;
+}
+
+.contacts-search-box input::placeholder {
+    color: #9CA3AF;
+}
+
+.search-clear-btn {
+    border: none;
+    background: transparent;
+    color: #9CA3AF;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+}
+
+.search-clear-btn:hover {
+    color: #4B5563;
+}
+
+.day-filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border: 1px solid #FEF08A;
+    border-radius: 20px;
+    background-color: #FEF9C3;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #854D0E;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+}
+
+.day-filter-btn:hover {
+    background-color: #FEF08A;
+}
+
+.day-filter-btn.active {
+    background-color: #FDE047;
+    border-color: #CA8A04;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(202, 138, 4, 0.2);
+}
+
+.export-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background-color: #DCFCE7;
+    border: 1px solid #86EFAC;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #166534;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.export-btn:hover {
+    background-color: #BBF7D0;
+}
+
+.refresh-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: #4B5563;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+}
+
+.refresh-icon-btn:hover {
+    background-color: #E5E7EB;
+    color: #111827;
+}
+
+.refresh-icon-btn.refreshing svg {
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ---------------- Table Styles ---------------- */
+.contacts-table-wrapper {
+    flex: 1;
+    overflow-x: auto;
+}
+
+.contacts-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.85rem;
+}
+
+.contacts-table thead tr {
+    border-bottom: 1px solid #E5E7EB;
+    background-color: #FFFFFF;
+    color: #4B5563;
+}
+
+.contacts-table th {
+    padding: 12px 16px;
+    font-weight: 600;
+    font-size: 0.825rem;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.contacts-table th.col-check {
+    padding: 12px 24px;
+    width: 40px;
+}
+
+.sortable-th {
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.sortable-th:hover {
+    color: #111827;
+}
+
+.th-content {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sort-arrows {
+    font-size: 11px;
+    color: #9CA3AF;
+}
+
+.sort-arrows.active {
+    color: #2563EB;
+    font-weight: bold;
+}
+
+.contacts-table tbody tr {
+    border-bottom: 1px solid #E5E7EB;
+    transition: background-color 0.15s ease;
+}
+
+.contacts-table tbody tr:hover {
+    background-color: #F9FAFB;
+}
+
+.contacts-table tbody tr.row-selected {
+    background-color: #EFF6FF;
+}
+
+.contacts-table td {
+    padding: 12px 16px;
+    color: #111827;
+    white-space: nowrap;
+}
+
+.contacts-table td.col-check {
+    padding: 12px 24px;
+}
+
+.contact-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.contact-avatar-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.775rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.contact-name-link {
+    color: #2563EB;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.15s;
+}
+
+.contact-name-link:hover {
+    text-decoration: underline;
+    color: #1D4ED8;
+}
+
+.eye-view-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    background: #F3F4F6;
+    color: #6B7280;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.eye-view-btn:hover {
+    background: #E5E7EB;
+    color: #111827;
+}
+
+.lead-status-pill {
+    padding: 4px 10px;
+    border-radius: 12px;
+    background-color: #F3F4F6;
+    color: #4B5563;
+    font-size: 0.775rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.15s ease;
+}
+
+.lead-status-pill:hover {
+    background-color: #E5E7EB;
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #6B7280;
+}
+
+.destination-pill {
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 0.775rem;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.dest-manali {
+    background-color: #D1FAE5;
+    color: #059669;
+}
+
+.dest-goa {
+    background-color: #FEE2E2;
+    color: #DC2626;
+}
+
+.dest-kashmir {
+    background-color: #E0E7FF;
+    color: #4338CA;
+}
+
+.dest-dubai {
+    background-color: #FEF3C7;
+    color: #B45309;
+}
+
+.dest-generic {
+    background-color: #F3F4F6;
+    color: #4B5563;
+}
+
+/* ---------------- Footer Pagination ---------------- */
+.contacts-footer {
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-top: 1px solid #E5E7EB;
+    background-color: #FFFFFF;
+    flex-wrap: wrap;
+    position: relative;
+}
+
+.footer-stat-pill {
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.total-leads-pill {
+    background-color: #EFF6FF;
+    border: 1px solid #BFDBFE;
+    color: #1E40AF;
+}
+
+.total-leads-pill strong {
+    color: #2563EB;
+}
+
+.untouched-leads-pill {
+    background-color: #FEF2F2;
+    border: 1px solid #FECACA;
+    color: #991B1B;
+}
+
+.untouched-leads-pill strong {
+    color: #DC2626;
+}
+
+.page-count-pill {
+    background-color: #F0F9FF;
+    border: 1px solid #BAE6FD;
+    color: #0369A1;
+}
+
+.rows-per-page-container {
+    position: relative;
+}
+
+.rows-per-page-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    background-color: #E5E7EB;
+    border: 1px solid #D1D5DB;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    color: #374151;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.rows-per-page-pill:hover {
+    background-color: #D1D5DB;
+}
+
+.rows-per-page-menu {
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 0;
+    width: 130px;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+    padding: 4px 0;
+}
+
+.rows-option {
+    padding: 7px 12px;
+    font-size: 0.825rem;
+    color: #374151;
+    cursor: pointer;
+    transition: background-color 0.15s;
+    display: flex;
+    justify-content: space-between;
+}
+
+.rows-option:hover {
+    background-color: #F3F4F6;
+}
+
+.rows-option.active {
+    background-color: #EFF6FF;
+    color: #2563EB;
+    font-weight: 600;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+}
+
+.pagination-btn {
+    padding: 4px 8px;
+    background-color: #FFFFFF;
+    border: 1px solid #D1D5DB;
+    border-radius: 6px;
+    color: #3B82F6;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    min-width: 28px;
+    height: 28px;
+    font-size: 0.85rem;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background-color: #F3F4F6;
+}
+
+.pagination-btn:disabled {
+    color: #D1D5DB;
+    border-color: #E5E7EB;
+    cursor: not-allowed;
+}
+
+.pagination-btn.active-page {
+    background-color: #2563EB;
+    color: #FFFFFF;
+    border-color: #2563EB;
+    font-weight: 600;
+    padding: 4px 12px;
+}
+
+/* ========================================================
+   DROPDOWNS & MODALS (MATCHING USER SCREENSHOTS)
+   ======================================================== */
+
+.dropdown-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    background: transparent;
+}
+
+/* ---------------- 1. "All Contacts" Dropdown (Image 1) ---------------- */
+.all-contacts-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 24px;
+    width: 275px;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+    z-index: 45;
+    padding: 6px 0;
+    max-height: 480px;
+    overflow-y: auto;
+}
+
+.all-contacts-menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.all-contacts-menu::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.all-contacts-menu::-webkit-scrollbar-thumb {
+    background: #D1D5DB;
+    border-radius: 3px;
+}
+
+.all-contacts-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    font-size: 0.875rem;
+    color: #1F2937;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.all-contacts-item:hover {
+    background-color: #F3F4F6;
+}
+
+.all-contacts-item.selected {
+    background-color: #E5E7EB;
+    font-weight: 600;
+}
+
+.item-info-icon {
+    margin-left: auto;
+    color: #3B82F6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.bookmark-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+}
+
+/* ---------------- 2. Date Filter Dropdown (Image 2) ---------------- */
+.date-filter-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 175px;
+    width: 220px;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+    z-index: 45;
+    padding: 6px 0;
+    max-height: 420px;
+    overflow-y: auto;
+}
+
+.date-filter-menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.date-filter-menu::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.date-filter-menu::-webkit-scrollbar-thumb {
+    background: #D1D5DB;
+    border-radius: 3px;
+}
+
+.date-filter-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 16px;
+    font-size: 0.85rem;
+    color: #374151;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.date-filter-item:hover {
+    background-color: #F3F4F6;
+}
+
+.date-filter-item.selected {
+    background-color: #E5E7EB;
+    color: #111827;
+    font-weight: 600;
+}
+
+.date-filter-star {
+    margin-left: auto;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.date-filter-star.gold {
+    color: #EAB308;
+}
+
+.date-filter-star.outline {
+    color: #9CA3AF;
+}
+
+/* ---------------- 3. Filter Data Modal / Popover (Image 3) ---------------- */
+.filter-data-popover {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 290px;
+    width: 380px;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 16px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    z-index: 55;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-data-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.filter-header-icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background-color: #EEF2FF;
+    color: #6366F1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filter-data-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #6B7280;
+}
+
+.filter-close-btn {
+    margin-left: auto;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: #F3F4F6;
+    color: #9CA3AF;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.filter-close-btn:hover {
+    background-color: #E5E7EB;
+    color: #4B5563;
+}
+
+.filter-data-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px 0 16px;
+    max-height: 360px;
+    overflow-y: auto;
+}
+
+.filter-empty-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background-color: #F3F4F6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #D1D5DB;
+    margin-bottom: 14px;
+}
+
+.filter-empty-title {
+    font-size: 0.925rem;
+    font-weight: 600;
+    color: #4B5563;
+    margin-bottom: 4px;
+}
+
+.filter-empty-subtitle {
+    font-size: 0.8rem;
+    color: #9CA3AF;
+    margin-bottom: 20px;
+}
+
+.add-condition-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #FFFFFF;
+    border: 1.5px solid #BFDBFE;
+    border-radius: 10px;
+    color: #2563EB;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+}
+
+.add-condition-btn:hover {
+    background-color: #EFF6FF;
+    border-color: #93C5FD;
+}
+
+.filter-conditions-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.filter-condition-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.condition-select {
+    padding: 6px 8px;
+    border: 1px solid #D1D5DB;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    background: #FFFFFF;
+    color: #111827;
+    outline: none;
+}
+
+.condition-input {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid #D1D5DB;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    outline: none;
+}
+
+.condition-input:focus, .condition-select:focus {
+    border-color: #3B82F6;
+}
+
+.condition-remove-btn {
+    border: none;
+    background: transparent;
+    color: #EF4444;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+}
+
+.condition-remove-btn:hover {
+    color: #DC2626;
+}
+
+.filter-data-footer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-top: 14px;
+    border-top: 1px solid #F3F4F6;
+}
+
+.clear-filters-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #4B5563;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.clear-filters-btn:hover {
+    background-color: #F9FAFB;
+    border-color: #D1D5DB;
+}
+
+.apply-filters-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 20px;
+    background-color: #1D4ED8;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.apply-filters-btn:hover {
+    background-color: #1E40AF;
+}
+
+/* ---------------- 4. "Add New Contacts" Menu (Image 4) ---------------- */
+.add-contacts-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 24px;
+    width: 250px;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 16px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12), 0 5px 15px rgba(0, 0, 0, 0.06);
+    z-index: 55;
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.gradient-border-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 14px;
+    background-color: #FFFFFF;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #111827;
+    transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+    border: 2px solid transparent;
+    background-image: linear-gradient(#FFFFFF, #FFFFFF), linear-gradient(135deg, #EC4899 0%, #3B82F6 50%, #EF4444 100%);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+}
+
+.gradient-border-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(236, 72, 153, 0.15);
+    background-image: linear-gradient(#F9FAFB, #F9FAFB), linear-gradient(135deg, #F43F5E 0%, #2563EB 50%, #EC4899 100%);
+}
+
+.source-icon-wrap {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* ---------------- 5. Column Settings Popover ---------------- */
+.column-settings-popover {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 175px;
+    width: 240px;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    z-index: 55;
+    padding: 12px;
+}
+
+.col-settings-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #E5E7EB;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.col-settings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 0;
+}
+
+.col-setting-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.825rem;
+    color: #1F2937;
+    cursor: pointer;
+    user-select: none;
+}
+
+.col-setting-item input {
+    cursor: pointer;
+}
+
+.col-settings-footer {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 8px;
+    border-top: 1px solid #E5E7EB;
+}
+
+.reset-cols-btn {
+    border: none;
+    background: transparent;
+    color: #3B82F6;
+    font-size: 0.775rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.reset-cols-btn:hover {
+    text-decoration: underline;
+}
+
+/* ---------------- 6. Modals (Add Contact Form, Bulk Import, Webhook Integrations) ---------------- */
+.crm-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(17, 24, 39, 0.4);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.crm-modal-card {
+    background-color: #FFFFFF;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    width: 90%;
+    max-width: 520px;
+    overflow: hidden;
+    animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalPop {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.crm-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.crm-modal-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0;
+}
+
+.crm-modal-body {
+    padding: 20px 24px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.crm-form-group {
+    margin-bottom: 16px;
+}
+
+.crm-form-group label {
+    display: block;
+    font-size: 0.825rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+}
+
+.crm-form-group input,
+.crm-form-group select,
+.crm-form-group textarea {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #111827;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease;
+}
+
+.crm-form-group input:focus,
+.crm-form-group select:focus,
+.crm-form-group textarea:focus {
+    border-color: #2563EB;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.crm-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid #E5E7EB;
+    background-color: #F9FAFB;
+}
+
+.crm-btn-secondary {
+    padding: 8px 16px;
+    background-color: #FFFFFF;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.crm-btn-secondary:hover {
+    background-color: #F3F4F6;
+    border-color: #9CA3AF;
+}
+
+.crm-btn-primary {
+    padding: 8px 20px;
+    background-color: #1D4ED8;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.crm-btn-primary:hover {
+    background-color: #1E40AF;
+}
+
+/* Bulk import drag and drop zone */
+.import-dropzone {
+    border: 2px dashed #93C5FD;
+    border-radius: 12px;
+    background-color: #EFF6FF;
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.import-dropzone:hover {
+    border-color: #2563EB;
+    background-color: #DBEAFE;
+}
+
+.dropzone-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #BFDBFE;
+    color: #1D4ED8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+}
+
+/* Integration Webhook Box */
+.webhook-box {
+    background: #F3F4F6;
+    border-radius: 8px;
+    padding: 12px;
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: #1F2937;
+    word-break: break-all;
+    border: 1px solid #E5E7EB;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 6px;
+}
+
+.copy-webhook-btn {
+    background: #FFFFFF;
+    border: 1px solid #D1D5DB;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    font-family: sans-serif;
+    color: #2563EB;
+    font-weight: 600;
+}
+
+/* ---------------- 7. Contact Details Slide-Over Drawer ---------------- */
+.contact-drawer-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(17, 24, 39, 0.3);
+    z-index: 90;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.contact-drawer {
+    width: 100%;
+    max-width: 480px;
+    height: 100%;
+    background-color: #FFFFFF;
+    box-shadow: -10px 0 25px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    animation: drawerSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes drawerSlide {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+.drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+}
+
+.drawer-profile-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #E5E7EB;
+    margin-bottom: 20px;
+}
+
+.drawer-avatar-lg {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+.quick-action-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.quick-action-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    background-color: #F9FAFB;
+    font-size: 0.775rem;
+    font-weight: 500;
+    color: #4B5563;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.quick-action-btn:hover {
+    background-color: #EFF6FF;
+    border-color: #BFDBFE;
+    color: #2563EB;
+}
+
+.drawer-section-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 12px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.info-grid-item label {
+    display: block;
+    font-size: 0.75rem;
+    color: #6B7280;
+    margin-bottom: 3px;
+    font-weight: 500;
+}
+
+.info-grid-item span {
+    font-size: 0.85rem;
+    color: #111827;
+    font-weight: 600;
+}
+
+/* ---------------- 8. Floating Bulk Actions Bar ---------------- */
+.bulk-actions-floating-bar {
+    position: fixed;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #1F2937;
+    color: #FFFFFF;
+    padding: 10px 20px;
+    border-radius: 30px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 60;
+    animation: barPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes barPop {
+    from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+    to { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+
+.bulk-count-badge {
+    background-color: #3B82F6;
+    color: #FFFFFF;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.775rem;
+    font-weight: 600;
+}
+
+.bulk-action-btn {
+    background: transparent;
+    border: none;
+    color: #E5E7EB;
+    cursor: pointer;
+    font-size: 0.825rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+}
+
+.bulk-action-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #FFFFFF;
+}
+
+.bulk-action-btn.btn-danger:hover {
+    background: #DC2626;
+    color: #FFFFFF;
+}
+
+/* ---------------- 9. Quick Status Selector Popover ---------------- */
+.status-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+    width: 160px;
+    padding: 4px 0;
+}
+
+.status-dropdown-item {
+    padding: 6px 12px;
+    font-size: 0.775rem;
+    color: #374151;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.15s ease;
+}
+
+.status-dropdown-item:hover {
+    background-color: #F3F4F6;
+}
+
+/* ---------------- 10. Toast Notification ---------------- */
+.contacts-toast {
+    position: fixed;
+    top: 20px;
+    right: 24px;
+    background-color: #10B981;
+    color: #FFFFFF;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+    z-index: 150;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: toastSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes toastSlide {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
