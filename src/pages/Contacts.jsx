@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
     Search,
     ChevronDown,
@@ -25,6 +25,7 @@ import {
     UploadCloud,
     Download
 } from 'lucide-react';
+import AddContact from './AddContact';
 import './Contacts.css';
 
 // Bookmark ribbon SVG icon
@@ -72,9 +73,39 @@ const initialContacts = [
     { id: 10, created: 'Jul 09, 2026 09:00:22 AM', modified: 'Aug 21, 2026 11:37:07 AM', mobile: '+919988776655', name: 'Karthik Raja', status: 'Follow Up Leads', dest: 'Manali', initial: 'K', color: '#10B981', email: 'karthik@example.com', owner: 'Self', daysOld: 62 },
 ];
 
-const Contacts = () => {
+const Contacts = ({ initialOpenAddContact = false, setCurrentPage: setDashboardPage }) => {
     // Contacts Data State
-    const [contacts, setContacts] = useState(initialContacts);
+    const [contacts, setContacts] = useState(() => {
+        try {
+            const saved = localStorage.getItem('dealconverter_contacts_data');
+            if (saved) return JSON.parse(saved);
+        } catch (e) {
+            console.error(e);
+        }
+        return initialContacts;
+    });
+
+    useEffect(() => {
+        const handleStorage = () => {
+            try {
+                const saved = localStorage.getItem('dealconverter_contacts_data');
+                if (saved) setContacts(JSON.parse(saved));
+            } catch (e) {
+                console.error(e);
+            }
+        };
+        handleStorage();
+        window.addEventListener('storage', handleStorage);
+        return () => window.removeEventListener('storage', handleStorage);
+    }, []);
+
+    useEffect(() => {
+        try {
+            localStorage.setItem('dealconverter_contacts_data', JSON.stringify(contacts));
+        } catch (e) {
+            console.error(e);
+        }
+    }, [contacts]);
 
     // Dropdown & Popover Toggles
     const [isAllContactsOpen, setIsAllContactsOpen] = useState(false);
@@ -86,9 +117,17 @@ const Contacts = () => {
     const [statusPopoverId, setStatusPopoverId] = useState(null);
 
     // Modals & Drawers
-    const [activeModal, setActiveModal] = useState(null); // 'form', 'import', 'integration'
+    const [isAddContactDrawerOpen, setIsAddContactDrawerOpen] = useState(initialOpenAddContact);
+    const [activeModal, setActiveModal] = useState(initialOpenAddContact ? 'form' : null); // 'form', 'import', 'integration'
     const [selectedIntegration, setSelectedIntegration] = useState(null);
     const [selectedContactForDrawer, setSelectedContactForDrawer] = useState(null);
+
+    useEffect(() => {
+        if (initialOpenAddContact) {
+            setIsAddContactDrawerOpen(true);
+            setActiveModal('form');
+        }
+    }, [initialOpenAddContact]);
 
     // Filter and Tab States
     const [selectedView, setSelectedView] = useState('All Contacts');
@@ -557,7 +596,8 @@ const Contacts = () => {
                     {/* Add New Contacts Button (Screenshot 4) */}
                     <button
                         className="add-contacts-btn"
-                        onClick={() => {
+                        onClick={(e) => {
+                            e.stopPropagation();
                             const next = !isAddMenuOpen;
                             closeAllDropdowns();
                             setIsAddMenuOpen(next);
@@ -745,13 +785,21 @@ const Contacts = () => {
                         {addSources.map((source) => (
                             <button
                                 key={source.id}
+                                type="button"
                                 className="gradient-border-btn"
-                                onClick={() => {
+                                onClick={(e) => {
+                                    e.stopPropagation();
                                     setIsAddMenuOpen(false);
                                     if (source.type === 'form') {
+                                        setIsAddContactDrawerOpen(true);
                                         setActiveModal('form');
                                     } else if (source.type === 'import') {
-                                        setActiveModal('import');
+                                        localStorage.setItem('dealconverter_import_target', 'Contacts');
+                                        if (setDashboardPage) {
+                                            setDashboardPage('Bulk Import');
+                                        } else {
+                                            setActiveModal('import');
+                                        }
                                     } else {
                                         setSelectedIntegration(source);
                                         setActiveModal('integration');
@@ -1171,88 +1219,28 @@ const Contacts = () => {
                 </div>
             )}
 
-            {/* ---------------- Modal 1: Show Form (Add New Contact) ---------------- */}
-            {activeModal === 'form' && (
-                <div className="crm-modal-backdrop" onClick={() => setActiveModal(null)}>
-                    <div className="crm-modal-card" onClick={e => e.stopPropagation()}>
-                        <div className="crm-modal-header">
-                            <h3 className="crm-modal-title">Create New Contact</h3>
-                            <button className="filter-close-btn" onClick={() => setActiveModal(null)}>
-                                <X size={16} />
-                            </button>
-                        </div>
-                        <form onSubmit={handleSaveContact}>
-                            <div className="crm-modal-body">
-                                <div className="crm-form-group">
-                                    <label>Contact Name *</label>
-                                    <input
-                                        type="text"
-                                        required
-                                        placeholder="e.g. Ramesh Kumar"
-                                        value={newContact.name}
-                                        onChange={(e) => setNewContact({ ...newContact, name: e.target.value })}
-                                    />
-                                </div>
-                                <div className="crm-form-group">
-                                    <label>Mobile Number *</label>
-                                    <input
-                                        type="tel"
-                                        required
-                                        placeholder="e.g. +91 98765 43210"
-                                        value={newContact.mobile}
-                                        onChange={(e) => setNewContact({ ...newContact, mobile: e.target.value })}
-                                    />
-                                </div>
-                                <div className="crm-form-group">
-                                    <label>Email Address</label>
-                                    <input
-                                        type="email"
-                                        placeholder="e.g. ramesh@example.com"
-                                        value={newContact.email}
-                                        onChange={(e) => setNewContact({ ...newContact, email: e.target.value })}
-                                    />
-                                </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                                    <div className="crm-form-group">
-                                        <label>Lead Status</label>
-                                        <select
-                                            value={newContact.status}
-                                            onChange={(e) => setNewContact({ ...newContact, status: e.target.value })}
-                                        >
-                                            <option value="Cold Leads">Cold Leads</option>
-                                            <option value="Hot Leads">Hot Leads</option>
-                                            <option value="Open Deal">Open Deal</option>
-                                            <option value="Follow Up Leads">Follow Up Leads</option>
-                                            <option value="Enquiries">Enquiries</option>
-                                        </select>
-                                    </div>
-                                    <div className="crm-form-group">
-                                        <label>Destination</label>
-                                        <select
-                                            value={newContact.dest}
-                                            onChange={(e) => setNewContact({ ...newContact, dest: e.target.value })}
-                                        >
-                                            <option value="Manali">Manali</option>
-                                            <option value="Goa">Goa</option>
-                                            <option value="Kashmir">Kashmir</option>
-                                            <option value="Dubai">Dubai</option>
-                                            <option value="Kerala">Kerala</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="crm-modal-footer">
-                                <button type="button" className="crm-btn-secondary" onClick={() => setActiveModal(null)}>
-                                    Cancel
-                                </button>
-                                <button type="submit" className="crm-btn-primary">
-                                    Save Contact
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+            {/* ---------------- Slide-Over Drawer: Add New Contact (Matching 5 Screenshots) ---------------- */}
+            <AddContact
+                isOpen={isAddContactDrawerOpen || activeModal === 'form'}
+                onClose={() => {
+                    setIsAddContactDrawerOpen(false);
+                    setActiveModal(null);
+                }}
+                onBulkImport={() => {
+                    setIsAddContactDrawerOpen(false);
+                    setActiveModal(null);
+                    localStorage.setItem('dealconverter_import_target', 'Contacts');
+                    if (setDashboardPage) {
+                        setDashboardPage('Bulk Import');
+                    }
+                }}
+                onContactAdded={(createdItem) => {
+                    setContacts(prev => [createdItem, ...prev]);
+                    setActiveModal(null);
+                    setIsAddContactDrawerOpen(false);
+                    showToast(`Contact "${createdItem.name}" created successfully!`);
+                }}
+            />
 
             {/* ---------------- Modal 2: Bulk Import ---------------- */}
             {activeModal === 'import' && (

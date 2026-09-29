@@ -865,6 +865,7 @@ const Companies = ({ setCurrentPage: setDashboardPage, initialOpenAddCompany = f
                                     className="add-comp-gradient-btn"
                                     onClick={() => {
                                         setIsAddMenuOpen(false);
+                                        localStorage.setItem('dealconverter_import_target', 'Companies');
                                         if (setDashboardPage) {
                                             setDashboardPage('Bulk Import');
                                         }

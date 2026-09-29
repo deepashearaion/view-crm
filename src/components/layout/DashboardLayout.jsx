@@ -1,14 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 
 const DashboardLayout = ({ children, currentPage, setCurrentPage }) => {
-    // Default to true (collapsed) matching the user's reference screenshot
-    const [isCollapsed, setIsCollapsed] = useState(true);
+    // Open for 2 seconds then auto-collapses
+    const [isCollapsed, setIsCollapsed] = useState(false);
+
+    // Auto-open sidebar for 2 seconds on page change or initial load, then collapses
+    useEffect(() => {
+        setIsCollapsed(false);
+    }, [currentPage]);
 
     const getHeaderTitle = (page) => {
         if (page === 'Deals') return 'Deals or Pipelines';
-        if (page === 'Call Logs') return 'Call logs';
+        if (page === 'Call Logs' || page === 'Call Recordings') return 'Call Recordings';
         if (page === 'Companies' || page === 'Add Company') return 'Companies';
         if (page === 'Bulk Import') return 'Bulk Import';
         if (page === 'Contacts') return 'Contacts';
@@ -18,6 +23,7 @@ const DashboardLayout = ({ children, currentPage, setCurrentPage }) => {
         if (page === 'File Cabinet') return 'File Cabinet';
         if (page === 'Quotation') return 'Quotation';
         if (page === 'Invoice') return 'Invoice';
+        if (page === 'Products & Services') return 'Products & Services';
         if (page === 'Home') return 'Home';
         return page;
     };

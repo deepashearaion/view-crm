@@ -2,7 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import './Deals.css';
 import {
     RefreshCw,
+    RotateCcw,
     Plus,
+    PlusCircle,
     Calendar,
     ChevronDown,
     List,
@@ -27,7 +29,8 @@ import {
     ChevronLeft,
     Clock,
     Flag,
-    Bookmark
+    Bookmark,
+    Lock
 } from 'lucide-react';
 import OwnerFilter from '../components/dashboard/OwnerFilter';
 
@@ -72,6 +75,7 @@ const Deals = () => {
     const [isReorderStagesOpen, setIsReorderStagesOpen] = useState(false);
     const [newStageName, setNewStageName] = useState('');
     const [newStageType, setNewStageType] = useState('Open');
+    const [isAddingStage, setIsAddingStage] = useState(false);
     const [reorderStagesList, setReorderStagesList] = useState([]);
 
     // Create New Deal Side-Panel State
@@ -136,14 +140,18 @@ const Deals = () => {
             color: randomColor,
             bgColor: '#F8FAFC',
             percentage: '20%',
-            type: 'open',
+            type: newStageType === 'Open' ? 'open' : 'lost',
             enabled: true
         };
 
-        // Insert before won & lost
-        const openStagesList = stages.filter(s => s.type === 'open');
-        const closedStagesList = stages.filter(s => s.type !== 'open');
-        setStages([...openStagesList, newStageObj, ...closedStagesList]);
+        if (newStageType === 'Open') {
+            const openStagesList = stages.filter(s => s.type === 'open');
+            const closedStagesList = stages.filter(s => s.type !== 'open');
+            setStages([...openStagesList, newStageObj, ...closedStagesList]);
+        } else {
+            setStages([...stages, newStageObj]);
+        }
+
         setNewStageName('');
     };
 
@@ -194,6 +202,7 @@ const Deals = () => {
     // Enabled stages only for display
     const visibleStages = stages.filter(s => s.enabled);
     const openStages = stages.filter(s => s.type === 'open');
+    const closingStages = stages.filter(s => s.type !== 'open');
 
     return (
         <div className="deals-page">
@@ -203,33 +212,61 @@ const Deals = () => {
                     <div className="pipeline-selector">
                         <div className="pipeline-icon">S</div>
                         <span>Sales Pipeline</span>
-                        <span className="star-icon">⭐</span>
+                        <span className="star-icon">★</span>
                         <ChevronDown size={14} color="#6B7280" />
                     </div>
                 </div>
 
                 <div className="toolbar-center">
                     <div className="scroll-tip">
-                        <List size={13} color="#059669" />
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" />
+                            <line x1="9" y1="3" x2="9" y2="21" />
+                            <line x1="15" y1="3" x2="15" y2="21" />
+                        </svg>
                         <span className="scroll-tip-label">Scroll via</span>
-                        <span className="key-hint"><ArrowUpDown size={11} className="hint-icon" /> Shift+Scroll</span>
-                        <span className="key-hint"><GripVertical size={11} className="hint-icon" /> Drag bar</span>
-                        <span className="key-hint"><Pointer size={11} className="hint-icon" /> 2-finger</span>
+                        <span className="key-hint">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="7 10 12 5 17 10" />
+                                <polyline points="7 14 12 19 17 14" />
+                            </svg>
+                            <span>Shift+Scroll</span>
+                        </span>
+                        <span className="key-hint">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="#059669">
+                                <circle cx="9" cy="6" r="1.8" />
+                                <circle cx="15" cy="6" r="1.8" />
+                                <circle cx="9" cy="12" r="1.8" />
+                                <circle cx="15" cy="12" r="1.8" />
+                                <circle cx="9" cy="18" r="1.8" />
+                                <circle cx="15" cy="18" r="1.8" />
+                            </svg>
+                            <span>Drag bar</span>
+                        </span>
+                        <span className="key-hint">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0" />
+                                <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2" />
+                                <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8" />
+                                <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
+                            </svg>
+                            <span>2-finger</span>
+                        </span>
                     </div>
                 </div>
 
                 <div className="toolbar-right">
                     <div className="owner-filter-wrapper">
-                        <OwnerFilter defaultLabel="All Lead Owners" />
+                        <OwnerFilter defaultLabel="All Lead Owners" borderRadius="8px" height="36px" caretType="triangle" />
                     </div>
 
                     <button
                         type="button"
-                        className="icon-action-btn"
+                        className="deals-refresh-btn"
                         onClick={() => setRefresh(!refresh)}
                         title="Refresh"
                     >
-                        <RefreshCw size={15} color="#4B5563" />
+                        <RotateCcw size={16} strokeWidth={2.2} color="#374151" />
                     </button>
 
                     <button
@@ -237,7 +274,8 @@ const Deals = () => {
                         className="add-stage-btn"
                         onClick={() => setIsManageStagesOpen(true)}
                     >
-                        <Plus size={15} color="#111827" /> Add Stage
+                        <PlusCircle size={15} color="#111827" strokeWidth={2} />
+                        <span>Add Stage</span>
                     </button>
 
                     <button
@@ -245,7 +283,13 @@ const Deals = () => {
                         className="reorder-btn"
                         onClick={handleOpenReorder}
                     >
-                        <List size={15} color="#111827" /> Reorder Stages
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#111827" strokeWidth="2.4" strokeLinecap="round">
+                            <line x1="3" y1="6" x2="21" y2="6" />
+                            <line x1="3" y1="10" x2="21" y2="10" />
+                            <line x1="3" y1="14" x2="21" y2="14" />
+                            <line x1="3" y1="18" x2="21" y2="18" />
+                        </svg>
+                        <span>Reorder Stages</span>
                     </button>
                 </div>
             </div>
@@ -260,7 +304,9 @@ const Deals = () => {
                         onClick={() => setPriorityOpen(!priorityOpen)}
                     >
                         <span>{selectedPriority}</span>
-                        <ChevronDown size={14} color="#6B7280" />
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="#6B7280" style={{ transition: 'transform 0.2s', transform: priorityOpen ? 'rotate(180deg)' : 'none' }}>
+                            <polygon points="6 9 12 15 18 9"/>
+                        </svg>
                         {priorityOpen && (
                             <div className="priority-menu dropdown-menu">
                                 <div className="priority-header-item">
@@ -310,7 +356,7 @@ const Deals = () => {
                         onClick={() => setTimeOpen(!timeOpen)}
                     >
                         <div className="icon-text">
-                            <InfinityIcon size={15} color="#2563EB" />
+                            <span style={{ color: '#2563EB', fontWeight: 'bold', fontSize: '15px' }}>∞</span>
                             <span>{selectedTime}</span>
                         </div>
                         <ChevronDown size={14} color="#6B7280" />
@@ -451,11 +497,11 @@ const Deals = () => {
                 {/* 1. MANAGE PIPELINE STAGES MODAL (Image 1)         */}
                 {/* ================================================= */}
                 {isManageStagesOpen && (
-                    <div className="deals-modal-backdrop" onClick={() => setIsManageStagesOpen(false)}>
+                    <div className="deals-modal-backdrop" onClick={() => { setIsManageStagesOpen(false); setNewStageName(''); }}>
                         <div className="manage-stages-modal" onClick={(e) => e.stopPropagation()}>
                             {/* Modal Header */}
-                            <div className="modal-top-header">
-                                <div className="modal-title-box">
+                            <div className="manage-stages-header">
+                                <div className="manage-stages-title-box">
                                     <div className="modal-badge-icon purple-badge">
                                         <Layers size={20} color="#4F46E5" />
                                     </div>
@@ -463,12 +509,15 @@ const Deals = () => {
                                 </div>
                             </div>
 
-                            {/* Modal Form */}
-                            <div className="modal-form-content">
-                                <div className="modal-input-section">
-                                    <label className="section-label">Add New Stage</label>
+                            {/* Modal Body */}
+                            <div className="manage-stages-body">
+                                {/* Add New Stage Input Section (media_1790432428132.png) */}
+                                <div className="add-new-stage-section">
+                                    <label className="add-new-stage-label">Add New Stage</label>
                                     <div className="stage-name-input-box">
-                                        <Tag size={16} color="#2563EB" />
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M4 5a1 1 0 0 1 1-1h10.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 0 1.414l-5.414 5.414a1 1 0 0 1-.707.293H5a1 1 0 0 1-1-1V5z" />
+                                        </svg>
                                         <input
                                             type="text"
                                             className="modal-text-input"
@@ -478,25 +527,29 @@ const Deals = () => {
                                             onKeyDown={(e) => { if (e.key === 'Enter') handleAddNewStage(e); }}
                                         />
                                     </div>
+                                </div>
 
-                                    <div className="stage-type-toggle-box">
-                                        <div className="stage-type-left">
-                                            <Circle size={16} color="#2563EB" />
-                                            <span>Stage Type</span>
-                                        </div>
-                                        <div className="stage-type-right">
-                                            <div className="open-type-pill">Open</div>
-                                            <div
-                                                className="type-toggle-switch"
-                                                onClick={() => setNewStageType(newStageType === 'Open' ? 'Closed' : 'Open')}
-                                            >
-                                                <div className="toggle-circle" />
-                                            </div>
+                                {/* Stage Type Toggle Box */}
+                                <div className="stage-type-toggle-box">
+                                    <div className="stage-type-left">
+                                        <Circle size={18} color="#2563EB" strokeWidth={2.4} />
+                                        <span>Stage Type</span>
+                                    </div>
+                                    <div className="stage-type-right">
+                                        <div className="open-type-pill">{newStageType}</div>
+                                        <div
+                                            className={`type-toggle-switch ${newStageType === 'Open' ? 'active' : 'inactive'}`}
+                                            onClick={() => setNewStageType(newStageType === 'Open' ? 'Closed' : 'Open')}
+                                        >
+                                            <div className="toggle-circle" />
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Open Stages List with Red Delete Buttons */}
+                                {/* Horizontal Divider */}
+                                <div className="modal-section-divider" />
+
+                                {/* Open Stages List */}
                                 <div className="open-stages-section">
                                     <div className="open-stages-header">
                                         <div className="blue-bar-indicator" />
@@ -507,15 +560,43 @@ const Deals = () => {
                                     <div className="stages-chips-grid">
                                         {openStages.map((stage) => (
                                             <div key={stage.id} className="stage-chip-card">
-                                                <Bookmark size={14} color="#2563EB" fill="#2563EB" />
+                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="#2563EB">
+                                                    <path d="M4 5a1 1 0 0 1 1-1h10.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 0 1.414l-5.414 5.414a1 1 0 0 1-.707.293H5a1 1 0 0 1-1-1V5z" />
+                                                </svg>
                                                 <span className="stage-chip-title">{stage.name}</span>
                                                 <div
                                                     className="delete-chip-btn"
-                                                    onClick={() => handleRemoveStage(stage.id)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleRemoveStage(stage.id);
+                                                    }}
                                                     title="Delete stage"
                                                 >
-                                                    <X size={10} color="#FFFFFF" strokeWidth={3} />
+                                                    <X size={10} color="#EF4444" strokeWidth={2.6} />
                                                 </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Closing Stages List (media_1790432446497.png) */}
+                                <div className="closing-stages-section">
+                                    <div className="closing-stages-header">
+                                        <div className="red-bar-indicator" />
+                                        <span className="closing-stages-title">Closing Stages</span>
+                                        <div className="closing-stage-count-badge">{closingStages.length}</div>
+                                    </div>
+
+                                    <div className="stages-chips-grid">
+                                        {closingStages.map((stage) => (
+                                            <div key={stage.id} className="stage-chip-card closing-chip">
+                                                <div className="closing-tag-icon-box">
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="#EF4444">
+                                                        <path d="M4 5a1 1 0 0 1 1-1h10.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 0 1.414l-5.414 5.414a1 1 0 0 1-.707.293H5a1 1 0 0 1-1-1V5z" />
+                                                    </svg>
+                                                </div>
+                                                <span className="stage-chip-title">{stage.name}</span>
+                                                <Lock size={12} color="#F87171" strokeWidth={2.2} />
                                             </div>
                                         ))}
                                     </div>
@@ -527,7 +608,10 @@ const Deals = () => {
                                 <button
                                     type="button"
                                     className="modal-cancel-btn"
-                                    onClick={() => setIsManageStagesOpen(false)}
+                                    onClick={() => {
+                                        setIsManageStagesOpen(false);
+                                        setNewStageName('');
+                                    }}
                                 >
                                     Cancel
                                 </button>
@@ -536,7 +620,8 @@ const Deals = () => {
                                     className="modal-submit-blue-btn"
                                     onClick={handleAddNewStage}
                                 >
-                                    <Plus size={16} /> Add Stage
+                                    <Plus size={16} strokeWidth={2.5} />
+                                    <span>Add Stage</span>
                                 </button>
                             </div>
                         </div>

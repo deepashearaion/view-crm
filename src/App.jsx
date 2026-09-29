@@ -10,10 +10,15 @@ import Deals from './pages/Deals';
 import Activities from './pages/Activities';
 import Attendance from './pages/Attendance';
 import Quotation from './pages/Quotation';
+import Reports from './pages/Reports';
+import FileCabinet from './pages/FileCabinet';
 import Contacts from './pages/Contacts';
 import Companies from './pages/Companies';
 import BulkImport from './pages/BulkImport';
 import AddCompany from './pages/AddCompany';
+import CallRecordings from './pages/CallRecordings';
+import ProductsServices from './pages/ProductsServices';
+import Invoice from './pages/Invoice';
 import { ArrowLeft, Rocket } from 'lucide-react';
 
 function ProtectedRoute({ children }) {
@@ -28,7 +33,21 @@ function MainDashboard() {
     return localStorage.getItem('dealconverter_activePage') || 'Companies';
   });
 
-  const handlePageChange = (page) => {
+  const [importTarget, setImportTarget] = useState(() => {
+    return localStorage.getItem('dealconverter_import_target') || 'Contacts';
+  });
+
+  const handlePageChange = (page, target = null) => {
+    if (target) {
+      setImportTarget(target);
+      localStorage.setItem('dealconverter_import_target', target);
+    } else if (page === 'Contacts' || page === 'Add Contact') {
+      setImportTarget('Contacts');
+      localStorage.setItem('dealconverter_import_target', 'Contacts');
+    } else if (page === 'Companies' || page === 'Add Company') {
+      setImportTarget('Companies');
+      localStorage.setItem('dealconverter_import_target', 'Companies');
+    }
     setCurrentPage(page);
     localStorage.setItem('dealconverter_activePage', page);
   };
@@ -45,32 +64,28 @@ function MainDashboard() {
         <Attendance />
       ) : currentPage === 'Quotation' ? (
         <Quotation />
-      ) : currentPage === 'Contacts' ? (
-        <Contacts />
+      ) : currentPage === 'Reports' ? (
+        <Reports setCurrentPage={handlePageChange} />
+      ) : currentPage === 'File Cabinet' ? (
+        <FileCabinet setCurrentPage={handlePageChange} />
+      ) : currentPage === 'Contacts' || currentPage === 'Add Contact' ? (
+        <Contacts
+          setCurrentPage={handlePageChange}
+          initialOpenAddContact={currentPage === 'Add Contact'}
+        />
       ) : currentPage === 'Companies' || currentPage === 'Add Company' ? (
         <Companies
           setCurrentPage={handlePageChange}
           initialOpenAddCompany={currentPage === 'Add Company'}
         />
       ) : currentPage === 'Bulk Import' ? (
-        <BulkImport setCurrentPage={handlePageChange} />
-      ) : currentPage === 'Call Logs' ? (
-        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: '#FFFFFF' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 24px' }}>
-            <ArrowLeft size={18} color="#6B7280" style={{ cursor: 'pointer' }} onClick={() => setCurrentPage('Home')} />
-            <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 500, color: '#111827' }}>Call logs</h3>
-          </div>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginTop: '10vh' }}>
-            <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
-              <Rocket size={32} color="#3B82F6" />
-            </div>
-            <h3 style={{ margin: '0 0 8px 0', fontSize: '1rem', fontWeight: 600, color: '#111827' }}>Coming Soon</h3>
-            <p style={{ margin: 0, color: '#6B7280', fontSize: '0.85rem', textAlign: 'center', lineHeight: '1.5' }}>
-              Call logs isn't available for your organization yet.<br />
-              We'll let you know as soon as it's ready.
-            </p>
-          </div>
-        </div>
+        <BulkImport setCurrentPage={handlePageChange} defaultTarget={importTarget} />
+      ) : currentPage === 'Call Recordings' || currentPage === 'Call Logs' ? (
+        <CallRecordings setCurrentPage={handlePageChange} />
+      ) : currentPage === 'Invoice' ? (
+        <Invoice />
+      ) : currentPage === 'Products & Services' ? (
+        <ProductsServices />
       ) : (
         <div style={{ padding: '40px', textAlign: 'center', color: '#6B7280' }}>
           <h2>{currentPage} Page</h2>
@@ -89,6 +104,7 @@ function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ForgotPassword />} />
         <Route
           path="/dashboard/*"
           element={

@@ -1,25 +1,25 @@
 import React, { useState, useRef } from 'react';
-import { ArrowLeft, Check, Download, AlertCircle, FileSpreadsheet } from 'lucide-react';
+import { ArrowLeft, Check, Download, Info, FileSpreadsheet } from 'lucide-react';
 import './BulkImport.css';
 
-// Exact Cloud Upload SVG Icon from Screenshot 2
+// Exact Cloud Upload SVG Icon from Screenshot
 const CloudUploadIcon = () => (
     <svg width="68" height="68" viewBox="0 0 24 24" fill="none">
         <path
-            d="M4.5 16.5C3.12 16.5 2 15.38 2 14C2 12.72 2.97 11.66 4.22 11.53C4.08 11.05 4 10.53 4 10C4 6.69 6.69 4 10 4C12.71 4 15.01 5.8 15.74 8.28C16.32 8.1 16.94 8 17.5 8C20 8 22 10 22 12.5C22 14.86 20.18 16.79 17.85 16.98"
+            d="M6.5 19H18C20.21 19 22 17.21 22 15C22 12.98 20.5 11.31 18.53 11.04C18.06 7.64 15.14 5 11.5 5C8.38 5 5.75 6.94 4.78 9.72C2.65 10.23 1 12.18 1 14.5C1 16.99 3.01 19 5.5 19H6.5Z"
             stroke="#2563EB"
-            strokeWidth="2.2"
+            strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
         />
         <path
-            d="M12 12V21"
+            d="M12 11V16"
             stroke="#2563EB"
             strokeWidth="2.2"
             strokeLinecap="round"
         />
         <path
-            d="M8.5 15.5L12 12L15.5 15.5"
+            d="M9 13.5L12 10.5L15 13.5"
             stroke="#2563EB"
             strokeWidth="2.2"
             strokeLinecap="round"
@@ -28,11 +28,15 @@ const CloudUploadIcon = () => (
     </svg>
 );
 
-const BulkImport = ({ setCurrentPage, onImportSuccess }) => {
+const BulkImport = ({ setCurrentPage, onImportSuccess, defaultTarget }) => {
     const fileInputRef = useRef(null);
     const [selectedFile, setSelectedFile] = useState(null);
     const [currentStep, setCurrentStep] = useState(1);
     const [toastMessage, setToastMessage] = useState(null);
+
+    // Detect target: Contacts or Companies (defaults to Contacts matching user's request)
+    const importTarget = defaultTarget || localStorage.getItem('dealconverter_import_target') || 'Contacts';
+    const isContacts = importTarget === 'Contacts';
 
     const showToast = (msg) => {
         setToastMessage(msg);
@@ -55,103 +59,168 @@ const BulkImport = ({ setCurrentPage, onImportSuccess }) => {
         }
     };
 
-    // Download Sample Template CSV
+    // Download Sample Template CSV (Contacts or Companies)
     const handleDownloadTemplate = () => {
-        const headers = 'Company Name,Mobile,Lead Status,Noofemployee,Annual Revenue,Mailing City,Email,Lead Owner\n';
-        const sampleRow1 = '"Acme Global Corp","+91 98111 22233","Hot Leads","50-200","$500k - $1M","Mumbai","contact@acmeglobal.com","Self"\n';
-        const sampleRow2 = '"Zenith Software","+91 98444 55566","Cold Leads","200+","$1M+","Bangalore","info@zenithsoft.com","Self"\n';
-        const csvContent = 'data:text/csv;charset=utf-8,' + encodeURIComponent(headers + sampleRow1 + sampleRow2);
-        const link = document.createElement('a');
-        link.setAttribute('href', csvContent);
-        link.setAttribute('download', 'dealconverter_companies_template.csv');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        showToast('Sample template downloaded (dealconverter_companies_template.csv)');
+        if (isContacts) {
+            const headers = 'Contact Name,Mobile,Lead Status,Destinations,Email,Lead Owner\n';
+            const sampleRow1 = '"Arun Kumar","+91 98401 23456","Hot Leads","Manali","arun@example.com","Self"\n';
+            const sampleRow2 = '"Pooja Hegde","+91 98840 65432","Follow Up Leads","Goa","pooja@example.com","Self"\n';
+            const sampleRow3 = '"Suresh Raina","+91 94441 12345","Open Deal","Kashmir","suresh@example.com","Self"\n';
+            const csvContent = 'data:text/csv;charset=utf-8,' + encodeURIComponent(headers + sampleRow1 + sampleRow2 + sampleRow3);
+            const link = document.createElement('a');
+            link.setAttribute('href', csvContent);
+            link.setAttribute('download', 'dealconverter_contacts_template.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('Sample template downloaded (dealconverter_contacts_template.csv)');
+        } else {
+            const headers = 'Company Name,Mobile,Lead Status,Noofemployee,Annual Revenue,Mailing City,Email,Lead Owner\n';
+            const sampleRow1 = '"Acme Global Corp","+91 98111 22233","Hot Leads","50-200","$500k - $1M","Mumbai","contact@acmeglobal.com","Self"\n';
+            const sampleRow2 = '"Zenith Software","+91 98444 55566","Cold Leads","200+","$1M+","Bangalore","info@zenithsoft.com","Self"\n';
+            const csvContent = 'data:text/csv;charset=utf-8,' + encodeURIComponent(headers + sampleRow1 + sampleRow2);
+            const link = document.createElement('a');
+            link.setAttribute('href', csvContent);
+            link.setAttribute('download', 'dealconverter_companies_template.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('Sample template downloaded (dealconverter_companies_template.csv)');
+        }
     };
 
-    // Complete the upload and add records to companies
+    // Complete the upload and add records
     const handleStartImport = () => {
         if (!selectedFile) {
             showToast('Please select a file first');
             return;
         }
 
-        // Generate imported companies
         const baseName = selectedFile.name.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9 ]/g, ' ');
-        const importedItems = [
-            {
-                id: Date.now() + 1,
-                name: `${baseName} Corp`,
-                mobile: '+91 98200 88991',
-                email: `sales@${baseName.toLowerCase().replace(/\s+/g, '')}.com`,
-                status: 'Hot Leads',
-                employees: '50-200',
-                revenue: '$500k - $1M',
-                city: 'Mumbai',
-                created: new Date().toLocaleString(),
-                modified: new Date().toLocaleString(),
-                owner: 'Self',
-                description: 'Bulk imported account',
-                country: 'India',
-                lead_source: 'Bulk Import',
-                instagram: `@${baseName.toLowerCase().replace(/\s+/g, '')}`,
-                sms_opt_out: 'No',
-                twitter: '',
-                linkedin: '',
-                email_opt_out: 'No',
-                zipcode: '400001',
-                address_1: 'Nariman Point',
-                facebook: '',
-                state: 'Maharashtra',
-                isNewToday: true
-            },
-            {
-                id: Date.now() + 2,
-                name: `${baseName} Solutions Ltd`,
-                mobile: '+91 98450 11223',
-                email: `info@${baseName.toLowerCase().replace(/\s+/g, '')}sol.com`,
-                status: 'Warm Leads',
-                employees: '10-50',
-                revenue: '$100k - $500k',
-                city: 'Bangalore',
-                created: new Date().toLocaleString(),
-                modified: new Date().toLocaleString(),
-                owner: 'Self',
-                description: 'Bulk imported client',
-                country: 'India',
-                lead_source: 'Bulk Import',
-                instagram: `@${baseName.toLowerCase().replace(/\s+/g, '')}sol`,
-                sms_opt_out: 'No',
-                twitter: '',
-                linkedin: '',
-                email_opt_out: 'No',
-                zipcode: '560001',
-                address_1: 'MG Road',
-                facebook: '',
-                state: 'Karnataka',
-                isNewToday: true
+
+        if (isContacts) {
+            // Generate imported contacts
+            const importedContacts = [
+                {
+                    id: Date.now() + 1,
+                    name: `${baseName} Lead 1`,
+                    mobile: '+91 9840' + Math.floor(100000 + Math.random() * 900000),
+                    email: `lead1.${baseName.toLowerCase().replace(/\s+/g, '')}@example.com`,
+                    status: 'Hot Leads',
+                    dest: 'Manali',
+                    owner: 'Self',
+                    created: new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                    modified: new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                    initial: baseName.charAt(0).toUpperCase() || 'L',
+                    color: '#3B82F6',
+                    daysOld: 0
+                },
+                {
+                    id: Date.now() + 2,
+                    name: `${baseName} Lead 2`,
+                    mobile: '+91 9841' + Math.floor(100000 + Math.random() * 900000),
+                    email: `lead2.${baseName.toLowerCase().replace(/\s+/g, '')}@example.com`,
+                    status: 'Cold Leads',
+                    dest: 'Goa',
+                    owner: 'Self',
+                    created: new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                    modified: new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                    initial: baseName.charAt(0).toUpperCase() || 'L',
+                    color: '#10B981',
+                    daysOld: 0
+                }
+            ];
+
+            const saved = localStorage.getItem('dealconverter_contacts_data');
+            const currentList = saved ? JSON.parse(saved) : [];
+            const updatedList = [...importedContacts, ...currentList];
+            localStorage.setItem('dealconverter_contacts_data', JSON.stringify(updatedList));
+
+            if (onImportSuccess) {
+                onImportSuccess(importedContacts);
             }
-        ];
 
-        // Save to localStorage
-        const saved = localStorage.getItem('dealconverter_companies_data');
-        const currentList = saved ? JSON.parse(saved) : [];
-        const updatedList = [...importedItems, ...currentList];
-        localStorage.setItem('dealconverter_companies_data', JSON.stringify(updatedList));
+            showToast(`Successfully imported contacts from ${selectedFile.name}!`);
 
-        if (onImportSuccess) {
-            onImportSuccess(importedItems);
+            setTimeout(() => {
+                if (setCurrentPage) {
+                    setCurrentPage('Contacts');
+                }
+            }, 1000);
+        } else {
+            // Generate imported companies
+            const importedCompanies = [
+                {
+                    id: Date.now() + 1,
+                    name: `${baseName} Corp`,
+                    mobile: '+91 98200 88991',
+                    email: `sales@${baseName.toLowerCase().replace(/\s+/g, '')}.com`,
+                    status: 'Hot Leads',
+                    employees: '50-200',
+                    revenue: '$500k - $1M',
+                    city: 'Mumbai',
+                    created: new Date().toLocaleString(),
+                    modified: new Date().toLocaleString(),
+                    owner: 'Self',
+                    description: 'Bulk imported account',
+                    country: 'India',
+                    lead_source: 'Bulk Import',
+                    instagram: `@${baseName.toLowerCase().replace(/\s+/g, '')}`,
+                    sms_opt_out: 'No',
+                    twitter: '',
+                    linkedin: '',
+                    email_opt_out: 'No',
+                    zipcode: '400001',
+                    address_1: 'Nariman Point',
+                    facebook: '',
+                    state: 'Maharashtra',
+                    isNewToday: true
+                },
+                {
+                    id: Date.now() + 2,
+                    name: `${baseName} Solutions Ltd`,
+                    mobile: '+91 98450 11223',
+                    email: `info@${baseName.toLowerCase().replace(/\s+/g, '')}sol.com`,
+                    status: 'Warm Leads',
+                    employees: '10-50',
+                    revenue: '$100k - $500k',
+                    city: 'Bangalore',
+                    created: new Date().toLocaleString(),
+                    modified: new Date().toLocaleString(),
+                    owner: 'Self',
+                    description: 'Bulk imported client',
+                    country: 'India',
+                    lead_source: 'Bulk Import',
+                    instagram: `@${baseName.toLowerCase().replace(/\s+/g, '')}sol`,
+                    sms_opt_out: 'No',
+                    twitter: '',
+                    linkedin: '',
+                    email_opt_out: 'No',
+                    zipcode: '560001',
+                    address_1: 'MG Road',
+                    facebook: '',
+                    state: 'Karnataka',
+                    isNewToday: true
+                }
+            ];
+
+            const saved = localStorage.getItem('dealconverter_companies_data');
+            const currentList = saved ? JSON.parse(saved) : [];
+            const updatedList = [...importedCompanies, ...currentList];
+            localStorage.setItem('dealconverter_companies_data', JSON.stringify(updatedList));
+
+            if (onImportSuccess) {
+                onImportSuccess(importedCompanies);
+            }
+
+            showToast(`Successfully imported companies from ${selectedFile.name}!`);
+
+            setTimeout(() => {
+                if (setCurrentPage) {
+                    setCurrentPage('Companies');
+                }
+            }, 1000);
         }
-
-        showToast(`Successfully imported companies from ${selectedFile.name}!`);
-
-        // Return to Companies page after a brief moment
-        setTimeout(() => {
-            if (setCurrentPage) {
-                setCurrentPage('Companies');
-            }
-        }, 1000);
     };
 
     return (
@@ -177,17 +246,20 @@ const BulkImport = ({ setCurrentPage, onImportSuccess }) => {
             <div className="bulk-import-header-row">
                 <button
                     className="bulk-import-back-btn"
-                    onClick={() => setCurrentPage && setCurrentPage('Companies')}
-                    title="Back to Companies"
+                    onClick={() => setCurrentPage && setCurrentPage(isContacts ? 'Contacts' : 'Companies')}
+                    title={isContacts ? "Back to Contacts" : "Back to Companies"}
                 >
                     <ArrowLeft size={18} />
-                    <span>Back to Companies</span>
+                    <span>{isContacts ? "Back to Contacts" : "Back to Companies"}</span>
                 </button>
             </div>
 
-            <h1 className="bulk-import-main-title">Bulk Import Companies</h1>
+            {/* Main Title matching Screenshot: "Bulk Import For Contacts" */}
+            <h1 className="bulk-import-main-title">
+                {isContacts ? 'Bulk Import For Contacts' : 'Bulk Import Companies'}
+            </h1>
 
-            {/* 4-Step Progress Indicator (Screenshot 2) */}
+            {/* 4-Step Progress Indicator (Screenshot) */}
             <div className="bulk-stepper-container">
                 {/* Step 1 */}
                 <div className="bulk-step-item active">
@@ -222,16 +294,18 @@ const BulkImport = ({ setCurrentPage, onImportSuccess }) => {
 
             <div className="bulk-import-divider" />
 
-            {/* Template Notification Card (Screenshot 2) */}
+            {/* Template Notification Card (Screenshot) */}
             <div className="bulk-template-card">
                 <div className="template-card-header">
                     <div className="template-info-icon-box">
-                        <AlertCircle size={20} color="#2563EB" />
+                        <Info size={20} color="#2563EB" />
                     </div>
                     <span className="template-card-title">Need a Template?</span>
                 </div>
                 <p className="template-card-subtext">
-                    Download our sample Excel template with pre-defined company headers.
+                    {isContacts
+                        ? 'Download our sample Excel template with pre-defined headers to ensure your data is formatted correctly for import.'
+                        : 'Download our sample Excel template with pre-defined company headers.'}
                 </p>
                 <div className="template-btn-row">
                     <button
@@ -245,7 +319,7 @@ const BulkImport = ({ setCurrentPage, onImportSuccess }) => {
                 </div>
             </div>
 
-            {/* Upload Area with Cloud Icon & Choose File Button (Screenshot 2) */}
+            {/* Upload Area with Cloud Icon & Choose File Button (Screenshot) */}
             <div className="bulk-upload-section">
                 <div className="bulk-cloud-icon-slot">
                     <CloudUploadIcon />

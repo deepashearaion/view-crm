@@ -1,19 +1,150 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, KeyRound, CheckCircle2, ShieldCheck } from 'lucide-react';
 import './Auth.css';
 
 const ForgotPassword = () => {
     const navigate = useNavigate();
+
+    // Steps: 'email' -> 'option' -> 'reset' -> 'success'
+    const [step, setStep] = useState('email');
     const [email, setEmail] = useState('');
+    const [resetToken, setResetToken] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        // Handle password reset request logic here
-        // The user hasn't specified complex logic, just that return to login should go to login page
-        // But for completeness, maybe simulate a success state or just redirect. We will keep it simple.
-    };
+    // Handle Email submission (Step 1)
+    // const handleEmailSubmit = (e) => {
+    //     e.preventDefault();
+    //     setError('');
 
+    //     if (!email.trim()) {
+    //         setError('Please enter your email address.');
+    //         return;
+    //     }
+
+    //     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    //     if (!emailRegex.test(email.trim())) {
+    //         setError('Please enter a valid email address.');
+    //         return;
+    //     }
+
+    //     // Navigate to Reset Password option step
+    //     setStep('option');
+    // };
+    const handleEmailSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    if (!email.trim()) {
+        setError('Email is required.');
+        return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email.trim())) {
+        setError('Please enter a valid email address.');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/auth/forgot-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email.trim(),
+            }),
+        });
+
+        const contentType = response.headers.get('content-type');
+
+        const data = contentType?.includes('application/json')
+            ? await response.json()
+            : { message: await response.text() };
+
+        if (!response.ok) {
+            setError(data.message || 'Password reset failed.');
+            return;
+        }
+
+        // console.log('Reset token:', data.reset_token);
+
+        // setStep('option');
+        setResetToken(data.reset_token);
+setStep('option');
+    } catch (error) {
+        console.error('Forgot password error:', error);
+        setError('Unable to connect to the server.');
+    }
+};
+
+   
+const handlePasswordResetSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    if (!newPassword) {
+        setError('New password is required.');
+        return;
+    }
+
+    if (newPassword.length < 8) {
+        setError('Password must be at least 8 characters.');
+        return;
+    }
+
+    if (!confirmPassword) {
+        setError('Please confirm your password.');
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        setError('Passwords do not match.');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/auth/reset-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                token: resetToken,
+                new_password: newPassword,
+            }),
+        });
+
+        const contentType = response.headers.get('content-type');
+
+        const data = contentType?.includes('application/json')
+            ? await response.json()
+            : { message: await response.text() };
+
+        if (!response.ok) {
+            setError(data.message || 'Password reset failed.');
+            return;
+        }
+
+        setSuccess('Password reset successfully.');
+
+        setStep('success');
+
+        setTimeout(() => {
+            navigate('/signin');
+        }, 2000);
+    } catch (error) {
+        console.error('Reset password error:', error);
+        setError('Unable to connect to the server.');
+    }
+};
     return (
         <div style={{
             display: 'flex',
@@ -25,7 +156,7 @@ const ForgotPassword = () => {
             position: 'relative',
             overflow: 'hidden'
         }}>
-            {/* Background representation for the wavy pattern seen in screenshots */}
+            {/* Background decorative SVG */}
             <div style={{
                 position: 'absolute',
                 top: 0,
@@ -59,77 +190,307 @@ const ForgotPassword = () => {
                 </div>
             </div>
 
-            <div className="auth-right" style={{ zIndex: 1, padding: 0, marginTop: '2.5rem' }}>
-                <div className="auth-card" style={{ padding: '3rem', width: '450px', boxShadow: '0 10px 40px -10px rgba(0, 0, 0, 0.1)', border: '1px solid #f3f4f6' }}>
-                    {/* Dots indicator */}
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginBottom: '2rem' }}>
-                        <div style={{ width: '20px', height: '6px', borderRadius: '4px', backgroundColor: '#1E29FF' }}></div>
-                        <div style={{ width: '6px', height: '6px', borderRadius: '4px', backgroundColor: '#e5e7eb' }}></div>
-                        <div style={{ width: '6px', height: '6px', borderRadius: '4px', backgroundColor: '#e5e7eb' }}></div>
+            <div className="auth-right" style={{ zIndex: 1, padding: '1rem', marginTop: '1.5rem', width: 'auto' }}>
+                <div className="auth-card" style={{ padding: '2.5rem', width: '450px', maxWidth: '92vw', boxShadow: '0 10px 40px -10px rgba(0, 0, 0, 0.1)', border: '1px solid #f3f4f6' }}>
+                    
+                    {/* 3-Step Dots indicator */}
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '1.75rem', alignItems: 'center' }}>
+                        <div style={{
+                            width: step === 'email' ? '22px' : '8px',
+                            height: '8px',
+                            borderRadius: '4px',
+                            backgroundColor: step === 'email' ? '#1E29FF' : '#10B981',
+                            transition: 'all 0.3s'
+                        }} title="Step 1: Email"></div>
+                        <div style={{
+                            width: step === 'option' ? '22px' : '8px',
+                            height: '8px',
+                            borderRadius: '4px',
+                            backgroundColor: step === 'option' ? '#1E29FF' : (step === 'reset' || step === 'success' ? '#10B981' : '#e5e7eb'),
+                            transition: 'all 0.3s'
+                        }} title="Step 2: Reset Option"></div>
+                        <div style={{
+                            width: (step === 'reset' || step === 'success') ? '22px' : '8px',
+                            height: '8px',
+                            borderRadius: '4px',
+                            backgroundColor: (step === 'reset' || step === 'success') ? '#1E29FF' : '#e5e7eb',
+                            transition: 'all 0.3s'
+                        }} title="Step 3: New Password"></div>
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
-                        <Lock size={32} color="#1E29FF" strokeWidth={2} />
-                    </div>
+                    {error && <div className="error-text">{error}</div>}
+                    {success && <div className="success-text">{success}</div>}
 
-                    <h2 style={{ fontSize: '1.4rem', color: '#111827', textAlign: 'center', marginBottom: '1rem', fontWeight: 600 }}>Forgot Password?</h2>
-                    <p style={{ color: '#6b7280', fontSize: '0.95rem', textAlign: 'center', marginBottom: '2rem', lineHeight: '1.5' }}>
-                        Enter your email and we'll send you a code to reset your password.
-                    </p>
+                    {/* STEP 1: Email ID Mattum (Only Email) */}
+                    {step === 'email' && (
+                        <>
+                            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                                <div style={{ background: '#EEF2FF', padding: '14px', borderRadius: '50%' }}>
+                                    <Lock size={32} color="#1E29FF" strokeWidth={2} />
+                                </div>
+                            </div>
 
-                    <form onSubmit={handleSubmit}>
-                        <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#374151', marginBottom: '0.5rem' }}>
-                                Email Address
-                            </label>
-                            <div className="input-wrapper" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                                <Mail className="input-icon" size={18} style={{ position: 'absolute', left: '1rem', color: '#9ca3af' }} />
-                                <input
-                                    type="email"
-                                    name="email"
-                                    className="auth-input"
-                                    placeholder="you@example.com"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                            <h2 style={{ fontSize: '1.4rem', color: '#111827', textAlign: 'center', marginBottom: '0.5rem', fontWeight: 600 }}>Forgot Password?</h2>
+                            <p style={{ color: '#6b7280', fontSize: '0.9rem', textAlign: 'center', marginBottom: '1.75rem', lineHeight: '1.5' }}>
+                                Enter your email address to continue to the password reset option.
+                            </p>
+
+                            <form onSubmit={handleEmailSubmit}>
+                                <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#374151', marginBottom: '0.5rem' }}>
+                                        Email Address
+                                    </label>
+                                    <div className="input-wrapper">
+                                        <Mail className="input-icon" size={18} />
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            className="auth-input"
+                                            placeholder="you@example.com"
+                                            value={email}
+                                            onChange={(e) => {
+                                                setEmail(e.target.value);
+                                                if (error) setError('');
+                                            }}
+                                            autoFocus
+                                        />
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    className="btn-primary"
                                     style={{
                                         width: '100%',
-                                        padding: '0.75rem 1rem 0.75rem 2.8rem',
-                                        border: '1px solid #d1d5db',
+                                        padding: '0.875rem',
+                                        background: '#1E29FF',
+                                        color: 'white',
+                                        border: 'none',
                                         borderRadius: '8px',
-                                        fontSize: '0.95rem',
-                                        outline: 'none',
-                                        transition: 'all 0.2s',
-                                        backgroundColor: '#fafafa'
+                                        fontSize: '1rem',
+                                        fontWeight: 500,
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        gap: '0.5rem',
+                                        cursor: 'pointer'
                                     }}
-                                />
+                                >
+                                    Continue <ArrowRight size={18} />
+                                </button>
+                            </form>
+                        </>
+                    )}
+
+                    {/* STEP 2: Email kudutha apro Reset Password option poganum */}
+                    {step === 'option' && (
+                        <>
+                            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                                <div style={{ background: '#ECFDF5', padding: '14px', borderRadius: '50%' }}>
+                                    <ShieldCheck size={32} color="#10B981" strokeWidth={2} />
+                                </div>
                             </div>
-                        </div>
 
-                        <button
-                            type="submit"
-                            className="btn-primary"
-                            style={{
-                                width: '100%',
+                            <h2 style={{ fontSize: '1.4rem', color: '#111827', textAlign: 'center', marginBottom: '0.5rem', fontWeight: 600 }}>Email Verified</h2>
+                            <p style={{ color: '#6b7280', fontSize: '0.9rem', textAlign: 'center', marginBottom: '1.5rem', lineHeight: '1.5' }}>
+                                Click the Reset Password option below to set your new password.
+                            </p>
+
+                            <div style={{
+                                background: '#F8FAFC',
+                                border: '1px solid #E2E8F0',
+                                borderRadius: '12px',
                                 padding: '1rem',
-                                background: '#1E29FF',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '8px',
-                                fontSize: '1rem',
-                                fontWeight: 500,
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                cursor: 'pointer',
-                                marginTop: '1rem'
-                            }}
-                        >
-                            Send Code <ArrowRight size={18} />
-                        </button>
-                    </form>
+                                marginBottom: '1.5rem'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <div>
+                                        <div style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Account</div>
+                                        <div style={{ fontSize: '0.95rem', color: '#0F172A', fontWeight: 600, wordBreak: 'break-all' }}>{email}</div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setError('');
+                                            setStep('email');
+                                        }}
+                                        style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            color: '#1E29FF',
+                                            fontSize: '0.85rem',
+                                            cursor: 'pointer',
+                                            textDecoration: 'underline',
+                                            padding: 0
+                                        }}
+                                    >
+                                        Change
+                                    </button>
+                                </div>
+                            </div>
 
-                    <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+                            <button
+                                type="button"
+                                className="btn-primary"
+                                onClick={() => {
+                                    setError('');
+                                    setStep('reset');
+                                }}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.875rem',
+                                    background: '#1E29FF',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    fontSize: '1rem',
+                                    fontWeight: 500,
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                <KeyRound size={18} /> Reset Password
+                            </button>
+                        </>
+                    )}
+
+                    {/* STEP 3: Atha click panna New Password and Confirm Password vaikanum */}
+                    {step === 'reset' && (
+                        <>
+                            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                                <div style={{ background: '#EEF2FF', padding: '14px', borderRadius: '50%' }}>
+                                    <KeyRound size={32} color="#1E29FF" strokeWidth={2} />
+                                </div>
+                            </div>
+
+                            <h2 style={{ fontSize: '1.4rem', color: '#111827', textAlign: 'center', marginBottom: '0.5rem', fontWeight: 600 }}>Reset Password</h2>
+                            <p style={{ color: '#6b7280', fontSize: '0.9rem', textAlign: 'center', marginBottom: '1.5rem', lineHeight: '1.5' }}>
+                                Enter your new password and confirm it for <strong style={{ color: '#111827' }}>{email}</strong>
+                            </p>
+
+                            <form onSubmit={handlePasswordResetSubmit}>
+                                <div className="form-group" style={{ marginBottom: '1.2rem' }}>
+                                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#374151', marginBottom: '0.5rem' }}>
+                                        New Password
+                                    </label>
+                                    <div className="input-wrapper">
+                                        <Lock className="input-icon" size={18} />
+                                        <input
+                                            type={showNewPassword ? "text" : "password"}
+                                            name="newPassword"
+                                            className="auth-input"
+                                            placeholder="Enter new password"
+                                            value={newPassword}
+                                            onChange={(e) => {
+                                                setNewPassword(e.target.value);
+                                                if (error) setError('');
+                                            }}
+                                            style={{ paddingRight: '2.75rem' }}
+                                            autoFocus
+                                        />
+                                        <button
+                                            type="button"
+                                            className="password-toggle"
+                                            onClick={() => setShowNewPassword(!showNewPassword)}
+                                            aria-label={showNewPassword ? "Hide password" : "Show password"}
+                                        >
+                                            {showNewPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#374151', marginBottom: '0.5rem' }}>
+                                        Confirm Password
+                                    </label>
+                                    <div className="input-wrapper">
+                                        <Lock className="input-icon" size={18} />
+                                        <input
+                                            type={showConfirmPassword ? "text" : "password"}
+                                            name="confirmPassword"
+                                            className="auth-input"
+                                            placeholder="Confirm your new password"
+                                            value={confirmPassword}
+                                            onChange={(e) => {
+                                                setConfirmPassword(e.target.value);
+                                                if (error) setError('');
+                                            }}
+                                            style={{ paddingRight: '2.75rem' }}
+                                        />
+                                        <button
+                                            type="button"
+                                            className="password-toggle"
+                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                                        >
+                                            {showConfirmPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    className="btn-primary"
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.875rem',
+                                        background: '#1E29FF',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        fontSize: '1rem',
+                                        fontWeight: 500,
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        gap: '0.5rem',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <CheckCircle2 size={18} /> Save New Password
+                                </button>
+                            </form>
+                        </>
+                    )}
+
+                    {/* STEP 4: Success confirmation */}
+                    {step === 'success' && (
+                        <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+                            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.25rem' }}>
+                                <div style={{ background: '#ECFDF5', padding: '16px', borderRadius: '50%' }}>
+                                    <CheckCircle2 size={42} color="#10B981" strokeWidth={2.5} />
+                                </div>
+                            </div>
+                            <h2 style={{ fontSize: '1.4rem', color: '#111827', marginBottom: '0.5rem', fontWeight: 600 }}>Password Reset Complete</h2>
+                            <p style={{ color: '#6b7280', fontSize: '0.9rem', marginBottom: '1.75rem' }}>
+                                Your password has been successfully updated. You will be redirected to the sign-in page in a moment.
+                            </p>
+                            <button
+                                type="button"
+                                className="btn-primary"
+                                onClick={() => navigate('/signin')}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.875rem',
+                                    background: '#1E29FF',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    fontSize: '1rem',
+                                    fontWeight: 500,
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Sign In Now
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Return to Login link */}
+                    <div style={{ textAlign: 'center', marginTop: '1.75rem' }}>
                         <Link
                             to="/signin"
                             style={{
@@ -145,6 +506,7 @@ const ForgotPassword = () => {
                             <ArrowLeft size={16} /> Return to Login
                         </Link>
                     </div>
+
                 </div>
             </div>
         </div>

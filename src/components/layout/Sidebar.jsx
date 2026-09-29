@@ -16,7 +16,8 @@ import {
     ChevronDown,
     ChevronLeft,
     ChevronRight,
-    Check
+    Check,
+    Archive
 } from 'lucide-react';
 
 export const DealConverterLogo = ({ size = 26, color = '#2563EB' }) => (
@@ -63,6 +64,7 @@ const crmItems = [
 const financeItems = [
     { label: 'Quotation', icon: QuotationIcon },
     { label: 'Invoice', icon: Receipt },
+    { label: 'Products & Services', icon: Archive },
 ];
 
 const Sidebar = ({ currentPage = 'Home', setCurrentPage, isCollapsed, setIsCollapsed }) => {
@@ -77,6 +79,7 @@ const Sidebar = ({ currentPage = 'Home', setCurrentPage, isCollapsed, setIsColla
     const cancelAutoCloseTimer = React.useCallback(() => {
         if (autoCloseTimerRef.current) {
             clearTimeout(autoCloseTimerRef.current);
+            autoCloseTimerRef.current = null;
         }
     }, []);
 
@@ -88,7 +91,7 @@ const Sidebar = ({ currentPage = 'Home', setCurrentPage, isCollapsed, setIsColla
         }, delay);
     }, [cancelAutoCloseTimer, setIsCollapsed]);
 
-    // Auto-close within 2 seconds whenever expanded
+    // Auto-close in exactly 2 seconds whenever expanded
     useEffect(() => {
         if (!isCollapsed) {
             startAutoCloseTimer(2000);
@@ -118,7 +121,7 @@ const Sidebar = ({ currentPage = 'Home', setCurrentPage, isCollapsed, setIsColla
         if (setCurrentPage) {
             setCurrentPage(pageName);
         }
-        // Automatically close within 2 seconds after selecting
+        // Keep open for 2 seconds after selecting then collapse
         startAutoCloseTimer(2000);
     };
 
@@ -148,19 +151,12 @@ const Sidebar = ({ currentPage = 'Home', setCurrentPage, isCollapsed, setIsColla
 
     const isFinanceActive = [
         'Quotation',
-        'Invoice'
+        'Invoice',
+        'Products & Services'
     ].includes(currentPage);
 
     return (
-        <aside
-            className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}
-            onMouseEnter={() => cancelAutoCloseTimer()}
-            onMouseLeave={() => {
-                if (!isCollapsed) {
-                    startAutoCloseTimer(2000);
-                }
-            }}
-        >
+        <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
             {/* Top Logo */}
             <div className="sidebar-logo">
                 <div className="logo-icon-wrapper">
@@ -267,7 +263,11 @@ const Sidebar = ({ currentPage = 'Home', setCurrentPage, isCollapsed, setIsColla
                         <div className="sub-items-list">
                             {crmItems.map((item) => {
                                 const ItemIcon = item.icon;
-                                const isActive = currentPage === item.label || (['Bulk Import', 'Add Company'].includes(currentPage) && item.label === 'Companies');
+                                const currentTarget = localStorage.getItem('dealconverter_import_target') || 'Contacts';
+                                const isActive = currentPage === item.label || 
+                                    (currentPage === 'Bulk Import' && item.label === (currentTarget === 'Companies' ? 'Companies' : 'Contacts')) ||
+                                    (currentPage === 'Add Company' && item.label === 'Companies') ||
+                                    (currentPage === 'Add Contact' && item.label === 'Contacts');
                                 return (
                                     <div
                                         key={item.label}

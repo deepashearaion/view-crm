@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 
-const OwnerFilter = ({ defaultLabel = 'All Owners', onSelect }) => {
+const OwnerFilter = ({ defaultLabel = 'All Owners', onSelect, borderRadius = '20px', height = '34px', caretType = 'chevron' }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedLabel, setSelectedLabel] = useState(defaultLabel);
     const [hoveredItem, setHoveredItem] = useState(null);
@@ -30,9 +30,9 @@ const OwnerFilter = ({ defaultLabel = 'All Owners', onSelect }) => {
                 style={{
                     flex: 1,
                     justifyContent: 'space-between',
-                    borderRadius: '20px',
+                    borderRadius: borderRadius,
                     padding: '6px 14px',
-                    height: '34px',
+                    height: height,
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -45,7 +45,13 @@ const OwnerFilter = ({ defaultLabel = 'All Owners', onSelect }) => {
                 onClick={() => setIsOpen(!isOpen)}
             >
                 <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#374151' }}>{selectedLabel}</span>
-                <ChevronDown size={14} className="filter-icon-right" style={{ color: '#6B7280', transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none' }} />
+                {caretType === 'triangle' ? (
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="#6B7280" style={{ transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none' }}>
+                        <polygon points="6 9 12 15 18 9"/>
+                    </svg>
+                ) : (
+                    <ChevronDown size={14} className="filter-icon-right" style={{ color: '#6B7280', transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none' }} />
+                )}
             </div>
 
             {isOpen && (

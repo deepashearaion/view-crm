@@ -14,17 +14,52 @@ const SignIn = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (!formData.email || !formData.password) {
-            setError('Email and password are required.');
+    const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    if (!formData.email || !formData.password) {
+        setError('Email and password are required.');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: formData.email,
+                password: formData.password,
+            }),
+        });
+
+        // const data = await response.json();
+        const contentType = response.headers.get('content-type');
+
+const data = contentType?.includes('application/json')
+    ? await response.json()
+    : { message: await response.text() };
+
+        if (!response.ok) {
+            setError(data.message || 'Login failed.');
             return;
         }
 
-        // Simulate Login (in real app, use auth API)
-        localStorage.setItem('currentUser', JSON.stringify({ email: formData.email, name: 'Arun' }));
+        localStorage.setItem('token', data.token);
+        localStorage.setItem(
+            'currentUser',
+            JSON.stringify({ email: formData.email })
+        );
+
         navigate('/dashboard');
-    };
+    
+    } catch (error) {
+    console.error('Login error:', error);
+    setError('Unable to connect to the server.');
+}
+};
 
     return (
         <div className="auth-page">
@@ -82,6 +117,7 @@ const SignIn = () => {
                                     placeholder="Enter your password"
                                     value={formData.password}
                                     onChange={handleChange}
+                                    style={{ paddingRight: '2.75rem' }}
                                 />
                                 <button type="button" className="password-toggle" onClick={() => setShowPassword(!showPassword)}>
                                     {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
