@@ -75,15 +75,145 @@ const initialContacts = [
 
 const Contacts = ({ initialOpenAddContact = false, setCurrentPage: setDashboardPage }) => {
     // Contacts Data State
-    const [contacts, setContacts] = useState(() => {
+    // const [contacts, setContacts] = useState(() => {
+    //     try {
+    //         const saved = localStorage.getItem('dealconverter_contacts_data');
+    //         if (saved) return JSON.parse(saved);
+    //     } catch (e) {
+    //         console.error(e);
+    //     }
+    //     return initialContacts;
+    // });
+    const [contacts, setContacts] = useState([]);
+    useEffect(() => {
+    const fetchContacts = async () => {
         try {
-            const saved = localStorage.getItem('dealconverter_contacts_data');
-            if (saved) return JSON.parse(saved);
-        } catch (e) {
-            console.error(e);
+            const token = localStorage.getItem('token');
+
+            const response = await fetch('/api/contacts', {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const data = await response.json();
+
+            console.log('Contacts API response:', data);
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to fetch contacts');
+            }
+
+            // setContacts(data.contacts || []);
+            setContacts(
+  (data.contacts || []).map(contact => ({
+    ...contact,
+    name: `${contact.first_name || ''} ${contact.last_name || ''}`.trim(),
+    created: contact.created_at,
+    modified: contact.updated_at,
+    mobile: contact.mobile || '',
+    email: contact.email || '',
+    dest: contact.destination || '',
+    status: String(contact.lead_status_id ?? ''),
+    owner: String(contact.lead_owner_id ?? ''),
+    initial: (contact.first_name || 'U').charAt(0).toUpperCase(),
+    color: '#3B82F6',
+  }))
+);
+        } catch (error) {
+            console.error('Failed to fetch contacts:', error);
         }
-        return initialContacts;
+    };
+
+    fetchContacts();
+}, []);
+//api for get contacts by id
+const fetchContactById = async (contactId) => {
+  try {
+    const token = localStorage.getItem('token');
+
+    const response = await fetch(`/api/contacts/${contactId}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
+
+    const data = await response.json();
+
+    console.log('Get Contact By ID response:', data);
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch contact');
+    }
+
+    return data.contact;
+  } catch (error) {
+    console.error('Failed to fetch contact by ID:', error);
+    return null;
+  }
+};
+//API for upadate
+
+const updateContact = async (contactId, updatedData) => {
+  try {
+    const token = localStorage.getItem('token');
+
+    const response = await fetch(`/api/contacts/${contactId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(updatedData),
+    });
+
+    const data = await response.json();
+
+    console.log('Update Contact response:', data);
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to update contact');
+    }
+
+    return data.contact;
+  } catch (error) {
+    console.error('Failed to update contact:', error);
+    return null;
+  }
+};
+// api gor delete contact
+const deleteContact = async (contactId) => {
+    try {
+        const token = localStorage.getItem('token');
+
+        const response = await fetch(`/api/contacts/${contactId}`, {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        const contentType = response.headers.get('content-type');
+
+        const data = contentType?.includes('application/json')
+            ? await response.json()
+            : { message: await response.text() };
+
+        console.log('Delete Contact response:', data);
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to delete contact');
+        }
+
+        return true;
+
+    } catch (error) {
+        console.error('Failed to delete contact:', error);
+        return false;
+    }
+};
 
     useEffect(() => {
         const handleStorage = () => {
@@ -1025,6 +1155,7 @@ const Contacts = ({ initialOpenAddContact = false, setCurrentPage: setDashboardP
                                 </th>
                             )}
                             {visibleColumns.destinations && <th>Destinations</th>}
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1052,29 +1183,47 @@ const Contacts = ({ initialOpenAddContact = false, setCurrentPage: setDashboardP
                                     {visibleColumns.modifiedDate && <td>{contact.modified}</td>}
                                     {visibleColumns.mobile && <td style={{ fontWeight: 600 }}>{contact.mobile}</td>}
                                     {visibleColumns.contactName && (
-                                        <td>
-                                            <div className="contact-name-cell">
-                                                <div
-                                                    className="contact-avatar-circle"
-                                                    style={{ backgroundColor: contact.color }}
-                                                >
-                                                    {contact.initial}
-                                                </div>
-                                                <span
-                                                    className="contact-name-link"
-                                                    onClick={() => setSelectedContactForDrawer(contact)}
-                                                >
-                                                    {contact.name}
-                                                </span>
-                                                <div
-                                                    className="eye-view-btn"
-                                                    title="View Profile Details"
-                                                    onClick={() => setSelectedContactForDrawer(contact)}
-                                                >
-                                                    👁
-                                                </div>
-                                            </div>
-                                        </td>
+<td>
+
+    <div className="contact-name-cell">
+
+        <div
+            className="contact-avatar-circle"
+            style={{ backgroundColor: contact.color }}
+        >
+            {contact.initial}
+        </div>
+
+        <span
+            className="contact-name-link"
+            onClick={async () => {
+                const contactData = await fetchContactById(contact.id);
+
+                if (contactData) {
+                    setSelectedContactForDrawer(contactData);
+                }
+            }}
+        >
+            {contact.name}
+        </span>
+
+        <div
+            className="eye-view-btn"
+            title="View Profile Details"
+            onClick={async () => {
+                const contactData = await fetchContactById(contact.id);
+
+                if (contactData) {
+                    setSelectedContactForDrawer(contactData);
+                }
+            }}
+        >
+            👁
+        </div>
+
+    </div>
+
+</td>
                                     )}
                                     {visibleColumns.leadStatus && (
                                         <td style={{ position: 'relative' }}>
@@ -1122,6 +1271,49 @@ const Contacts = ({ initialOpenAddContact = false, setCurrentPage: setDashboardP
                                             )}
                                         </td>
                                     )}
+                                    <td>
+    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+
+        <button
+            type="button"
+            title="Edit Contact"
+            onClick={async () => {
+                const contactData = await fetchContactById(contact.id);
+
+                if (contactData) {
+                    setSelectedContactForDrawer(contactData);
+                }
+            }}
+        >
+            ✏️
+        </button>
+
+        <button
+            type="button"
+            title="Delete Contact"
+            onClick={async () => {
+                const confirmed = window.confirm(
+                    `Are you sure you want to delete ${contact.name}?`
+                );
+
+                if (!confirmed) return;
+
+                const deleted = await deleteContact(contact.id);
+
+                if (deleted) {
+                    setContacts(prev =>
+                        prev.filter(item => item.id !== contact.id)
+                    );
+
+                    showToast('Contact deleted successfully!');
+                }
+            }}
+        >
+            🗑️
+        </button>
+
+    </div>
+</td>
                                 </tr>
                             ))
                         )}
@@ -1284,7 +1476,7 @@ const Contacts = ({ initialOpenAddContact = false, setCurrentPage: setDashboardP
                             <button type="button" className="crm-btn-secondary" onClick={() => setActiveModal(null)}>
                                 Cancel
                             </button>
-                            <button
+                            {/* <button
                                 type="button"
                                 className="crm-btn-primary"
                                 onClick={() => {
@@ -1293,7 +1485,34 @@ const Contacts = ({ initialOpenAddContact = false, setCurrentPage: setDashboardP
                                 }}
                             >
                                 Start Import
-                            </button>
+                            </button> */}
+                            <button
+    type="button"
+    className="crm-btn-primary"
+    style={{ width: '100%' }}
+    onClick={async () => {
+        const updatedContact = await updateContact(
+            selectedContactForDrawer.id,
+            {
+                first_name: selectedContactForDrawer.first_name,
+                last_name: selectedContactForDrawer.last_name,
+                email: selectedContactForDrawer.email,
+                mobile: selectedContactForDrawer.mobile,
+                destination: selectedContactForDrawer.destination,
+                lead_status_id: Number(selectedContactForDrawer.lead_status_id),
+                lead_owner_id: Number(selectedContactForDrawer.lead_owner_id),
+                notes: selectedContactForDrawer.notes,
+            }
+        );
+
+        if (updatedContact) {
+            showToast('Contact updated successfully!');
+            setSelectedContactForDrawer(null);
+        }
+    }}
+>
+    Save Changes
+</button>
                         </div>
                     </div>
                 </div>
@@ -1411,22 +1630,76 @@ const Contacts = ({ initialOpenAddContact = false, setCurrentPage: setDashboardP
 
                             <div className="drawer-section-title">Lead Information</div>
                             <div className="info-grid">
-                                <div className="info-grid-item">
+                                {/* <div className="info-grid-item">
                                     <label>Mobile Number</label>
                                     <span>{selectedContactForDrawer.mobile}</span>
-                                </div>
+                                </div> */}
                                 <div className="info-grid-item">
+    <label>Mobile Number</label>
+    <input
+        type="text"
+        value={selectedContactForDrawer.mobile || ''}
+        onChange={(e) =>
+            setSelectedContactForDrawer(prev => ({
+                ...prev,
+                mobile: e.target.value
+            }))
+        }
+    />
+</div>
+                                {/* <div className="info-grid-item">
                                     <label>Email Address</label>
                                     <span>{selectedContactForDrawer.email}</span>
-                                </div>
+                                </div> */}
                                 <div className="info-grid-item">
+    <label>Email Address</label>
+    <input
+        type="email"
+        value={selectedContactForDrawer.email || ''}
+        onChange={(e) =>
+            setSelectedContactForDrawer(prev => ({
+                ...prev,
+                email: e.target.value
+            }))
+        }
+    />
+</div>
+                                {/* <div className="info-grid-item">
                                     <label>Destination</label>
                                     <span>{selectedContactForDrawer.dest || 'Not Specified'}</span>
-                                </div>
+                                </div> */}
                                 <div className="info-grid-item">
+    <label>Destination</label>
+    <input
+        type="text"
+        value={selectedContactForDrawer.destination || ''}
+        onChange={(e) =>
+            setSelectedContactForDrawer(prev => ({
+                ...prev,
+                destination: e.target.value,
+                dest: e.target.value
+            }))
+        }
+    />
+</div>
+                                {/* <div className="info-grid-item">
                                     <label>Lead Owner</label>
                                     <span>{selectedContactForDrawer.owner}</span>
-                                </div>
+                                </div> */}
+                                <div className="info-grid-item">
+    <label>Lead Owner</label>
+    <input
+        type="text"
+        value={selectedContactForDrawer.lead_owner_id || ''}
+        onChange={(e) =>
+            setSelectedContactForDrawer(prev => ({
+                ...prev,
+                lead_owner_id: e.target.value,
+                owner: e.target.value
+            }))
+        }
+    />
+</div>
                                 <div className="info-grid-item">
                                     <label>Created Date</label>
                                     <span style={{ fontSize: '0.8rem' }}>{selectedContactForDrawer.created}</span>
@@ -1456,19 +1729,41 @@ const Contacts = ({ initialOpenAddContact = false, setCurrentPage: setDashboardP
                             </div>
                         </div>
 
-                        <div className="crm-modal-footer">
-                            <button
-                                type="button"
-                                className="crm-btn-primary"
-                                style={{ width: '100%' }}
-                                onClick={() => {
-                                    showToast(`Contact ${selectedContactForDrawer.name} updated!`);
-                                    setSelectedContactForDrawer(null);
-                                }}
-                            >
-                                Done
-                            </button>
-                        </div>
+                        `<div className="crm-modal-footer">
+    <button
+        type="button"
+        className="crm-btn-primary"
+        style={{ width: '100%' }}
+        onClick={async () => {
+            if (selectedContactForDrawer) {
+                const updatedContact = await updateContact(
+                    selectedContactForDrawer.id,
+                    {
+                        first_name: selectedContactForDrawer.first_name,
+                        last_name: selectedContactForDrawer.last_name,
+                        email: selectedContactForDrawer.email,
+                        mobile: selectedContactForDrawer.mobile,
+                        destination: selectedContactForDrawer.destination,
+                        lead_status_id: Number(
+                            selectedContactForDrawer.lead_status_id
+                        ),
+                        lead_owner_id: Number(
+                            selectedContactForDrawer.lead_owner_id
+                        ),
+                        notes: selectedContactForDrawer.notes,
+                    }
+                );
+
+                if (updatedContact) {
+                    showToast('Contact updated successfully!');
+                    setSelectedContactForDrawer(null);
+                }
+            }
+        }}
+    >
+        Save Changes
+    </button>
+</div>
                     </div>
                 </div>
             )}
