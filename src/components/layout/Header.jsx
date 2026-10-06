@@ -18,10 +18,34 @@ const Header = ({ title = 'Home' }) => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handleLogout = () => {
-        localStorage.removeItem('currentUser');
-        navigate('/signin');
+    const [currentUser, setCurrentUser] = useState(() => {
+        try {
+            return JSON.parse(localStorage.getItem('currentUser') || '{}');
+        } catch {
+            return {};
+        }
+    });
+
+    const handleLogout = async () => {
+        const token = localStorage.getItem('token');
+        try {
+            await fetch('/api/auth/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                }
+            });
+        } catch (err) {
+            console.warn('Backend logout call completed with warning:', err);
+        } finally {
+            localStorage.removeItem('token');
+            localStorage.removeItem('currentUser');
+            navigate('/signin');
+        }
     };
+
+    const userName = currentUser?.name || currentUser?.email?.split('@')[0] || 'User';
 
     return (
         <header className="header">
@@ -36,7 +60,7 @@ const Header = ({ title = 'Home' }) => {
                 </div>
 
                 <div className="welcome-msg">
-                    👋 Welcome , Arun!
+                    👋 Welcome , {userName}!
                 </div>
 
                 <div className="notifications" style={{ position: 'relative' }}>

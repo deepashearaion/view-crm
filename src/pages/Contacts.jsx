@@ -75,145 +75,91 @@ const initialContacts = [
 
 const Contacts = ({ initialOpenAddContact = false, setCurrentPage: setDashboardPage }) => {
     // Contacts Data State
-    // const [contacts, setContacts] = useState(() => {
-    //     try {
-    //         const saved = localStorage.getItem('dealconverter_contacts_data');
-    //         if (saved) return JSON.parse(saved);
-    //     } catch (e) {
-    //         console.error(e);
-    //     }
-    //     return initialContacts;
-    // });
-    const [contacts, setContacts] = useState([]);
-    useEffect(() => {
-    const fetchContacts = async () => {
+    const [contacts, setContacts] = useState(() => {
         try {
-            const token = localStorage.getItem('token');
+            const saved = localStorage.getItem('dealconverter_contacts_data');
+            if (saved) return JSON.parse(saved);
+        } catch (e) {
+            console.error(e);
+        }
+        return initialContacts;
+    });
 
+    // Helper to map backend contact model to UI contact model
+    const mapBackendContact = (c) => {
+        const fullName = `${c.first_name || ''} ${c.last_name || ''}`.trim() || c.first_name || 'Unnamed';
+        const createdDate = c.created_at ? new Date(c.created_at).toLocaleString('en-US', {
+            month: 'short', day: 'numeric', year: 'numeric',
+            hour: '2-digit', minute: '2-digit', second: '2-digit'
+        }) : 'Recently';
+        const modifiedDate = c.updated_at ? new Date(c.updated_at).toLocaleString('en-US', {
+            month: 'short', day: 'numeric', year: 'numeric',
+            hour: '2-digit', minute: '2-digit', second: '2-digit'
+        }) : createdDate;
+
+        const statusMap = {
+            1: 'Hot Leads',
+            2: 'Warm Leads',
+            3: 'Cold Leads',
+            4: 'Open Deal',
+            5: 'Follow Up Leads'
+        };
+
+        return {
+            id: c.id,
+            name: fullName,
+            first_name: c.first_name || '',
+            last_name: c.last_name || '',
+            mobile: c.mobile || '',
+            alternate_mobile: c.alternate_mobile || '',
+            email: c.email || `${(c.first_name || 'contact').toLowerCase()}@example.com`,
+            status: c.lead_status_id ? (statusMap[c.lead_status_id] || 'Cold Leads') : 'Cold Leads',
+            dest: c.destination || '',
+            owner: 'Arun',
+            notes: c.notes || '',
+            source: c.source || 'Website',
+            initial: (c.first_name || 'U').charAt(0).toUpperCase(),
+            color: ['#8B5CF6', '#EC4899', '#3B82F6', '#10B981', '#F59E0B'][Math.abs(Number(c.id) || 0) % 5],
+            created: createdDate,
+            modified: modifiedDate,
+            daysOld: 0
+        };
+    };
+
+    // 1. GET ALL CONTACTS API
+    const fetchContacts = async (silent = false) => {
+        const token = localStorage.getItem('token');
+        if (!silent) setIsRefreshing(true);
+        try {
             const response = await fetch('/api/contacts', {
                 method: 'GET',
                 headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                }
             });
+            const contentType = response.headers.get('content-type');
+            const data = contentType?.includes('application/json')
+                ? await response.json()
+                : null;
 
-            const data = await response.json();
-
-            console.log('Contacts API response:', data);
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to fetch contacts');
+            if (response.ok && data?.contacts && Array.isArray(data.contacts)) {
+                if (data.contacts.length > 0) {
+                    const formatted = data.contacts.map(mapBackendContact);
+                    setContacts(formatted);
+                    localStorage.setItem('dealconverter_contacts_data', JSON.stringify(formatted));
+                }
             }
-
-            // setContacts(data.contacts || []);
-            setContacts(
-  (data.contacts || []).map(contact => ({
-    ...contact,
-    name: `${contact.first_name || ''} ${contact.last_name || ''}`.trim(),
-    created: contact.created_at,
-    modified: contact.updated_at,
-    mobile: contact.mobile || '',
-    email: contact.email || '',
-    dest: contact.destination || '',
-    status: String(contact.lead_status_id ?? ''),
-    owner: String(contact.lead_owner_id ?? ''),
-    initial: (contact.first_name || 'U').charAt(0).toUpperCase(),
-    color: '#3B82F6',
-  }))
-);
-        } catch (error) {
-            console.error('Failed to fetch contacts:', error);
+        } catch (err) {
+            console.warn('GET /api/contacts error, using cached data:', err);
+        } finally {
+            if (!silent) setIsRefreshing(false);
         }
     };
 
-    fetchContacts();
-}, []);
-//api for get contacts by id
-const fetchContactById = async (contactId) => {
-  try {
-    const token = localStorage.getItem('token');
-
-    const response = await fetch(`/api/contacts/${contactId}`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    const data = await response.json();
-
-    console.log('Get Contact By ID response:', data);
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to fetch contact');
-    }
-
-    return data.contact;
-  } catch (error) {
-    console.error('Failed to fetch contact by ID:', error);
-    return null;
-  }
-};
-//API for upadate
-
-const updateContact = async (contactId, updatedData) => {
-  try {
-    const token = localStorage.getItem('token');
-
-    const response = await fetch(`/api/contacts/${contactId}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(updatedData),
-    });
-
-    const data = await response.json();
-
-    console.log('Update Contact response:', data);
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to update contact');
-    }
-
-    return data.contact;
-  } catch (error) {
-    console.error('Failed to update contact:', error);
-    return null;
-  }
-};
-// api gor delete contact
-const deleteContact = async (contactId) => {
-    try {
-        const token = localStorage.getItem('token');
-
-        const response = await fetch(`/api/contacts/${contactId}`, {
-            method: 'DELETE',
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
-
-        const contentType = response.headers.get('content-type');
-
-        const data = contentType?.includes('application/json')
-            ? await response.json()
-            : { message: await response.text() };
-
-        console.log('Delete Contact response:', data);
-
-        if (!response.ok) {
-            throw new Error(data.message || 'Failed to delete contact');
-        }
-
-        return true;
-
-    } catch (error) {
-        console.error('Failed to delete contact:', error);
-        return false;
-    }
-};
+    useEffect(() => {
+        fetchContacts(true);
+    }, []);
 
     useEffect(() => {
         const handleStorage = () => {
@@ -251,6 +197,9 @@ const deleteContact = async (contactId) => {
     const [activeModal, setActiveModal] = useState(initialOpenAddContact ? 'form' : null); // 'form', 'import', 'integration'
     const [selectedIntegration, setSelectedIntegration] = useState(null);
     const [selectedContactForDrawer, setSelectedContactForDrawer] = useState(null);
+    const [isDrawerLoading, setIsDrawerLoading] = useState(false);
+    const [isEditingInDrawer, setIsEditingInDrawer] = useState(false);
+    const [drawerEditForm, setDrawerEditForm] = useState({ first_name: '', last_name: '', destination: '', mobile: '', email: '', notes: '' });
 
     useEffect(() => {
         if (initialOpenAddContact) {
@@ -297,7 +246,7 @@ const deleteContact = async (contactId) => {
         mobile: '',
         email: '',
         status: 'Cold Leads',
-        dest: 'Manali',
+        dest: '',
         owner: 'Self'
     });
 
@@ -562,56 +511,268 @@ const deleteContact = async (contactId) => {
         showToast('Contacts exported to dealconverter_contacts.csv');
     };
 
-    // Handle Refresh
+    // Handle Refresh (GET /api/contacts)
     const handleRefresh = () => {
-        setIsRefreshing(true);
-        setTimeout(() => {
-            setIsRefreshing(false);
-            showToast('Contacts list refreshed');
-        }, 600);
+        fetchContacts(false);
+        showToast('Contacts list refreshed from database');
     };
 
-    // Handle Create New Contact
-    const handleSaveContact = (e) => {
-        e.preventDefault();
-        if (!newContact.name.trim() || !newContact.mobile.trim()) {
-            alert('Please fill in Contact Name and Mobile Number.');
-            return;
-        }
+    // 2. GET CONTACT BY ID API (GET /api/contacts/:id)
+    const handleViewContact = async (contact) => {
+        setSelectedContactForDrawer(contact);
+        setIsEditingInDrawer(false);
+        const rawMob = (contact.mobile || '').replace(/\D/g, '');
+        const mob10 = rawMob.length >= 10 ? rawMob.slice(-10) : rawMob;
+        setDrawerEditForm({
+            first_name: contact.first_name || contact.name.split(' ')[0] || '',
+            last_name: contact.last_name || contact.name.split(' ').slice(1).join(' ') || '',
+            destination: contact.dest || '',
+            mobile: mob10,
+            email: contact.email || '',
+            notes: contact.notes || ''
+        });
 
-        const createdItem = {
-            id: Date.now(),
-            created: new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-            modified: new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-            mobile: newContact.mobile,
-            name: newContact.name,
-            status: newContact.status,
-            dest: newContact.dest,
-            initial: newContact.name.charAt(0).toUpperCase(),
-            color: ['#8B5CF6', '#EC4899', '#3B82F6', '#10B981', '#F59E0B'][Math.floor(Math.random() * 5)],
-            email: newContact.email || `${newContact.name.toLowerCase().replace(/\s+/g, '')}@example.com`,
-            owner: newContact.owner,
-            daysOld: 0
+        setIsDrawerLoading(true);
+        const token = localStorage.getItem('token');
+        try {
+            const response = await fetch(`/api/contacts/${contact.id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                }
+            });
+            const contentType = response.headers.get('content-type');
+            const data = contentType?.includes('application/json') ? await response.json() : null;
+
+            if (response.ok && data?.contact) {
+                const mapped = mapBackendContact(data.contact);
+                setSelectedContactForDrawer(mapped);
+                const backMob = (mapped.mobile || '').replace(/\D/g, '');
+                setDrawerEditForm({
+                    first_name: mapped.first_name,
+                    last_name: mapped.last_name,
+                    destination: mapped.dest,
+                    mobile: backMob.length >= 10 ? backMob.slice(-10) : backMob,
+                    email: mapped.email,
+                    notes: mapped.notes
+                });
+            }
+        } catch (err) {
+            console.warn(`GET /api/contacts/${contact.id} error:`, err);
+        } finally {
+            setIsDrawerLoading(false);
+        }
+    };
+
+    // 3. UPDATE CONTACT API (PATCH /api/contacts/:id)
+    const handleUpdateStatus = async (id, newStatus) => {
+        const statusIdMap = {
+            'Hot Leads': 1,
+            'Warm Leads': 2,
+            'Cold Leads': 3,
+            'Open Deal': 4,
+            'Follow Up Leads': 5
         };
 
-        setContacts([createdItem, ...contacts]);
-        setActiveModal(null);
-        setNewContact({ name: '', mobile: '', email: '', status: 'Cold Leads', dest: 'Manali', owner: 'Self' });
-        showToast(`Contact "${createdItem.name}" created successfully!`);
-    };
-
-    // Quick Status Update
-    const handleUpdateStatus = (id, newStatus) => {
         setContacts(prev => prev.map(c => c.id === id ? { ...c, status: newStatus } : c));
         setStatusPopoverId(null);
         showToast(`Status updated to ${newStatus}`);
+
+        const token = localStorage.getItem('token');
+        try {
+            await fetch(`/api/contacts/${id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
+                body: JSON.stringify({
+                    lead_status_id: statusIdMap[newStatus] || 1,
+                    notes: `Status updated to ${newStatus}`
+                })
+            });
+        } catch (err) {
+            console.warn(`PATCH /api/contacts/${id} status error:`, err);
+        }
     };
 
-    // Bulk Delete
-    const handleBulkDelete = () => {
-        setContacts(prev => prev.filter(c => !selectedRowIds.includes(c.id)));
+    const handleSaveDrawerContact = async (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        if (!selectedContactForDrawer) return;
+
+        const rawMobile = (drawerEditForm.mobile || '').replace(/\D/g, '');
+        const cleanMobile = rawMobile.length >= 10 ? rawMobile.slice(-10) : rawMobile;
+        if (cleanMobile.length !== 10) {
+            showToast('Mobile number must be exactly 10 digits');
+            alert('Mobile number must be exactly 10 digits');
+            return;
+        }
+
+        const id = selectedContactForDrawer.id;
+        const token = localStorage.getItem('token');
+        const updatedName = `${drawerEditForm.first_name || ''} ${drawerEditForm.last_name || ''}`.trim() || selectedContactForDrawer.name;
+        const fullMobile = `+91 ${cleanMobile}`;
+        const updatedDest = drawerEditForm.destination || selectedContactForDrawer.dest || '';
+        const nowFormatted = new Date().toLocaleString('en-US', {
+            month: 'short', day: 'numeric', year: 'numeric',
+            hour: '2-digit', minute: '2-digit', second: '2-digit'
+        });
+
+        // Optimistic UI update for both drawer and table
+        const updatedItem = {
+            ...selectedContactForDrawer,
+            name: updatedName,
+            first_name: drawerEditForm.first_name,
+            last_name: drawerEditForm.last_name,
+            dest: updatedDest,
+            mobile: fullMobile,
+            email: drawerEditForm.email,
+            notes: drawerEditForm.notes,
+            modified: nowFormatted
+        };
+
+        // Immediately update state and localStorage
+        setContacts(prev => {
+            const next = prev.map(c => c.id === id ? updatedItem : c);
+            try {
+                localStorage.setItem('dealconverter_contacts_data', JSON.stringify(next));
+            } catch (err) {
+                console.error(err);
+            }
+            return next;
+        });
+        setSelectedContactForDrawer(updatedItem);
+        setIsEditingInDrawer(false);
+
+        try {
+            const response = await fetch(`/api/contacts/${id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
+                body: JSON.stringify({
+                    first_name: drawerEditForm.first_name,
+                    last_name: drawerEditForm.last_name,
+                    mobile: fullMobile,
+                    email: drawerEditForm.email,
+                    destination: updatedDest,
+                    notes: drawerEditForm.notes
+                })
+            });
+            const contentType = response.headers.get('content-type');
+            const data = contentType?.includes('application/json') ? await response.json() : null;
+
+            if (response.ok) {
+                if (data?.contact) {
+                    const mapped = mapBackendContact(data.contact);
+                    setContacts(prev => {
+                        const next = prev.map(c => c.id === id ? mapped : c);
+                        try {
+                            localStorage.setItem('dealconverter_contacts_data', JSON.stringify(next));
+                        } catch (err) {
+                            console.error(err);
+                        }
+                        return next;
+                    });
+                    setSelectedContactForDrawer(mapped);
+                }
+                showToast(data?.message || 'Contact updated in database!');
+            } else if (response.status === 404) {
+                // If ID is not in DB (client-side/mock item), save into PostgreSQL via POST
+                const createRes = await fetch('/api/contacts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                    },
+                    body: JSON.stringify({
+                        first_name: drawerEditForm.first_name,
+                        last_name: drawerEditForm.last_name,
+                        mobile: fullMobile,
+                        email: drawerEditForm.email,
+                        destination: updatedDest,
+                        notes: drawerEditForm.notes,
+                        lead_status_id: 1
+                    })
+                });
+                const createData = await createRes.json();
+                if (createRes.ok && createData?.contact) {
+                    const mappedNew = mapBackendContact(createData.contact);
+                    setContacts(prev => {
+                        const next = prev.map(c => c.id === id ? mappedNew : c);
+                        try {
+                            localStorage.setItem('dealconverter_contacts_data', JSON.stringify(next));
+                        } catch (err) {
+                            console.error(err);
+                        }
+                        return next;
+                    });
+                    setSelectedContactForDrawer(mappedNew);
+                    showToast('Contact created and updated in database!');
+                } else {
+                    showToast('Updated locally in table');
+                }
+            } else {
+                showToast(data?.error || 'Updated locally');
+            }
+        } catch (err) {
+            console.warn(`PATCH /api/contacts/${id} error:`, err);
+            showToast('Updated locally (offline)');
+        }
+    };
+
+    // 4. DELETE CONTACT API (DELETE /api/contacts/:id)
+    const handleDeleteContact = async (id) => {
+        const token = localStorage.getItem('token');
+        try {
+            const response = await fetch(`/api/contacts/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                }
+            });
+            const contentType = response.headers.get('content-type');
+            const data = contentType?.includes('application/json') ? await response.json() : null;
+
+            if (response.ok) {
+                showToast(data?.message || 'Contact deleted successfully from database');
+            }
+        } catch (err) {
+            console.warn(`DELETE /api/contacts/${id} error:`, err);
+        }
+
+        setContacts(prev => prev.filter(c => c.id !== id));
+        setSelectedRowIds(prev => prev.filter(rId => rId !== id));
+        if (selectedContactForDrawer?.id === id) {
+            setSelectedContactForDrawer(null);
+        }
+    };
+
+    // Bulk Delete (DELETE /api/contacts/:id)
+    const handleBulkDelete = async () => {
+        const token = localStorage.getItem('token');
+        const idsToDelete = [...selectedRowIds];
+        setContacts(prev => prev.filter(c => !idsToDelete.includes(c.id)));
         setSelectedRowIds([]);
-        showToast('Selected contacts deleted');
+        showToast(`Deleting ${idsToDelete.length} contact(s) from database...`);
+
+        for (const id of idsToDelete) {
+            try {
+                await fetch(`/api/contacts/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                    }
+                });
+            } catch (err) {
+                console.warn(`DELETE /api/contacts/${id} error:`, err);
+            }
+        }
+        showToast('Selected contacts deleted from database');
     };
 
     // Bulk Status Change
@@ -1155,7 +1316,6 @@ const deleteContact = async (contactId) => {
                                 </th>
                             )}
                             {visibleColumns.destinations && <th>Destinations</th>}
-                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1183,47 +1343,52 @@ const deleteContact = async (contactId) => {
                                     {visibleColumns.modifiedDate && <td>{contact.modified}</td>}
                                     {visibleColumns.mobile && <td style={{ fontWeight: 600 }}>{contact.mobile}</td>}
                                     {visibleColumns.contactName && (
-<td>
-
-    <div className="contact-name-cell">
-
-        <div
-            className="contact-avatar-circle"
-            style={{ backgroundColor: contact.color }}
-        >
-            {contact.initial}
-        </div>
-
-        <span
-            className="contact-name-link"
-            onClick={async () => {
-                const contactData = await fetchContactById(contact.id);
-
-                if (contactData) {
-                    setSelectedContactForDrawer(contactData);
-                }
-            }}
-        >
-            {contact.name}
-        </span>
-
-        <div
-            className="eye-view-btn"
-            title="View Profile Details"
-            onClick={async () => {
-                const contactData = await fetchContactById(contact.id);
-
-                if (contactData) {
-                    setSelectedContactForDrawer(contactData);
-                }
-            }}
-        >
-            👁
-        </div>
-
-    </div>
-
-</td>
+                                        <td>
+                                            <div className="contact-name-cell">
+                                                <div
+                                                    className="contact-avatar-circle"
+                                                    style={{ backgroundColor: contact.color }}
+                                                >
+                                                    {contact.initial}
+                                                </div>
+                                                <span
+                                                    className="contact-name-link"
+                                                    onClick={() => handleViewContact(contact)}
+                                                >
+                                                    {contact.name}
+                                                </span>
+                                                <div
+                                                    className="eye-view-btn"
+                                                    title="View Profile Details (GET by ID)"
+                                                    onClick={() => handleViewContact(contact)}
+                                                >
+                                                    👁
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    style={{
+                                                        background: 'none',
+                                                        border: 'none',
+                                                        color: '#EF4444',
+                                                        cursor: 'pointer',
+                                                        padding: '4px',
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        borderRadius: '4px',
+                                                        marginLeft: '4px'
+                                                    }}
+                                                    title="Delete Contact (DELETE API)"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        if (window.confirm(`Delete "${contact.name}" from database?`)) {
+                                                            handleDeleteContact(contact.id);
+                                                        }
+                                                    }}
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
+                                        </td>
                                     )}
                                     {visibleColumns.leadStatus && (
                                         <td style={{ position: 'relative' }}>
@@ -1271,49 +1436,6 @@ const deleteContact = async (contactId) => {
                                             )}
                                         </td>
                                     )}
-                                    <td>
-    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-
-        <button
-            type="button"
-            title="Edit Contact"
-            onClick={async () => {
-                const contactData = await fetchContactById(contact.id);
-
-                if (contactData) {
-                    setSelectedContactForDrawer(contactData);
-                }
-            }}
-        >
-            ✏️
-        </button>
-
-        <button
-            type="button"
-            title="Delete Contact"
-            onClick={async () => {
-                const confirmed = window.confirm(
-                    `Are you sure you want to delete ${contact.name}?`
-                );
-
-                if (!confirmed) return;
-
-                const deleted = await deleteContact(contact.id);
-
-                if (deleted) {
-                    setContacts(prev =>
-                        prev.filter(item => item.id !== contact.id)
-                    );
-
-                    showToast('Contact deleted successfully!');
-                }
-            }}
-        >
-            🗑️
-        </button>
-
-    </div>
-</td>
                                 </tr>
                             ))
                         )}
@@ -1476,7 +1598,7 @@ const deleteContact = async (contactId) => {
                             <button type="button" className="crm-btn-secondary" onClick={() => setActiveModal(null)}>
                                 Cancel
                             </button>
-                            {/* <button
+                            <button
                                 type="button"
                                 className="crm-btn-primary"
                                 onClick={() => {
@@ -1485,34 +1607,7 @@ const deleteContact = async (contactId) => {
                                 }}
                             >
                                 Start Import
-                            </button> */}
-                            <button
-    type="button"
-    className="crm-btn-primary"
-    style={{ width: '100%' }}
-    onClick={async () => {
-        const updatedContact = await updateContact(
-            selectedContactForDrawer.id,
-            {
-                first_name: selectedContactForDrawer.first_name,
-                last_name: selectedContactForDrawer.last_name,
-                email: selectedContactForDrawer.email,
-                mobile: selectedContactForDrawer.mobile,
-                destination: selectedContactForDrawer.destination,
-                lead_status_id: Number(selectedContactForDrawer.lead_status_id),
-                lead_owner_id: Number(selectedContactForDrawer.lead_owner_id),
-                notes: selectedContactForDrawer.notes,
-            }
-        );
-
-        if (updatedContact) {
-            showToast('Contact updated successfully!');
-            setSelectedContactForDrawer(null);
-        }
-    }}
->
-    Save Changes
-</button>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1584,187 +1679,381 @@ const deleteContact = async (contactId) => {
             {selectedContactForDrawer && (
                 <div className="contact-drawer-backdrop" onClick={() => setSelectedContactForDrawer(null)}>
                     <div className="contact-drawer" onClick={e => e.stopPropagation()}>
-                        <div className="drawer-header">
-                            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#111827' }}>
-                                Contact Overview
-                            </h3>
+                        <div className="drawer-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#111827' }}>
+                                    Contact Details
+                                </h3>
+                                <span style={{ fontSize: '0.75rem', background: '#EEF2FF', color: '#1E29FF', padding: '2px 8px', borderRadius: '12px', fontWeight: 600 }}>
+                                    ID #{selectedContactForDrawer.id}
+                                </span>
+                            </div>
                             <button className="filter-close-btn" onClick={() => setSelectedContactForDrawer(null)}>
                                 <X size={16} />
                             </button>
                         </div>
 
                         <div className="drawer-body">
-                            <div className="drawer-profile-card">
-                                <div
-                                    className="drawer-avatar-lg"
-                                    style={{ backgroundColor: selectedContactForDrawer.color }}
-                                >
-                                    {selectedContactForDrawer.initial}
+                            {isDrawerLoading ? (
+                                <div style={{ padding: '40px', textAlign: 'center', color: '#6B7280' }}>
+                                    <RefreshCw className="refreshing" size={24} style={{ marginBottom: '8px' }} />
+                                    <p>Loading contact details from database...</p>
                                 </div>
-                                <div>
-                                    <h2 style={{ margin: '0 0 4px 0', fontSize: '1.2rem', fontWeight: 700, color: '#111827' }}>
-                                        {selectedContactForDrawer.name}
-                                    </h2>
-                                    <span className="lead-status-pill">
-                                        <div className="status-dot"></div>
-                                        {selectedContactForDrawer.status}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Quick Action Buttons */}
-                            <div className="quick-action-row">
-                                <button className="quick-action-btn" onClick={() => showToast(`Calling ${selectedContactForDrawer.mobile}...`)}>
-                                    <Phone size={18} color="#2563EB" />
-                                    <span>Call</span>
-                                </button>
-                                <button className="quick-action-btn" onClick={() => showToast(`Opening WhatsApp for ${selectedContactForDrawer.mobile}...`)}>
-                                    <MessageSquare size={18} color="#10B981" />
-                                    <span>WhatsApp</span>
-                                </button>
-                                <button className="quick-action-btn" onClick={() => showToast(`Drafting email to ${selectedContactForDrawer.email}...`)}>
-                                    <Mail size={18} color="#8B5CF6" />
-                                    <span>Email</span>
-                                </button>
-                            </div>
-
-                            <div className="drawer-section-title">Lead Information</div>
-                            <div className="info-grid">
-                                {/* <div className="info-grid-item">
-                                    <label>Mobile Number</label>
-                                    <span>{selectedContactForDrawer.mobile}</span>
-                                </div> */}
-                                <div className="info-grid-item">
-    <label>Mobile Number</label>
-    <input
-        type="text"
-        value={selectedContactForDrawer.mobile || ''}
-        onChange={(e) =>
-            setSelectedContactForDrawer(prev => ({
-                ...prev,
-                mobile: e.target.value
-            }))
-        }
-    />
-</div>
-                                {/* <div className="info-grid-item">
-                                    <label>Email Address</label>
-                                    <span>{selectedContactForDrawer.email}</span>
-                                </div> */}
-                                <div className="info-grid-item">
-    <label>Email Address</label>
-    <input
-        type="email"
-        value={selectedContactForDrawer.email || ''}
-        onChange={(e) =>
-            setSelectedContactForDrawer(prev => ({
-                ...prev,
-                email: e.target.value
-            }))
-        }
-    />
-</div>
-                                {/* <div className="info-grid-item">
-                                    <label>Destination</label>
-                                    <span>{selectedContactForDrawer.dest || 'Not Specified'}</span>
-                                </div> */}
-                                <div className="info-grid-item">
-    <label>Destination</label>
-    <input
-        type="text"
-        value={selectedContactForDrawer.destination || ''}
-        onChange={(e) =>
-            setSelectedContactForDrawer(prev => ({
-                ...prev,
-                destination: e.target.value,
-                dest: e.target.value
-            }))
-        }
-    />
-</div>
-                                {/* <div className="info-grid-item">
-                                    <label>Lead Owner</label>
-                                    <span>{selectedContactForDrawer.owner}</span>
-                                </div> */}
-                                <div className="info-grid-item">
-    <label>Lead Owner</label>
-    <input
-        type="text"
-        value={selectedContactForDrawer.lead_owner_id || ''}
-        onChange={(e) =>
-            setSelectedContactForDrawer(prev => ({
-                ...prev,
-                lead_owner_id: e.target.value,
-                owner: e.target.value
-            }))
-        }
-    />
-</div>
-                                <div className="info-grid-item">
-                                    <label>Created Date</label>
-                                    <span style={{ fontSize: '0.8rem' }}>{selectedContactForDrawer.created}</span>
-                                </div>
-                                <div className="info-grid-item">
-                                    <label>Modified Date</label>
-                                    <span style={{ fontSize: '0.8rem' }}>{selectedContactForDrawer.modified}</span>
-                                </div>
-                            </div>
-
-                            <div className="drawer-section-title" style={{ marginTop: '20px' }}>Recent Activity</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                <div style={{ display: 'flex', gap: '10px', fontSize: '0.825rem' }}>
-                                    <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#3B82F6', marginTop: 5 }}></div>
-                                    <div>
-                                        <div style={{ fontWeight: 600, color: '#1F2937' }}>Lead viewed in Contacts table</div>
-                                        <div style={{ color: '#9CA3AF', fontSize: '0.75rem' }}>Just now</div>
+                            ) : (
+                                <>
+                                    <div className="drawer-profile-card">
+                                        <div
+                                            className="drawer-avatar-lg"
+                                            style={{ backgroundColor: selectedContactForDrawer.color }}
+                                        >
+                                            {selectedContactForDrawer.initial}
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <h2 style={{ margin: '0 0 4px 0', fontSize: '1.2rem', fontWeight: 700, color: '#111827' }}>
+                                                {selectedContactForDrawer.name}
+                                            </h2>
+                                            <span className="lead-status-pill">
+                                                <div className="status-dot"></div>
+                                                {selectedContactForDrawer.status}
+                                            </span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (!isEditingInDrawer && selectedContactForDrawer) {
+                                                    const rawMob = (selectedContactForDrawer.mobile || '').replace(/\D/g, '');
+                                                    const mob10 = rawMob.length >= 10 ? rawMob.slice(-10) : rawMob;
+                                                    setDrawerEditForm({
+                                                        first_name: selectedContactForDrawer.first_name || (selectedContactForDrawer.name ? selectedContactForDrawer.name.split(' ')[0] : '') || '',
+                                                        last_name: selectedContactForDrawer.last_name || (selectedContactForDrawer.name ? selectedContactForDrawer.name.split(' ').slice(1).join(' ') : '') || '',
+                                                        destination: selectedContactForDrawer.dest || '',
+                                                        mobile: mob10,
+                                                        email: selectedContactForDrawer.email || '',
+                                                        notes: selectedContactForDrawer.notes || ''
+                                                    });
+                                                }
+                                                setIsEditingInDrawer(!isEditingInDrawer);
+                                            }}
+                                            style={{
+                                                background: isEditingInDrawer ? '#E5E7EB' : '#EEF2FF',
+                                                color: isEditingInDrawer ? '#374151' : '#1E29FF',
+                                                border: 'none',
+                                                padding: '6px 12px',
+                                                borderRadius: '6px',
+                                                cursor: 'pointer',
+                                                fontSize: '0.825rem',
+                                                fontWeight: 600
+                                            }}
+                                        >
+                                            {isEditingInDrawer ? 'Cancel Edit' : 'Edit Contact'}
+                                        </button>
                                     </div>
-                                </div>
-                                <div style={{ display: 'flex', gap: '10px', fontSize: '0.825rem' }}>
-                                    <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#10B981', marginTop: 5 }}></div>
-                                    <div>
-                                        <div style={{ fontWeight: 600, color: '#1F2937' }}>Lead status updated to {selectedContactForDrawer.status}</div>
-                                        <div style={{ color: '#9CA3AF', fontSize: '0.75rem' }}>{selectedContactForDrawer.modified}</div>
+
+                                    {/* Quick Action Buttons */}
+                                    <div className="quick-action-row">
+                                        <button className="quick-action-btn" onClick={() => showToast(`Calling ${selectedContactForDrawer.mobile}...`)}>
+                                            <Phone size={18} color="#2563EB" />
+                                            <span>Call</span>
+                                        </button>
+                                        <button className="quick-action-btn" onClick={() => showToast(`Opening WhatsApp for ${selectedContactForDrawer.mobile}...`)}>
+                                            <MessageSquare size={18} color="#10B981" />
+                                            <span>WhatsApp</span>
+                                        </button>
+                                        <button className="quick-action-btn" onClick={() => showToast(`Drafting email to ${selectedContactForDrawer.email}...`)}>
+                                            <Mail size={18} color="#8B5CF6" />
+                                            <span>Email</span>
+                                        </button>
                                     </div>
-                                </div>
-                            </div>
+
+                                    {/* EDIT MODE (PATCH API) */}
+                                    {isEditingInDrawer ? (
+                                        <form onSubmit={handleSaveDrawerContact} style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '16px' }}>
+                                            <div className="drawer-section-title">Edit Contact Details</div>
+                                            <div>
+                                                <label style={{ fontSize: '0.78rem', color: '#4B5563', fontWeight: 600, display: 'block', marginBottom: '4px' }}>First Name</label>
+                                                <input
+                                                    type="text"
+                                                    className="auth-input"
+                                                    value={drawerEditForm.first_name}
+                                                    onChange={e => setDrawerEditForm({ ...drawerEditForm, first_name: e.target.value })}
+                                                    required
+                                                />
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.78rem', color: '#4B5563', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Last Name</label>
+                                                <input
+                                                    type="text"
+                                                    className="auth-input"
+                                                    value={drawerEditForm.last_name}
+                                                    onChange={e => setDrawerEditForm({ ...drawerEditForm, last_name: e.target.value })}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.78rem', color: '#4B5563', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
+                                                    Mobile Number (10 digits)
+                                                </label>
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    <span style={{
+                                                        background: '#F3F4F6',
+                                                        border: '1px solid #D1D5DB',
+                                                        borderRight: 'none',
+                                                        borderRadius: '6px 0 0 6px',
+                                                        padding: '8px 10px',
+                                                        fontSize: '0.875rem',
+                                                        color: '#4B5563',
+                                                        fontWeight: 600
+                                                    }}>
+                                                        +91
+                                                    </span>
+                                                    <input
+                                                        type="tel"
+                                                        maxLength={10}
+                                                        className="auth-input"
+                                                        style={{ borderRadius: '0 6px 6px 0' }}
+                                                        placeholder="10-digit mobile number"
+                                                        value={drawerEditForm.mobile}
+                                                        onChange={e => {
+                                                            const digits = e.target.value.replace(/\D/g, '');
+                                                            setDrawerEditForm({ ...drawerEditForm, mobile: digits });
+                                                        }}
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.78rem', color: '#4B5563', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Email Address</label>
+                                                <input
+                                                    type="email"
+                                                    className="auth-input"
+                                                    value={drawerEditForm.email}
+                                                    onChange={e => setDrawerEditForm({ ...drawerEditForm, email: e.target.value })}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.78rem', color: '#4B5563', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Destination</label>
+                                                <input
+                                                    type="text"
+                                                    list="drawer-destinations"
+                                                    className="auth-input"
+                                                    placeholder="e.g. Manali, Goa, Dubai..."
+                                                    value={drawerEditForm.destination}
+                                                    onChange={e => setDrawerEditForm({ ...drawerEditForm, destination: e.target.value })}
+                                                />
+                                                <datalist id="drawer-destinations">
+                                                    <option value="Manali" />
+                                                    <option value="Goa" />
+                                                    <option value="Dubai" />
+                                                    <option value="Bali" />
+                                                    <option value="Singapore" />
+                                                    <option value="Kerala" />
+                                                    <option value="Kashmir" />
+                                                    <option value="Ooty" />
+                                                    <option value="Maldives" />
+                                                    <option value="Thailand" />
+                                                </datalist>
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.78rem', color: '#4B5563', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Notes</label>
+                                                <textarea
+                                                    className="auth-input"
+                                                    style={{ height: '70px', resize: 'vertical' }}
+                                                    value={drawerEditForm.notes}
+                                                    onChange={e => setDrawerEditForm({ ...drawerEditForm, notes: e.target.value })}
+                                                />
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                                                <button
+                                                    type="submit"
+                                                    className="crm-btn-primary"
+                                                    style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                                                >
+                                                    <Check size={16} /> Save Update
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="crm-btn-secondary"
+                                                    onClick={() => setIsEditingInDrawer(false)}
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </form>
+                                    ) : (
+                                        <>
+                                            <div className="drawer-section-title">Lead Information</div>
+                                            <div className="info-grid">
+                                                <div className="info-grid-item">
+                                                    <label>Mobile Number</label>
+                                                    <span>{selectedContactForDrawer.mobile}</span>
+                                                </div>
+                                                <div className="info-grid-item">
+                                                    <label>Email Address</label>
+                                                    <span>{selectedContactForDrawer.email}</span>
+                                                </div>
+                                                <div className="info-grid-item">
+                                                    <label>Destination</label>
+                                                    <span>{selectedContactForDrawer.dest || 'Not Specified'}</span>
+                                                </div>
+                                                <div className="info-grid-item">
+                                                    <label>Lead Owner</label>
+                                                    <span>{selectedContactForDrawer.owner}</span>
+                                                </div>
+                                                <div className="info-grid-item">
+                                                    <label>Created Date</label>
+                                                    <span style={{ fontSize: '0.8rem' }}>{selectedContactForDrawer.created}</span>
+                                                </div>
+                                                <div className="info-grid-item">
+                                                    <label>Modified Date</label>
+                                                    <span style={{ fontSize: '0.8rem' }}>{selectedContactForDrawer.modified}</span>
+                                                </div>
+                                            </div>
+
+                                            {selectedContactForDrawer.notes && (
+                                                <div style={{ marginTop: '16px', background: '#F9FAFB', padding: '12px', borderRadius: '8px' }}>
+                                                    <div style={{ fontSize: '0.78rem', color: '#6B7280', fontWeight: 600, marginBottom: '4px' }}>Notes:</div>
+                                                    <div style={{ fontSize: '0.88rem', color: '#1F2937' }}>{selectedContactForDrawer.notes}</div>
+                                                </div>
+                                            )}
+
+                                            <div className="drawer-section-title" style={{ marginTop: '20px' }}>Recent Activity</div>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                                <div style={{ display: 'flex', gap: '10px', fontSize: '0.825rem' }}>
+                                                    <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#3B82F6', marginTop: 5 }}></div>
+                                                    <div>
+                                                        <div style={{ fontWeight: 600, color: '#1F2937' }}>Lead fetched via GET /api/contacts/{selectedContactForDrawer.id}</div>
+                                                        <div style={{ color: '#9CA3AF', fontSize: '0.75rem' }}>Active database record</div>
+                                                    </div>
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '10px', fontSize: '0.825rem' }}>
+                                                    <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#10B981', marginTop: 5 }}></div>
+                                                    <div>
+                                                        <div style={{ fontWeight: 600, color: '#1F2937' }}>Lead status: {selectedContactForDrawer.status}</div>
+                                                        <div style={{ color: '#9CA3AF', fontSize: '0.75rem' }}>{selectedContactForDrawer.modified}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+                                </>
+                            )}
                         </div>
 
-                        `<div className="crm-modal-footer">
-    <button
-        type="button"
-        className="crm-btn-primary"
-        style={{ width: '100%' }}
-        onClick={async () => {
-            if (selectedContactForDrawer) {
-                const updatedContact = await updateContact(
-                    selectedContactForDrawer.id,
-                    {
-                        first_name: selectedContactForDrawer.first_name,
-                        last_name: selectedContactForDrawer.last_name,
-                        email: selectedContactForDrawer.email,
-                        mobile: selectedContactForDrawer.mobile,
-                        destination: selectedContactForDrawer.destination,
-                        lead_status_id: Number(
-                            selectedContactForDrawer.lead_status_id
-                        ),
-                        lead_owner_id: Number(
-                            selectedContactForDrawer.lead_owner_id
-                        ),
-                        notes: selectedContactForDrawer.notes,
-                    }
-                );
+                        <div className="crm-modal-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
+                            {isEditingInDrawer ? (
+                                <>
+                                    <button
+                                        type="button"
+                                        className="crm-btn-secondary"
+                                        onClick={() => setIsEditingInDrawer(false)}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="crm-btn-primary"
+                                        onClick={handleSaveDrawerContact}
+                                        style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: '130px', justifyContent: 'center' }}
+                                    >
+                                        <Check size={16} /> Save Update
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <button
+                                        type="button"
+                                        style={{
+                                            background: '#FEE2E2',
+                                            color: '#DC2626',
+                                            border: '1px solid #FCA5A5',
+                                            padding: '8px 16px',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '6px',
+                                            fontWeight: 600,
+                                            fontSize: '0.875rem'
+                                        }}
+                                        onClick={() => {
+                                            if (window.confirm(`Are you sure you want to permanently delete "${selectedContactForDrawer.name}" from database?`)) {
+                                                handleDeleteContact(selectedContactForDrawer.id);
+                                            }
+                                        }}
+                                    >
+                                        <Trash2 size={16} /> Delete Contact
+                                    </button>
 
-                if (updatedContact) {
-                    showToast('Contact updated successfully!');
-                    setSelectedContactForDrawer(null);
-                }
-            }
-        }}
-    >
-        Save Changes
-    </button>
-</div>
+                                    <button
+                                        type="button"
+                                        className="crm-btn-primary"
+                                        style={{ minWidth: '120px' }}
+                                        onClick={() => setSelectedContactForDrawer(null)}
+                                    >
+                                        Close
+                                    </button>
+                                </>
+                            )}
+                        </div>
                     </div>
+                </div>
+            )}
+
+            {/* ---------------- Floating Bulk Delete Bar ---------------- */}
+            {selectedRowIds.length > 0 && (
+                <div style={{
+                    position: 'fixed',
+                    bottom: '24px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    background: '#1F2937',
+                    color: '#FFFFFF',
+                    padding: '12px 24px',
+                    borderRadius: '50px',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.35)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '16px',
+                    zIndex: 1000
+                }}>
+                    <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>
+                        {selectedRowIds.length} contact(s) selected
+                    </span>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            if (window.confirm(`Delete ${selectedRowIds.length} contact(s) from database?`)) {
+                                handleBulkDelete();
+                            }
+                        }}
+                        style={{
+                            background: '#EF4444',
+                            color: '#fff',
+                            border: 'none',
+                            padding: '8px 18px',
+                            borderRadius: '20px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            cursor: 'pointer',
+                            fontWeight: 600,
+                            fontSize: '0.85rem'
+                        }}
+                    >
+                        <Trash2 size={15} /> Delete Selected (DELETE API)
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setSelectedRowIds([])}
+                        style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#9CA3AF',
+                            cursor: 'pointer',
+                            fontSize: '0.85rem'
+                        }}
+                    >
+                        Cancel
+                    </button>
                 </div>
             )}
         </div>

@@ -71,6 +71,8 @@ const destinationOptions = [
     'Kerala',
     'Ooty',
     'Shimla',
+    'Madurai',
+    'Chennai',
     'Thailand',
     'Bali',
     'Maldives',
@@ -116,6 +118,7 @@ const AddContact = ({ isOpen = false, onClose, onContactAdded, onBulkImport }) =
     const [contactName, setContactName] = useState('');
     const [countryCode, setCountryCode] = useState('+91');
     const [mobile, setMobile] = useState('');
+    const [mobileError, setMobileError] = useState('');
     const [leadStatus, setLeadStatus] = useState('New');
     const [leadOwner, setLeadOwner] = useState('Arun');
     const [description, setDescription] = useState('');
@@ -154,10 +157,52 @@ const AddContact = ({ isOpen = false, onClose, onContactAdded, onBulkImport }) =
     // Section 6: Quatation Details
     const [quoteSharedStatus, setQuoteSharedStatus] = useState('');
     const [quoteRequired, setQuoteRequired] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Dropdown open states
     const [openDropdown, setOpenDropdown] = useState(null);
     const containerRef = useRef(null);
+
+    const resetForm = () => {
+        setContactName('');
+        setCountryCode('+91');
+        setMobile('');
+        setMobileError('');
+        setLeadStatus('New');
+        setLeadOwner('Arun');
+        setDescription('');
+        setAgeOfLead('');
+        setContacted('');
+        setWhatsappOptIn(false);
+        setState('');
+        setBulkWhatsappMonth('');
+        setLeadSource('');
+        setPackageDestinations('');
+        setAddress('');
+        setChildHeadCount('');
+        setAdvanceStatus('');
+        setTotalAmount('');
+        setDestinations('');
+        setDateOfTravelPlan('');
+        setAdvanceAmount('');
+        setInvoiceShared('');
+        setRemainingAmount('');
+        setNumberOfPeopleToTravel('');
+        setPostTrip('');
+        setDuringTripIssues('');
+        setTicketsBooked('');
+        setFollowupRequiredToday('');
+        setSpokenLanguage('');
+        setArrangementsMade('');
+        setQuoteSharedStatus('');
+        setQuoteRequired('');
+        setOpenDropdown(null);
+    };
+
+    const handleClose = () => {
+        resetForm();
+        if (onClose) onClose();
+    };
 
     // Auto calculate Remaining Amount when total & advance change
     useEffect(() => {
@@ -186,13 +231,13 @@ const AddContact = ({ isOpen = false, onClose, onContactAdded, onBulkImport }) =
                 if (openDropdown) {
                     setOpenDropdown(null);
                 } else if (isOpen) {
-                    onClose();
+                    handleClose();
                 }
             }
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [openDropdown, isOpen, onClose]);
+    }, [openDropdown, isOpen]);
 
     if (!isOpen) return null;
 
@@ -201,7 +246,7 @@ const AddContact = ({ isOpen = false, onClose, onContactAdded, onBulkImport }) =
         setOpenDropdown(prev => (prev === id ? null : id));
     };
 
-    const handleSave = (e) => {
+    const handleSave = async (e) => {
         if (e) e.preventDefault();
 
         if (!contactName.trim()) {
@@ -209,17 +254,93 @@ const AddContact = ({ isOpen = false, onClose, onContactAdded, onBulkImport }) =
             return;
         }
 
-        if (!mobile.trim()) {
+        const digitsOnly = mobile.replace(/\D/g, '');
+        if (!digitsOnly) {
+            setMobileError('Please enter Mobile Number');
             alert('Please enter Mobile Number');
             return;
         }
 
+        if (digitsOnly.length !== 10) {
+            setMobileError(`Mobile number must be exactly 10 digits (currently ${digitsOnly.length} digits)`);
+            alert(`Mobile number must be exactly 10 digits (currently ${digitsOnly.length} digits)`);
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        const nameParts = contactName.trim().split(' ');
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || '';
+        const contactEmail = `${contactName.trim().toLowerCase().replace(/\s+/g, '')}@example.com`;
+        const fullMobile = `${countryCode} ${digitsOnly}`;
+        const dest = (destinations || packageDestinations || '').trim();
+
+        let savedId = Date.now();
+        let apiCreatedAt = null;
+
+        // Try saving via backend API /api/contacts
+        const token = localStorage.getItem('token');
+        try {
+            const response = await fetch('/api/contacts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
+                body: JSON.stringify({
+                    first_name: firstName,
+                    last_name: lastName,
+                    email: contactEmail,
+                    mobile: fullMobile,
+                    alternate_mobile: '',
+                    destination: dest,
+                    source: leadSource || 'Website',
+                    notes: description.trim()
+                })
+            });
+
+            const contentType = response.headers.get('content-type');
+            const data = contentType?.includes('application/json')
+                ? await response.json()
+                : { message: await response.text() };
+
+            if (response.ok && data.contact) {
+                savedId = data.contact.id || savedId;
+                if (data.contact.created_at) {
+                    apiCreatedAt = new Date(data.contact.created_at).toLocaleString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    });
+                }
+            } else {
+                console.warn('API /api/contacts notice:', data?.message || response.statusText);
+            }
+        } catch (apiErr) {
+            console.warn('API /api/contacts call error, continuing locally:', apiErr);
+        } finally {
+            setIsSubmitting(false);
+        }
+
+        const nowFormatted = new Date().toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+
         const newContactRecord = {
-            id: Date.now(),
+            id: savedId,
             name: contactName.trim(),
-            mobile: `${countryCode} ${mobile.trim()}`,
+            mobile: fullMobile,
             status: leadStatus || 'New',
-            dest: destinations || packageDestinations || 'Manali',
+            dest: dest,
             owner: leadOwner || 'Arun',
             type: 'Lead',
             description: description.trim(),
@@ -235,7 +356,7 @@ const AddContact = ({ isOpen = false, onClose, onContactAdded, onBulkImport }) =
             childHeadCount: childHeadCount.trim(),
             advanceStatus: advanceStatus,
             totalAmount: totalAmount.trim(),
-            destinations: destinations,
+            destinations: dest,
             dateOfTravelPlan: dateOfTravelPlan.trim(),
             advanceAmount: advanceAmount.trim(),
             invoiceShared: invoiceShared,
@@ -249,31 +370,18 @@ const AddContact = ({ isOpen = false, onClose, onContactAdded, onBulkImport }) =
             arrangementsMade: arrangementsMade,
             quoteSharedStatus: quoteSharedStatus,
             quoteRequired: quoteRequired,
-            created: new Date().toLocaleString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            }),
-            modified: new Date().toLocaleString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            }),
+            created: apiCreatedAt || nowFormatted,
+            modified: nowFormatted,
             initial: contactName.trim().charAt(0).toUpperCase(),
             color: ['#8B5CF6', '#EC4899', '#3B82F6', '#10B981', '#F59E0B'][Math.floor(Math.random() * 5)],
-            email: `${contactName.trim().toLowerCase().replace(/\s+/g, '')}@example.com`,
+            email: contactEmail,
             daysOld: 0
         };
 
         if (onContactAdded) {
             onContactAdded(newContactRecord);
         }
+        resetForm();
     };
 
     const currentCountryObj = countryCodes.find(c => c.code === countryCode) || countryCodes[0];
@@ -281,7 +389,7 @@ const AddContact = ({ isOpen = false, onClose, onContactAdded, onBulkImport }) =
     const currentOwnerObj = leadOwners.find(o => o.name === leadOwner) || leadOwners[0];
 
     return (
-        <div className="add-contact-drawer-overlay" onClick={onClose}>
+        <div className="add-contact-drawer-overlay" onClick={handleClose}>
             <div
                 className="add-contact-drawer-panel"
                 ref={containerRef}
@@ -311,7 +419,7 @@ const AddContact = ({ isOpen = false, onClose, onContactAdded, onBulkImport }) =
                         <button
                             type="button"
                             className="add-contact-drawer-close-btn"
-                            onClick={onClose}
+                            onClick={handleClose}
                         >
                             <span>Close</span>
                         </button>
@@ -342,10 +450,15 @@ const AddContact = ({ isOpen = false, onClose, onContactAdded, onBulkImport }) =
 
                                 {/* Mobile */}
                                 <div className="drawer-field-group">
-                                    <label className="drawer-field-label">
-                                        Mobile<span className="required-red-star">*</span>
-                                    </label>
-                                    <div className="drawer-mobile-compound">
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <label className="drawer-field-label">
+                                            Mobile<span className="required-red-star">*</span>
+                                        </label>
+                                        <span style={{ fontSize: '11px', color: mobile.length === 10 ? '#10B981' : '#6B7280', fontWeight: 500 }}>
+                                            {mobile.length}/10 digits
+                                        </span>
+                                    </div>
+                                    <div className={`drawer-mobile-compound ${mobileError ? 'has-error' : ''}`}>
                                         <div className="drawer-country-picker-wrap">
                                             <button
                                                 type="button"
@@ -377,11 +490,30 @@ const AddContact = ({ isOpen = false, onClose, onContactAdded, onBulkImport }) =
                                         <input
                                             type="tel"
                                             className="drawer-mobile-number-input"
-                                            placeholder="123 456 7890"
+                                            placeholder="10-digit mobile number"
                                             value={mobile}
-                                            onChange={(e) => setMobile(e.target.value)}
+                                            maxLength={10}
+                                            onChange={(e) => {
+                                                const digits = e.target.value.replace(/\D/g, '');
+                                                setMobile(digits);
+                                                if (digits.length === 10) {
+                                                    setMobileError('');
+                                                }
+                                            }}
+                                            onBlur={() => {
+                                                if (mobile && mobile.length !== 10) {
+                                                    setMobileError('Mobile number must be exactly 10 digits');
+                                                } else {
+                                                    setMobileError('');
+                                                }
+                                            }}
                                         />
                                     </div>
+                                    {mobileError && (
+                                        <span className="drawer-field-error-text">
+                                            {mobileError}
+                                        </span>
+                                    )}
                                 </div>
 
                                 {/* Lead Status */}
@@ -488,8 +620,49 @@ const AddContact = ({ isOpen = false, onClose, onContactAdded, onBulkImport }) =
                                     />
                                 </div>
 
-                                {/* Empty column to preserve 2-col balance */}
-                                <div className="drawer-field-group"></div>
+                                {/* Destination */}
+                                <div className="drawer-field-group">
+                                    <label className="drawer-field-label">Destination</label>
+                                    <div className="drawer-combobox-wrap">
+                                        <input
+                                            type="text"
+                                            className="drawer-combobox-input"
+                                            placeholder="Enter destination (e.g. Goa, Manali, Madurai)"
+                                            value={destinations}
+                                            onChange={(e) => {
+                                                setDestinations(e.target.value);
+                                                setPackageDestinations(e.target.value);
+                                            }}
+                                            onClick={() => toggleDropdown('destination_sec1')}
+                                        />
+                                        <button
+                                            type="button"
+                                            className="drawer-combobox-btn"
+                                            onClick={(e) => toggleDropdown('destination_sec1', e)}
+                                            title="Select from popular destinations"
+                                        >
+                                            <ChevronDown size={15} />
+                                        </button>
+                                        {openDropdown === 'destination_sec1' && (
+                                            <div className="drawer-dropdown-menu">
+                                                {destinationOptions.map((dst) => (
+                                                    <div
+                                                        key={dst}
+                                                        className={`drawer-dropdown-option ${destinations === dst ? 'selected' : ''}`}
+                                                        onClick={() => {
+                                                            setDestinations(dst);
+                                                            setPackageDestinations(dst);
+                                                            setOpenDropdown(null);
+                                                        }}
+                                                    >
+                                                        <span>{dst}</span>
+                                                        {destinations === dst && <Check size={14} />}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -724,7 +897,10 @@ const AddContact = ({ isOpen = false, onClose, onContactAdded, onBulkImport }) =
                                         className="drawer-text-input"
                                         placeholder="Enter Package Destinations"
                                         value={packageDestinations}
-                                        onChange={(e) => setPackageDestinations(e.target.value)}
+                                        onChange={(e) => {
+                                            setPackageDestinations(e.target.value);
+                                            setDestinations(e.target.value);
+                                        }}
                                     />
                                 </div>
 
@@ -800,34 +976,45 @@ const AddContact = ({ isOpen = false, onClose, onContactAdded, onBulkImport }) =
                                 {/* Destinations */}
                                 <div className="drawer-field-group">
                                     <label className="drawer-field-label">Destinations</label>
-                                    <div
-                                        className={`drawer-select-trigger ${openDropdown === 'destinations' ? 'active' : ''}`}
-                                        onClick={(e) => toggleDropdown('destinations', e)}
-                                    >
-                                        {destinations ? (
-                                            <span className="drawer-select-value">{destinations}</span>
-                                        ) : (
-                                            <span className="drawer-select-placeholder">Select destinations</span>
+                                    <div className="drawer-combobox-wrap">
+                                        <input
+                                            type="text"
+                                            className="drawer-combobox-input"
+                                            placeholder="Enter or select destinations"
+                                            value={destinations}
+                                            onChange={(e) => {
+                                                setDestinations(e.target.value);
+                                                setPackageDestinations(e.target.value);
+                                            }}
+                                            onClick={() => toggleDropdown('destinations_sec3')}
+                                        />
+                                        <button
+                                            type="button"
+                                            className="drawer-combobox-btn"
+                                            onClick={(e) => toggleDropdown('destinations_sec3', e)}
+                                            title="Select from popular destinations"
+                                        >
+                                            <ChevronDown size={15} />
+                                        </button>
+                                        {openDropdown === 'destinations_sec3' && (
+                                            <div className="drawer-dropdown-menu">
+                                                {destinationOptions.map((dst) => (
+                                                    <div
+                                                        key={dst}
+                                                        className={`drawer-dropdown-option ${destinations === dst ? 'selected' : ''}`}
+                                                        onClick={() => {
+                                                            setDestinations(dst);
+                                                            setPackageDestinations(dst);
+                                                            setOpenDropdown(null);
+                                                        }}
+                                                    >
+                                                        <span>{dst}</span>
+                                                        {destinations === dst && <Check size={14} />}
+                                                    </div>
+                                                ))}
+                                            </div>
                                         )}
-                                        <ChevronDown size={15} color="#6B7280" />
                                     </div>
-                                    {openDropdown === 'destinations' && (
-                                        <div className="drawer-dropdown-menu">
-                                            {destinationOptions.map((dst) => (
-                                                <div
-                                                    key={dst}
-                                                    className={`drawer-dropdown-option ${destinations === dst ? 'selected' : ''}`}
-                                                    onClick={() => {
-                                                        setDestinations(dst);
-                                                        setOpenDropdown(null);
-                                                    }}
-                                                >
-                                                    <span>{dst}</span>
-                                                    {destinations === dst && <Check size={14} />}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
                                 </div>
 
                                 {/* Date of Travel Plan */}
@@ -1161,9 +1348,11 @@ const AddContact = ({ isOpen = false, onClose, onContactAdded, onBulkImport }) =
                             <button
                                 type="submit"
                                 className="drawer-create-contact-submit-btn"
+                                disabled={isSubmitting}
+                                style={{ opacity: isSubmitting ? 0.7 : 1, cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
                             >
                                 <Plus size={16} strokeWidth={2.5} />
-                                <span>Create Contact</span>
+                                <span>{isSubmitting ? 'Creating Contact...' : 'Create Contact'}</span>
                             </button>
                         </div>
                     </form>

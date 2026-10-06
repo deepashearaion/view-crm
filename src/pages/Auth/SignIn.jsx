@@ -8,58 +8,69 @@ const SignIn = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+        if (error) setError('');
     };
 
     const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
+        e.preventDefault();
+        setError('');
 
-    if (!formData.email || !formData.password) {
-        setError('Email and password are required.');
-        return;
-    }
+        const email = formData.email.trim();
+        const password = formData.password;
 
-    try {
-        const response = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                email: formData.email,
-                password: formData.password,
-            }),
-        });
-
-        // const data = await response.json();
-        const contentType = response.headers.get('content-type');
-
-const data = contentType?.includes('application/json')
-    ? await response.json()
-    : { message: await response.text() };
-
-        if (!response.ok) {
-            setError(data.message || 'Login failed.');
+        if (!email || !password) {
+            setError('Email and password are required.');
             return;
         }
 
-        localStorage.setItem('token', data.token);
-        localStorage.setItem(
-            'currentUser',
-            JSON.stringify({ email: formData.email })
-        );
+        setLoading(true);
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email,
+                    password,
+                }),
+            });
 
-        navigate('/dashboard');
-    
-    } catch (error) {
-    console.error('Login error:', error);
-    setError('Unable to connect to the server.');
-}
-};
+            const contentType = response.headers.get('content-type');
+            const data = contentType?.includes('application/json')
+                ? await response.json()
+                : { message: await response.text() };
+
+            if (!response.ok) {
+                setError(data.message || 'Login failed. Please check your credentials.');
+                return;
+            }
+
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+            }
+            localStorage.setItem(
+                'currentUser',
+                JSON.stringify({
+                    id: data.user_id,
+                    email: email,
+                    name: email.split('@')[0]
+                })
+            );
+
+            navigate('/dashboard');
+        } catch (error) {
+            console.error('Login error:', error);
+            setError('Unable to connect to the server. Please ensure the backend is running.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="auth-page">
@@ -126,8 +137,8 @@ const data = contentType?.includes('application/json')
                             <Link to="/forgot-password" className="forgot-link">Forgot Password?</Link>
                         </div>
 
-                        <button type="submit" className="btn-primary">
-                            Sign In <ArrowRight size={18} />
+                        <button type="submit" className="btn-primary" disabled={loading} style={{ opacity: loading ? 0.7 : 1 }}>
+                            {loading ? 'Signing In...' : 'Sign In'} <ArrowRight size={18} />
                         </button>
                     </form>
 

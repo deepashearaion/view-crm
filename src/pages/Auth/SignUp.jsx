@@ -16,6 +16,7 @@ const SignUp = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -67,49 +68,44 @@ const SignUp = () => {
             return;
         }
 
-        // Try API registration if server is running
+        setLoading(true);
         try {
-    const response = await fetch(
-        '/api/auth/register',
-        {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                name: formData.name.trim(),
-                email: formData.email.trim(),
-                password: formData.password,
-            }),
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: formData.name.trim(),
+                    email: formData.email.trim(),
+                    password: formData.password,
+                }),
+            });
+
+            const contentType = response.headers.get('content-type');
+            const data = contentType?.includes('application/json')
+                ? await response.json()
+                : { message: await response.text() };
+
+            console.log('Signup response:', data);
+
+            if (!response.ok) {
+                setError(data.message || 'Registration failed.');
+                return;
+            }
+
+            setSuccess('Account created successfully! Redirecting to sign in...');
+
+            setTimeout(() => {
+                navigate('/signin');
+            }, 1200);
+
+        } catch (error) {
+            console.error('Signup error:', error);
+            setError('Unable to connect to the server. Please ensure backend is running.');
+        } finally {
+            setLoading(false);
         }
-    );
-
-    // const data = await response.json();
-    const contentType = response.headers.get('content-type');
-
-const data = contentType?.includes('application/json')
-    ? await response.json()
-    : { message: await response.text() };
-
-    console.log('Signup response:', data);
-
-    if (!response.ok) {
-        setError(data.message || 'Registration failed.');
-        return;
-    }
-
-    setSuccess('Account created successfully!');
-
-    setTimeout(() => {
-        navigate('/signin');
-    }, 1000);
-
-} catch (error) {
-    console.error('Signup error:', error);
-    setError('Unable to connect to the server.');
-}
-
-        
     };
 
     return (
@@ -220,8 +216,8 @@ const data = contentType?.includes('application/json')
                             </div>
                         </div>
 
-                        <button type="submit" className="btn-primary" style={{ marginTop: '1.25rem' }}>
-                            Create Account <ArrowRight size={18} />
+                        <button type="submit" className="btn-primary" disabled={loading} style={{ marginTop: '1.25rem', opacity: loading ? 0.7 : 1 }}>
+                            {loading ? 'Creating Account...' : 'Create Account'} <ArrowRight size={18} />
                         </button>
                     </form>
 

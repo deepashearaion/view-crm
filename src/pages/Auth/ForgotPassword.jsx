@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, KeyRound, CheckCircle2, ShieldCheck } from 'lucide-react';
 import './Auth.css';
 
 const ForgotPassword = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
 
     // Steps: 'email' -> 'option' -> 'reset' -> 'success'
     const [step, setStep] = useState('email');
@@ -16,6 +17,16 @@ const ForgotPassword = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    // If reset token is in URL (e.g. /reset-password?token=xxx), jump to reset step directly
+    useEffect(() => {
+        const urlToken = searchParams.get('token');
+        if (urlToken) {
+            setResetToken(urlToken);
+            setStep('reset');
+        }
+    }, [searchParams]);
 
     // Handle Email submission (Step 1)
     // const handleEmailSubmit = (e) => {
@@ -52,6 +63,8 @@ const ForgotPassword = () => {
         return;
     }
 
+    setLoading(true);
+
     try {
         const response = await fetch('/api/auth/forgot-password', {
             method: 'POST',
@@ -76,12 +89,15 @@ const ForgotPassword = () => {
 
         // console.log('Reset token:', data.reset_token);
 
-        // setStep('option');
-        setResetToken(data.reset_token);
-setStep('option');
+        if (data.reset_token) {
+            setResetToken(data.reset_token);
+        }
+        setStep('option');
     } catch (error) {
         console.error('Forgot password error:', error);
-        setError('Unable to connect to the server.');
+        setError('Unable to connect to the server. Please ensure backend is running.');
+    } finally {
+        setLoading(false);
     }
 };
 
@@ -90,13 +106,18 @@ const handlePasswordResetSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
+    if (!resetToken) {
+        setError('Reset token is missing or expired. Please start over from step 1.');
+        return;
+    }
+
     if (!newPassword) {
         setError('New password is required.');
         return;
     }
 
-    if (newPassword.length < 8) {
-        setError('Password must be at least 8 characters.');
+    if (newPassword.length < 6) {
+        setError('Password must be at least 6 characters.');
         return;
     }
 
@@ -110,6 +131,7 @@ const handlePasswordResetSubmit = async (e) => {
         return;
     }
 
+    setLoading(true);
     try {
         const response = await fetch('/api/auth/reset-password', {
             method: 'POST',
@@ -142,7 +164,9 @@ const handlePasswordResetSubmit = async (e) => {
         }, 2000);
     } catch (error) {
         console.error('Reset password error:', error);
-        setError('Unable to connect to the server.');
+        setError('Unable to connect to the server. Please ensure backend is running.');
+    } finally {
+        setLoading(false);
     }
 };
     return (
@@ -273,10 +297,12 @@ const handlePasswordResetSubmit = async (e) => {
                                         justifyContent: 'center',
                                         alignItems: 'center',
                                         gap: '0.5rem',
-                                        cursor: 'pointer'
+                                        cursor: loading ? 'not-allowed' : 'pointer',
+                                        opacity: loading ? 0.7 : 1
                                     }}
+                                    disabled={loading}
                                 >
-                                    Continue <ArrowRight size={18} />
+                                    {loading ? 'Processing...' : 'Continue'} <ArrowRight size={18} />
                                 </button>
                             </form>
                         </>
@@ -447,10 +473,12 @@ const handlePasswordResetSubmit = async (e) => {
                                         justifyContent: 'center',
                                         alignItems: 'center',
                                         gap: '0.5rem',
-                                        cursor: 'pointer'
+                                        cursor: loading ? 'not-allowed' : 'pointer',
+                                        opacity: loading ? 0.7 : 1
                                     }}
+                                    disabled={loading}
                                 >
-                                    <CheckCircle2 size={18} /> Save New Password
+                                    <CheckCircle2 size={18} /> {loading ? 'Saving New Password...' : 'Save New Password'}
                                 </button>
                             </form>
                         </>
