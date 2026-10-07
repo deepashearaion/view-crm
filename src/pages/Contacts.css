@@ -1557,3 +1557,60 @@
     from { transform: translateY(-20px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
 }
+
+/* Database Fields Display Badges */
+.email-link {
+    color: #2563EB;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.email-link:hover {
+    text-decoration: underline;
+    color: #1D4ED8;
+}
+
+.company-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.775rem;
+    font-weight: 600;
+    background-color: #F3F4F6;
+    color: #4B5563;
+    border: 1px solid #E5E7EB;
+}
+
+.lead-owner-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background-color: #EEF2FF;
+    color: #4F46E5;
+}
+
+.source-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.775rem;
+    font-weight: 600;
+    background-color: #F0FDF4;
+    color: #166534;
+    border: 1px solid #BBF7D0;
+}
+
+.notes-cell {
+    display: block;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #4B5563;
+    font-size: 0.8rem;
+}
