@@ -1,0 +1,757 @@
+/* ==========================================================================
+   Activities Page & Create Task Drawer Styles (Exact match to Screenshots)
+   ========================================================================== */
+
+.activities-container {
+    background-color: #FFFFFF;
+    min-height: calc(100vh - 64px);
+    display: flex;
+    flex-direction: column;
+    padding: 10px 24px 16px 24px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #111827;
+    position: relative;
+    box-sizing: border-box;
+}
+
+/* ---------------- Action Bar 1 ---------------- */
+.activities-action-bar-1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+/* Popover anchor wrapper */
+.act-popover-anchor {
+    position: relative;
+}
+
+/* Date filter dropdown button (Today) */
+.act-date-filter-btn {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 14px;
+    background-color: #FFFFFF;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #111827;
+    transition: border-color 0.15s ease;
+}
+
+.act-date-filter-btn:hover {
+    border-color: #9CA3AF;
+}
+
+/* Lead Owner dropdown button */
+.act-owner-filter-btn {
+    height: 40px;
+    min-width: 170px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px;
+    background-color: #FFFFFF;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13.5px;
+    color: #9CA3AF;
+    transition: border-color 0.15s ease;
+}
+
+.act-owner-filter-btn:hover {
+    border-color: #9CA3AF;
+}
+
+/* Refresh circular button */
+.act-refresh-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.3s ease;
+    color: #2563EB;
+}
+
+.act-refresh-btn:hover {
+    background-color: #EFF6FF;
+}
+
+.act-refresh-btn.spinning svg {
+    animation: actSpin 0.6s linear infinite;
+}
+
+@keyframes actSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Blue "+ New" button */
+.act-new-task-btn {
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #2563EB;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    padding: 0 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.act-new-task-btn:hover {
+    background-color: #1D4ED8;
+}
+
+.act-new-task-btn:active {
+    transform: translateY(1px);
+}
+
+/* Grouped Status Pills (Overdue, Upcoming, Completed) */
+.act-status-pills-group {
+    display: inline-flex;
+    align-items: stretch;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #FFFFFF;
+}
+
+.act-status-pill {
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 16px;
+    background-color: #FFFFFF;
+    border: none;
+    border-right: 1px solid #E5E7EB;
+    font-size: 13px;
+    color: #6B7280;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.act-status-pill:last-child {
+    border-right: none;
+}
+
+.act-status-pill:hover {
+    background-color: #F9FAFB;
+}
+
+.act-status-pill.active-upcoming {
+    background-color: #DCFCE7;
+    color: #15803D;
+    font-weight: 600;
+}
+
+.act-status-pill.active-overdue {
+    background-color: #FEE2E2;
+    color: #DC2626;
+    font-weight: 600;
+}
+
+.act-status-pill.active-completed {
+    background-color: #EFF6FF;
+    color: #2563EB;
+    font-weight: 600;
+}
+
+/* ---------------- Action Bar 2: Search Input ---------------- */
+.activities-action-bar-2 {
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+}
+
+.act-search-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 290px;
+    height: 40px;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    padding: 0 14px;
+    background-color: #FFFFFF;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.act-search-box:focus-within {
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.act-search-input {
+    border: none;
+    outline: none;
+    font-size: 13.5px;
+    width: 100%;
+    color: #111827;
+    background: transparent;
+}
+
+.act-search-input::placeholder {
+    color: #9CA3AF;
+}
+
+/* ---------------- Dropdown Menus ---------------- */
+.act-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 190px;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+    padding: 4px;
+}
+
+.act-dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #374151;
+    transition: background-color 0.12s ease;
+}
+
+.act-dropdown-item:hover {
+    background-color: #F3F4F6;
+}
+
+.act-dropdown-item.selected {
+    background-color: #EFF6FF;
+    color: #2563EB;
+    font-weight: 500;
+}
+
+/* ---------------- Main Content Area ---------------- */
+.activities-main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Empty State */
+.activities-empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 380px;
+}
+
+.act-empty-icon-wrap {
+    margin-bottom: 12px;
+    color: #CBD5E1;
+}
+
+.act-empty-text {
+    font-size: 14px;
+    color: #6B7280;
+    margin: 0;
+}
+
+/* Tasks Table (When tasks exist) */
+.activities-table-wrapper {
+    flex: 1;
+    overflow-x: auto;
+}
+
+.activities-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+}
+
+.activities-table th {
+    background-color: #F9FAFB;
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+    color: #4B5563;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.activities-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #F3F4F6;
+    color: #1F2937;
+}
+
+.activities-table tr:hover td {
+    background-color: #F9FAFB;
+}
+
+/* ---------------- Bottom Pagination Bar ---------------- */
+.activities-footer-bar {
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-top: 1px solid #E5E7EB;
+    padding-top: 16px;
+    flex-wrap: wrap;
+}
+
+.act-pill-total-tasks {
+    padding: 6px 14px;
+    background-color: #EFF6FF;
+    color: #374151;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid #BFDBFE;
+}
+
+.act-pill-total-upcoming {
+    padding: 6px 14px;
+    background-color: #EFF6FF;
+    color: #374151;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid #BFDBFE;
+}
+
+.act-blue-val {
+    color: #2563EB;
+    font-weight: 600;
+}
+
+.act-pill-page {
+    padding: 6px 14px;
+    background-color: #F3F4F6;
+    color: #374151;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid #E5E7EB;
+}
+
+.act-rows-per-page-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background-color: #E5E7EB;
+    border-radius: 6px;
+    border: 1px solid #D1D5DB;
+    margin-left: auto;
+    font-size: 13px;
+    color: #374151;
+    cursor: pointer;
+}
+
+.act-star-icon {
+    font-size: 13px;
+    color: #6B7280;
+}
+
+.act-pagination-controls {
+    display: flex;
+    align-items: center;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: #FFFFFF;
+}
+
+.act-page-nav-btn {
+    height: 32px;
+    padding: 0 10px;
+    background-color: #FFFFFF;
+    border: none;
+    border-right: 1px solid #E5E7EB;
+    color: #6B7280;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+
+.act-page-nav-btn:last-child {
+    border-right: none;
+}
+
+.act-page-nav-btn:disabled {
+    color: #CBD5E1;
+    cursor: not-allowed;
+}
+
+.act-page-nav-btn.active {
+    background-color: #2563EB;
+    color: #FFFFFF;
+    font-weight: 600;
+    padding: 0 14px;
+}
+
+/* ==========================================================================
+   Create Task Slide-Over Drawer Styles (Screenshots 2 & 3)
+   ========================================================================== */
+
+/* Overlay */
+.create-task-drawer-overlay {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(17, 24, 39, 0.22);
+    z-index: 99;
+    display: flex;
+    justify-content: flex-end;
+    animation: fadeInTaskOverlay 0.2s ease-out;
+}
+
+@keyframes fadeInTaskOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Slide-Over Panel */
+.create-task-drawer-panel {
+    width: clamp(520px, 48vw, 740px);
+    height: calc(100vh - 64px);
+    background-color: #FFFFFF;
+    box-shadow: -6px 0 30px rgba(0, 0, 0, 0.14);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    animation: slideTaskDrawerFromRight 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+}
+
+@keyframes slideTaskDrawerFromRight {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+/* Drawer Header */
+.create-task-drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 18px 28px;
+    border-bottom: 1px solid #E5E7EB;
+    background-color: #FFFFFF;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+.create-task-drawer-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+    letter-spacing: -0.2px;
+}
+
+.create-task-drawer-subtitle {
+    font-size: 13px;
+    color: #6B7280;
+    margin: 4px 0 0 0;
+}
+
+.create-task-close-btn {
+    background-color: #FEE2E2;
+    color: #EF4444;
+    border: none;
+    border-radius: 6px;
+    padding: 7px 22px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.create-task-close-btn:hover {
+    background-color: #FECACA;
+}
+
+/* Drawer Scrollable Body */
+.create-task-drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 22px 28px 48px 28px;
+    box-sizing: border-box;
+}
+
+.task-section-heading {
+    font-size: 16.5px;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 16px 0;
+}
+
+/* 2-Column Grid for task fields */
+.task-form-grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 24px;
+    row-gap: 18px;
+}
+
+.task-field-fullwidth {
+    grid-column: 1 / -1;
+}
+
+.task-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.task-field-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+    display: flex;
+    align-items: center;
+}
+
+.task-red-star {
+    color: #EF4444;
+    margin-left: 2px;
+    font-weight: 700;
+}
+
+/* Dropdown triggers */
+.task-dropdown-trigger {
+    width: 100%;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #FFFFFF;
+    border: 1px solid #D1D5DB;
+    border-radius: 7px;
+    padding: 0 13px;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.task-dropdown-trigger:hover {
+    border-color: #9CA3AF;
+}
+
+.task-dropdown-trigger:focus {
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.task-validator-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    color: #111827;
+    font-weight: 500;
+}
+
+.task-placeholder-text {
+    font-size: 13.5px;
+    color: #9CA3AF;
+}
+
+.task-selected-text {
+    font-size: 13.5px;
+    color: #111827;
+    font-weight: 500;
+}
+
+/* Dropdown popover */
+.task-dropdown-popover {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    width: 100%;
+    max-height: 220px;
+    overflow-y: auto;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+    padding: 4px;
+}
+
+.task-dropdown-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #374151;
+    transition: background-color 0.12s ease;
+}
+
+.task-dropdown-option:hover {
+    background-color: #F3F4F6;
+}
+
+.task-dropdown-option.selected {
+    background-color: #EFF6FF;
+    color: #2563EB;
+    font-weight: 500;
+}
+
+/* Inputs */
+.task-text-input {
+    width: 100%;
+    height: 42px;
+    border: 1px solid #D1D5DB;
+    border-radius: 7px;
+    padding: 0 13px;
+    font-size: 13.5px;
+    color: #111827;
+    background-color: #FFFFFF;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.task-text-input:focus {
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* Due Date 2-Box Compound */
+.task-due-date-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.task-date-box,
+.task-time-box {
+    height: 42px;
+    border: 1px solid #EF4444; /* Red highlight border matching screenshot */
+    border-radius: 7px;
+    padding: 0 13px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #FFFFFF;
+    box-sizing: border-box;
+}
+
+.task-date-input,
+.task-time-input {
+    border: none;
+    outline: none;
+    font-size: 13.5px;
+    color: #111827;
+    width: 100%;
+    background: transparent;
+}
+
+.task-date-input::placeholder,
+.task-time-input::placeholder {
+    color: #9CA3AF;
+}
+
+.task-error-text {
+    font-size: 12px;
+    color: #EF4444;
+    margin: 4px 0 0 0;
+}
+
+/* Description Textarea */
+.task-textarea {
+    width: 100%;
+    min-height: 100px;
+    border: 1px solid #D1D5DB;
+    border-radius: 7px;
+    padding: 10px 13px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #111827;
+    background-color: #FFFFFF;
+    outline: none;
+    resize: vertical;
+    box-sizing: border-box;
+    font-family: inherit;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.task-textarea:focus {
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* Bottom Centered Create Button */
+.task-bottom-action-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 36px;
+    margin-bottom: 20px;
+}
+
+.task-create-submit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #1D4ED8;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    padding: 11px 52px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(29, 78, 216, 0.2);
+    transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.task-create-submit-btn:hover {
+    background-color: #1E40AF;
+}
+
+.task-create-submit-btn:active {
+    transform: translateY(1px);
+}
+
+@media (max-width: 768px) {
+    .create-task-drawer-panel {
+        width: 100vw;
+    }
+
+    .task-form-grid-2col {
+        grid-template-columns: 1fr;
+    }
+
+    .task-due-date-row {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,46 @@
+.task-filters {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.tasks-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    grid-auto-rows: 140px;
+}
+
+/* Make Upcoming Tasks span across or be on a new row depending on the design */
+.task-card:nth-child(4) {
+    height: 80px;
+    /* the image shows it cropped, but we can make it a smaller block */
+}
+
+.task-card {
+    border-radius: 12px;
+    padding: 16px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.task-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.task-card-title {
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+.task-card-value {
+    font-size: 2rem;
+    font-weight: 600;
+}

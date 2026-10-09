@@ -1,0 +1,99 @@
+.date-filter-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.date-filter-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background-color: #ffffff;
+    border: 1px solid #E5E7EB;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    color: #1F2937;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    white-space: nowrap;
+    height: 34px;
+}
+
+.date-filter-btn:hover {
+    border-color: #D1D5DB;
+}
+
+.date-filter-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.date-filter-cal-icon {
+    color: #2563EB;
+}
+
+.date-filter-label {
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: #374151;
+}
+
+.date-filter-star-icon {
+    color: #6B7280;
+    fill: none;
+    stroke: #6B7280;
+    margin-left: 1px;
+}
+
+.date-filter-chevron {
+    color: #6B7280;
+    margin-left: 4px;
+    transition: transform 0.2s;
+}
+
+.date-filter-chevron.open {
+    transform: rotate(180deg);
+}
+
+.date-filter-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 150px;
+    background-color: #ffffff;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    z-index: 1000;
+    padding: 4px 0;
+    overflow: hidden;
+}
+
+.date-filter-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    color: #374151;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.date-filter-option:hover {
+    background-color: #F3F4F6;
+    color: #111827;
+}
+
+.date-filter-option.active {
+    background-color: #EFF6FF;
+    color: #2563EB;
+    font-weight: 500;
+}
+
+.option-star {
+    color: #6B7280;
+}
