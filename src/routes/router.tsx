@@ -64,11 +64,11 @@ const dashboardRoutes: RouteObject[] = [
     path: 'companies',
     handle: crumb('Companies'),
     children: [
-      { index: true, lazy: legacyPage(() => import('@/pages/Companies')) },
+      { index: true, lazy: legacyPage(() => import('@/features/companies/pages/companies-page')) },
       {
         path: 'new',
         handle: crumb('New company'),
-        lazy: legacyPage(() => import('@/pages/Companies'), { initialOpenAddCompany: true }),
+        lazy: legacyPage(() => import('@/features/companies/pages/companies-page'), { initialOpenAddCompany: true }),
       },
     ],
   },

@@ -1,3 +1,4 @@
+// @ts-nocheck -- moved for history; rewritten in the next commit
 import React, { useState, useMemo, useEffect } from 'react';
 import {
     Search,
@@ -18,8 +19,8 @@ import {
     UploadCloud,
     Download
 } from 'lucide-react';
-import './Companies.css';
-import AddCompany from './AddCompany';
+import '@/pages/Companies.css';
+import AddCompany from '../components/company-form';
 
 // Empty Tray SVG Icon matching DealConverter screenshot
 const EmptyTrayIcon = () => (

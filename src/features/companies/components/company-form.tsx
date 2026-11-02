@@ -1,6 +1,7 @@
+// @ts-nocheck -- moved for history; rewritten in the next commit
 import React, { useState, useRef, useEffect } from 'react';
 import { Plus, ChevronDown, Check } from 'lucide-react';
-import './AddCompany.css';
+import '@/pages/AddCompany.css';
 
 const countryCodes = [
     { code: '+91', flag: '🇮🇳', name: 'India' },
