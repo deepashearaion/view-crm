@@ -13,11 +13,12 @@ import { authRoutes, hasValidSession, RequireAuth } from '@/features/auth';
 import { companiesRoutes } from '@/features/companies';
 import { contactsRoutes } from '@/features/contacts';
 import { dealsRoutes } from '@/features/deals';
+import { importRoutes } from '@/features/import';
 import { tasksRoutes } from '@/features/tasks';
 import { AppShell } from '@/layouts/app-shell';
 import { crumb } from '@/types';
 
-import { readImportTarget, useLegacyNavigate, type LegacyNavigate } from './legacy';
+import { useLegacyNavigate, type LegacyNavigate } from './legacy';
 import { ModulePlaceholder } from './module-placeholder';
 import { paths } from './paths';
 
@@ -64,14 +65,7 @@ const dashboardRoutes: RouteObject[] = [
   },
   ...contactsRoutes,
   ...companiesRoutes,
-  {
-    path: 'import',
-    handle: crumb('Bulk import'),
-    lazy: legacyPage(
-      () => import('@/features/import/pages/import-page'),
-      () => ({ defaultTarget: readImportTarget() }),
-    ),
-  },
+  ...importRoutes,
 
   // Nurture
   {

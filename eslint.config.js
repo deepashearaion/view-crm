@@ -57,6 +57,11 @@ export default defineConfig([
     },
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',
+      // `text || fallback` is intentional for empty strings.
+      '@typescript-eslint/prefer-nullish-coalescing': [
+        'error',
+        { ignorePrimitives: { string: true } },
+      ],
       '@typescript-eslint/consistent-type-imports': ['error', { fixStyle: 'inline-type-imports' }],
       '@typescript-eslint/consistent-type-definitions': 'off',
       '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true }],
