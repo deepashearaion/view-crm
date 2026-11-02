@@ -22,9 +22,6 @@
     "noUncheckedSideEffectImports": true,
     "erasableSyntaxOnly": true,
 
-    "allowJs": true,
-    "checkJs": false,
-
     "paths": {
       "@/*": ["./src/*"]
     }

@@ -113,25 +113,6 @@ export default defineConfig([
     rules: { 'react-refresh/only-export-components': 'off' },
   },
 
-  // Legacy JS pages, linted leniently until each one is migrated in Phase 2.
-  {
-    files: ['src/**/*.{js,jsx}'],
-    extends: [js.configs.recommended],
-    plugins: { 'react-hooks': reactHooks },
-    languageOptions: {
-      ecmaVersion: 2023,
-      globals: globals.browser,
-      parserOptions: { ecmaFeatures: { jsx: true } },
-    },
-    rules: {
-      ...Object.fromEntries(
-        Object.keys(js.configs.recommended.rules).map((rule) => [rule, 'warn']),
-      ),
-      'no-unused-vars': 'off',
-      'react-hooks/rules-of-hooks': 'error',
-    },
-  },
-
   // Node-side config files
   {
     files: ['*.config.{js,ts}'],

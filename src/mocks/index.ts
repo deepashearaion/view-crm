@@ -7,9 +7,11 @@ import './handlers/auth';
 import './handlers/calls';
 import './handlers/companies';
 import './handlers/contacts';
+import './handlers/dashboard';
 import './handlers/deals';
 import './handlers/files';
 import './handlers/products';
+import './handlers/reports';
 import './handlers/tasks';
 import './handlers/users';
 

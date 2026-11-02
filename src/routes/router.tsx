@@ -1,4 +1,3 @@
-import type { ComponentType } from 'react';
 import {
   createBrowserRouter,
   Navigate,
@@ -12,46 +11,24 @@ import { RouteError } from '@/components/feedback/route-error';
 import { authRoutes, hasValidSession, RequireAuth } from '@/features/auth';
 import { companiesRoutes } from '@/features/companies';
 import { contactsRoutes } from '@/features/contacts';
+import { dashboardRoutes } from '@/features/dashboard';
 import { dealsRoutes } from '@/features/deals';
 import { extrasRoutes } from '@/features/extras';
 import { importRoutes } from '@/features/import';
 import { onboardingRoutes } from '@/features/onboarding';
 import { productsRoutes } from '@/features/products';
+import { reportsRoutes } from '@/features/reports';
 import { tasksRoutes } from '@/features/tasks';
 import { AppShell } from '@/layouts/app-shell';
 import { crumb } from '@/types';
 
-import { useLegacyNavigate, type LegacyNavigate } from './legacy';
 import { ModulePlaceholder } from './module-placeholder';
 import { paths } from './paths';
 
-interface LegacyPageProps {
-  setCurrentPage: LegacyNavigate;
-  [prop: string]: unknown;
-}
-
-/**
- * Lazily mounts an untyped legacy .jsx page inside the new shell, wiring its
- * `setCurrentPage` prop to the router. Removed as each page migrates in Phase 2.
- */
-function legacyPage(
-  load: () => Promise<{ default: unknown }>,
-  props: Record<string, unknown> | (() => Record<string, unknown>) = {},
-): RouteObject['lazy'] {
-  return async () => {
-    const Page = (await load()).default as ComponentType<LegacyPageProps>;
-    function LegacyRoute() {
-      const setCurrentPage = useLegacyNavigate();
-      const extra = typeof props === 'function' ? props() : props;
-      return <Page setCurrentPage={setCurrentPage} {...extra} />;
-    }
-    return { Component: LegacyRoute };
-  };
-}
-
-const dashboardRoutes: RouteObject[] = [
+/** Children of /dashboard, grouped by workflow stage. */
+const appRoutes: RouteObject[] = [
   { index: true, element: <Navigate to={paths.home} replace /> },
-  { path: 'home', handle: crumb('Home'), lazy: legacyPage(() => import('@/features/dashboard/pages/dashboard-page')) },
+  ...dashboardRoutes,
 
   // Leads
   {
@@ -105,7 +82,7 @@ const dashboardRoutes: RouteObject[] = [
   ...productsRoutes,
 
   // Reports
-  { path: 'reports', handle: crumb('Reports'), lazy: legacyPage(() => import('@/features/reports/pages/reports-page')) },
+  ...reportsRoutes,
 
   // Workspace extras
   ...extrasRoutes,
@@ -143,7 +120,7 @@ export const router = createBrowserRouter([
             <AppShell />
           </RequireAuth>
         ),
-        children: [{ errorElement: <RouteError />, children: dashboardRoutes }],
+        children: [{ errorElement: <RouteError />, children: appRoutes }],
       },
     ],
   },

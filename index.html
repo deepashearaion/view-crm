@@ -8,8 +8,11 @@
     <script>
       // Apply the persisted theme before first paint to avoid a light/dark flash.
       try {
-        var theme = (JSON.parse(localStorage.getItem('view-crm-ui') || '{}').state || {}).theme || 'system';
-        var dark = theme === 'dark' || (theme === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+        var theme =
+          (JSON.parse(localStorage.getItem('view-crm-ui') || '{}').state || {}).theme || 'system';
+        var dark =
+          theme === 'dark' ||
+          (theme === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
         document.documentElement.classList.toggle('dark', dark);
         document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
       } catch (e) {}

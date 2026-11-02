@@ -1,5 +1,6 @@
 import type { User } from '@/features/auth';
 import type { StoredFileDto } from '@/features/extras';
+import type { ReportDto } from '@/features/reports';
 import type { RepAlert } from '@/features/tasks';
 
 import { seedAttendance } from './seed/attendance';
@@ -37,6 +38,35 @@ export const db = {
   attendance: seedAttendance(),
   calls: seedCalls(),
   files: [] as StoredFileDto[],
+  reports: [
+    {
+      id: 701,
+      name: 'Pipeline by stage',
+      module: 'Deals',
+      type: 'bar',
+      description: 'Open deal value per pipeline stage.',
+      owner_id: 1,
+      created_at: minutesAgo(60 * 24 * 12),
+    },
+    {
+      id: 702,
+      name: 'Lead sources this quarter',
+      module: 'Contacts',
+      type: 'pie',
+      description: 'Where new leads come from: WhatsApp, web forms, email.',
+      owner_id: 2,
+      created_at: minutesAgo(60 * 24 * 30),
+    },
+    {
+      id: 703,
+      name: 'Rep call productivity',
+      module: 'Call productivity',
+      type: 'table',
+      description: '',
+      owner_id: 1,
+      created_at: minutesAgo(60 * 24 * 45),
+    },
+  ] satisfies ReportDto[] as ReportDto[],
   alerts: [
     {
       id: 'alt_001',

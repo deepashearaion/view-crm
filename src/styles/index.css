@@ -3,10 +3,6 @@
 @import 'shadcn/tailwind.css';
 @import '@fontsource-variable/geist';
 
-/* Legacy global styles for pages not yet migrated. Layered so utilities always win.
-   Removed at the end of Phase 2. */
-@import './legacy.css' layer(base);
-
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
