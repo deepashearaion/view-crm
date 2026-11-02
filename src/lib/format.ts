@@ -46,10 +46,11 @@ export function formatDateTime(value: string | Date | null | undefined): string 
 const inrFormatter = new Intl.NumberFormat('en-IN', {
   style: 'currency',
   currency: 'INR',
+  minimumFractionDigits: 0,
   maximumFractionDigits: 2,
 });
 
-/** ₹4,18,638.00 */
+/** ₹4,18,638 (paise shown only when present). */
 export function formatCurrency(value: number): string {
   return inrFormatter.format(value);
 }
@@ -64,4 +65,9 @@ export function initials(name: string): string {
       .map((part) => part.charAt(0).toUpperCase())
       .join('') || '?'
   );
+}
+
+/** "1 deal", "3 deals". */
+export function plural(count: number, singular: string, pluralForm = `${singular}s`): string {
+  return `${count.toLocaleString('en-IN')} ${count === 1 ? singular : pluralForm}`;
 }

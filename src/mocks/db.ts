@@ -3,6 +3,7 @@ import type { RepAlert } from '@/features/tasks';
 
 import { seedCompanies, seedCustomFields } from './seed/companies';
 import { seedContacts } from './seed/contacts';
+import { seedDeals, seedStages } from './seed/deals';
 import { seedTasks } from './seed/tasks';
 
 const minutesAgo = (minutes: number): string =>
@@ -26,6 +27,8 @@ export const db = {
   companies: seedCompanies(),
   companyFields: [...seedCustomFields],
   tasks: seedTasks(),
+  deals: seedDeals(),
+  stages: [...seedStages],
   alerts: [
     {
       id: 'alt_001',
