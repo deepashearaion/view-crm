@@ -1,3 +1,4 @@
+// @ts-nocheck -- moved for history; rewritten in the next commit
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
     Calendar,
@@ -15,7 +16,7 @@ import {
     Trash2,
     CheckCircle2
 } from 'lucide-react';
-import './Activities.css';
+import '@/pages/Activities.css';
 
 // Empty state task icon matching Screenshot 1
 const EmptyTaskIcon = () => (
