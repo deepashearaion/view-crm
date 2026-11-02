@@ -53,6 +53,9 @@ export const http = {
     request<T>({ method: 'PUT', path, body, ...options }),
   patch: <T>(path: string, body?: unknown, options?: RequestOptions) =>
     request<T>({ method: 'PATCH', path, body, ...options }),
+  /** multipart/form-data upload (files). */
+  upload: <T>(path: string, form: FormData, options?: RequestOptions) =>
+    request<T>({ method: 'POST', path, body: form, ...options }),
   delete: <T = void>(path: string, options?: RequestOptions) =>
     request<T>({ method: 'DELETE', path, ...options }),
 };

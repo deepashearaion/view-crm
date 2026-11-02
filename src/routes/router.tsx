@@ -13,6 +13,7 @@ import { authRoutes, hasValidSession, RequireAuth } from '@/features/auth';
 import { companiesRoutes } from '@/features/companies';
 import { contactsRoutes } from '@/features/contacts';
 import { dealsRoutes } from '@/features/deals';
+import { extrasRoutes } from '@/features/extras';
 import { importRoutes } from '@/features/import';
 import { onboardingRoutes } from '@/features/onboarding';
 import { productsRoutes } from '@/features/products';
@@ -107,21 +108,7 @@ const dashboardRoutes: RouteObject[] = [
   { path: 'reports', handle: crumb('Reports'), lazy: legacyPage(() => import('@/pages/Reports')) },
 
   // Workspace extras
-  {
-    path: 'attendance',
-    handle: crumb('Attendance'),
-    lazy: legacyPage(() => import('@/features/extras/attendance/pages/attendance-page')),
-  },
-  {
-    path: 'files',
-    handle: crumb('File cabinet'),
-    lazy: legacyPage(() => import('@/features/extras/file-cabinet/pages/file-cabinet-page')),
-  },
-  {
-    path: 'call-recordings',
-    handle: crumb('Call recordings'),
-    lazy: legacyPage(() => import('@/features/extras/call-recordings/pages/call-recordings-page')),
-  },
+  ...extrasRoutes,
 
   {
     path: 'automation',

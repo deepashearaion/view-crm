@@ -2,10 +2,13 @@ import type { HttpAdapter, HttpRequest } from '@/types';
 
 import { dispatch, hasRoute } from './router';
 import './handlers/alerts';
+import './handlers/attendance';
 import './handlers/auth';
+import './handlers/calls';
 import './handlers/companies';
 import './handlers/contacts';
 import './handlers/deals';
+import './handlers/files';
 import './handlers/products';
 import './handlers/tasks';
 import './handlers/users';

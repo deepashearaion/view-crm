@@ -43,16 +43,21 @@ export function formatDateTime(value: string | Date | null | undefined): string 
   return date ? dateTimeFormatter.format(date) : '';
 }
 
-const inrFormatter = new Intl.NumberFormat('en-IN', {
+const inrWhole = new Intl.NumberFormat('en-IN', {
   style: 'currency',
   currency: 'INR',
-  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+});
+const inrPaise = new Intl.NumberFormat('en-IN', {
+  style: 'currency',
+  currency: 'INR',
+  minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
 
 /** ₹4,18,638 (paise shown only when present). */
 export function formatCurrency(value: number): string {
-  return inrFormatter.format(value);
+  return (Number.isInteger(value) ? inrWhole : inrPaise).format(value);
 }
 
 /** "Priya Sharma" → "PS". */

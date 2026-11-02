@@ -1,6 +1,9 @@
 import type { User } from '@/features/auth';
+import type { StoredFileDto } from '@/features/extras';
 import type { RepAlert } from '@/features/tasks';
 
+import { seedAttendance } from './seed/attendance';
+import { seedCalls } from './seed/calls';
 import { seedCompanies, seedCustomFields } from './seed/companies';
 import { seedContacts } from './seed/contacts';
 import { seedDeals, seedStages } from './seed/deals';
@@ -31,6 +34,9 @@ export const db = {
   deals: seedDeals(),
   stages: [...seedStages],
   products: seedProducts(),
+  attendance: seedAttendance(),
+  calls: seedCalls(),
+  files: [] as StoredFileDto[],
   alerts: [
     {
       id: 'alt_001',

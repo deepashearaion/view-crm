@@ -22,16 +22,18 @@ async function readBody(response: Response): Promise<unknown> {
 /** Talks to the real REST backend. */
 export const fetchAdapter: HttpAdapter = async ({ method, path, query, body, signal }) => {
   const token = getAuthToken();
+  const isForm = body instanceof FormData;
   const headers: HeadersInit = {
     Accept: 'application/json',
-    ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+    // FormData sets its own multipart boundary header.
+    ...(body !== undefined && !isForm ? { 'Content-Type': 'application/json' } : {}),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 
   const response = await fetch(buildUrl(path, query), {
     method,
     headers,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
+    body: isForm ? body : body !== undefined ? JSON.stringify(body) : undefined,
     signal,
   });
   const payload = await readBody(response);
