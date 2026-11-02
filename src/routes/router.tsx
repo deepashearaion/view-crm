@@ -62,11 +62,11 @@ const dashboardRoutes: RouteObject[] = [
     path: 'contacts',
     handle: crumb('Contacts'),
     children: [
-      { index: true, lazy: legacyPage(() => import('@/pages/Contacts')) },
+      { index: true, lazy: legacyPage(() => import('@/features/contacts/pages/contacts-page')) },
       {
         path: 'new',
         handle: crumb('New contact'),
-        lazy: legacyPage(() => import('@/pages/Contacts'), { initialOpenAddContact: true }),
+        lazy: legacyPage(() => import('@/features/contacts/pages/contacts-page'), { initialOpenAddContact: true }),
       },
     ],
   },

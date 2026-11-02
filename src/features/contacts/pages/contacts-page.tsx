@@ -1,5 +1,6 @@
+// @ts-nocheck -- moved for history; rewritten in the next commit
 import React, { useState, useMemo, useEffect } from 'react';
-import { apiUrl } from '../utils/api';
+import { apiUrl } from '@/utils/api';
 import {
     Search,
     ChevronDown,
@@ -26,8 +27,8 @@ import {
     UploadCloud,
     Download
 } from 'lucide-react';
-import AddContact from './AddContact';
-import './Contacts.css';
+import AddContact from '../components/contact-form';
+import '@/pages/Contacts.css';
 
 // Bookmark ribbon SVG icon
 const BookmarkIcon = ({ color = '#3B82F6' }) => (

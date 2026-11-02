@@ -1,7 +1,8 @@
+// @ts-nocheck -- moved for history; rewritten in the next commit
 import React, { useState, useRef, useEffect } from 'react';
 import { Plus, ChevronDown, Check, Lock, Clock, FileSpreadsheet } from 'lucide-react';
-import './AddContact.css';
-import { apiUrl } from '../utils/api';
+import '@/pages/AddContact.css';
+import { apiUrl } from '@/utils/api';
 
 const countryCodes = [
     { code: '+91', flag: '🇮🇳', name: 'India' },
