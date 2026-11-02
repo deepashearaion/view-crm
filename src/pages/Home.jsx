@@ -12,6 +12,7 @@ import EmailStats from '../components/dashboard/EmailStats';
 import MeetingDashboard from '../components/dashboard/MeetingDashboard';
 import TBasedCallAnalytics from '../components/dashboard/TBasedCallAnalytics';
 import { getValidToken, DEFAULT_DEV_TOKEN } from '../utils/auth';
+import { apiUrl } from '../utils/api';
 
 const Home = ({ setCurrentPage }) => {
     const [salesData, setSalesData] = useState({
@@ -34,7 +35,7 @@ const Home = ({ setCurrentPage }) => {
 
         try {
             // 1. Fetch Sales Dashboard metrics (deals, won, loss, arr, mrr)
-            let salesRes = await fetch('/api/dashboard/sales', {
+            let salesRes = await fetch(apiUrl('/api/dashboard/sales'), {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
@@ -43,7 +44,7 @@ const Home = ({ setCurrentPage }) => {
 
             if (salesRes.status === 401) {
                 localStorage.setItem('token', DEFAULT_DEV_TOKEN);
-                salesRes = await fetch('/api/dashboard/sales', {
+                salesRes = await fetch(apiUrl('/api/dashboard/sales'), {
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${DEFAULT_DEV_TOKEN}`
@@ -57,7 +58,7 @@ const Home = ({ setCurrentPage }) => {
             }
 
             // 2. Fetch Contacts for Contact Lead Status Chart
-            let contactsRes = await fetch('/api/contacts', {
+            let contactsRes = await fetch(apiUrl('/api/contacts'), {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
@@ -65,7 +66,7 @@ const Home = ({ setCurrentPage }) => {
             });
 
             if (contactsRes.status === 401) {
-                contactsRes = await fetch('/api/contacts', {
+                contactsRes = await fetch(apiUrl('/api/contacts'), {
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${DEFAULT_DEV_TOKEN}`

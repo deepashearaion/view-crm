@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { apiUrl } from '../utils/api';
 import {
     Search,
     ChevronDown,
@@ -206,7 +207,7 @@ const Contacts = ({ initialOpenAddContact = false, setCurrentPage: setDashboardP
         const token = getValidToken();
         if (!silent) setIsRefreshing(true);
         try {
-            const response = await fetch('/api/contacts', {
+            const response = await fetch(apiUrl('/api/contacts'), {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -662,7 +663,7 @@ const Contacts = ({ initialOpenAddContact = false, setCurrentPage: setDashboardP
         setIsDrawerLoading(true);
         const token = getValidToken();
         try {
-            const response = await fetch(`/api/contacts/${contact.id}`, {
+            const response = await fetch(apiUrl(`/api/contacts/${contact.id}`), {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -715,7 +716,7 @@ const Contacts = ({ initialOpenAddContact = false, setCurrentPage: setDashboardP
 
         const token = getValidToken();
         try {
-            const response = await fetch(`/api/contacts/${id}`, {
+            const response = await fetch(apiUrl(`/api/contacts/${id}`), {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -733,7 +734,7 @@ const Contacts = ({ initialOpenAddContact = false, setCurrentPage: setDashboardP
                 // If it was a mock contact, create it in DB with the updated status
                 const contactToCreate = contacts.find(c => c.id === id);
                 if (contactToCreate) {
-                    const createRes = await fetch('/api/contacts', {
+                    const createRes = await fetch(apiUrl('/api/contacts'), {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -853,7 +854,7 @@ const Contacts = ({ initialOpenAddContact = false, setCurrentPage: setDashboardP
         };
 
         try {
-            const response = await fetch(`/api/contacts/${id}`, {
+            const response = await fetch(apiUrl(`/api/contacts/${id}`), {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -883,7 +884,7 @@ const Contacts = ({ initialOpenAddContact = false, setCurrentPage: setDashboardP
             } else if (response.status === 401) {
                 // Token invalid or expired, retry with DEFAULT_DEV_TOKEN
                 localStorage.setItem('token', DEFAULT_DEV_TOKEN);
-                const retryRes = await fetch(`/api/contacts/${id}`, {
+                const retryRes = await fetch(apiUrl(`/api/contacts/${id}`), {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
@@ -904,7 +905,7 @@ const Contacts = ({ initialOpenAddContact = false, setCurrentPage: setDashboardP
                 }
             } else if (response.status === 404) {
                 // If ID is not in DB (client-side/mock item), save into PostgreSQL via POST
-                const createRes = await fetch('/api/contacts', {
+                const createRes = await fetch(apiUrl('/api/contacts'), {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -943,7 +944,7 @@ const Contacts = ({ initialOpenAddContact = false, setCurrentPage: setDashboardP
     const handleDeleteContact = async (id) => {
         const token = localStorage.getItem('token') || DEFAULT_DEV_TOKEN;
         try {
-            const response = await fetch(`/api/contacts/${id}`, {
+            const response = await fetch(apiUrl(`/api/contacts/${id}`), {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -977,7 +978,7 @@ const Contacts = ({ initialOpenAddContact = false, setCurrentPage: setDashboardP
 
         for (const id of idsToDelete) {
             try {
-                await fetch(`/api/contacts/${id}`, {
+                await fetch(apiUrl(`/api/contacts/${id}`), {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',

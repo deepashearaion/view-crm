@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Plus, ChevronDown, Check, Lock, Clock, FileSpreadsheet } from 'lucide-react';
 import './AddContact.css';
+import { apiUrl } from '../utils/api';
 
 const countryCodes = [
     { code: '+91', flag: '🇮🇳', name: 'India' },
@@ -371,7 +372,7 @@ const AddContact = ({ isOpen = false, onClose, onContactAdded, onBulkImport }) =
         };
 
         try {
-            let response = await fetch('/api/contacts', {
+            let response = await fetch(apiUrl('/api/contacts'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -383,7 +384,7 @@ const AddContact = ({ isOpen = false, onClose, onContactAdded, onBulkImport }) =
             if (response.status === 401) {
                 // Retry with DEFAULT_DEV_TOKEN
                 localStorage.setItem('token', DEFAULT_DEV_TOKEN);
-                response = await fetch('/api/contacts', {
+                response = await fetch(apiUrl('/api/contacts'), {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

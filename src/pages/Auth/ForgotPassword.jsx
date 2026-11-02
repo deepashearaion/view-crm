@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../utils/api';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, KeyRound, CheckCircle2, ShieldCheck } from 'lucide-react';
 import './Auth.css';
@@ -66,7 +67,7 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-        const response = await fetch('/api/auth/forgot-password', {
+        const response = await fetch(apiUrl('/api/auth/forgot-password'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -133,7 +134,7 @@ const handlePasswordResetSubmit = async (e) => {
 
     setLoading(true);
     try {
-        const response = await fetch('/api/auth/reset-password', {
+        const response = await fetch(apiUrl('/api/auth/reset-password'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './Header.css';
 import { Bell, Settings, LogIn, Coffee, LogOut, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { apiUrl } from '../../utils/api';
 
 const Header = ({ title = 'Home' }) => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -29,7 +30,7 @@ const Header = ({ title = 'Home' }) => {
     const handleLogout = async () => {
         const token = localStorage.getItem('token');
         try {
-            await fetch('/api/auth/logout', {
+            await fetch(apiUrl('/api/auth/logout'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

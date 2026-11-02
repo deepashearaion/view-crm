@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import AuthLeftPanel from './AuthLeftPanel';
 import './Auth.css';
+import { apiUrl } from '../../utils/api';
 
 const SignUp = () => {
     const navigate = useNavigate();
@@ -70,7 +71,7 @@ const SignUp = () => {
 
         setLoading(true);
         try {
-            const response = await fetch('/api/auth/register', {
+            const response = await fetch(apiUrl('/api/auth/register'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
