@@ -3,6 +3,8 @@ import type { HttpAdapter, HttpRequest } from '@/types';
 import { dispatch, hasRoute } from './router';
 import './handlers/alerts';
 import './handlers/auth';
+import './handlers/contacts';
+import './handlers/users';
 
 /** Serves requests from the in-memory mock db with the same shapes as the REST API. */
 export const mockAdapter: HttpAdapter = (request) => dispatch(request);

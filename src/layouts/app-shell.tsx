@@ -8,7 +8,7 @@ import { Topbar } from './topbar';
 
 export function AppShell() {
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={window.matchMedia('(min-width: 1024px)').matches}>
       <AppSidebar />
       <SidebarInset className="min-w-0">
         <Topbar />

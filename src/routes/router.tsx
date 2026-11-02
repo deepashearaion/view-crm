@@ -10,6 +10,7 @@ import {
 import { PageSkeleton } from '@/components/feedback/page-skeleton';
 import { RouteError } from '@/components/feedback/route-error';
 import { authRoutes, hasValidSession, RequireAuth } from '@/features/auth';
+import { contactsRoutes } from '@/features/contacts';
 import { AppShell } from '@/layouts/app-shell';
 import { crumb } from '@/types';
 
@@ -58,18 +59,7 @@ const dashboardRoutes: RouteObject[] = [
       />
     ),
   },
-  {
-    path: 'contacts',
-    handle: crumb('Contacts'),
-    children: [
-      { index: true, lazy: legacyPage(() => import('@/features/contacts/pages/contacts-page')) },
-      {
-        path: 'new',
-        handle: crumb('New contact'),
-        lazy: legacyPage(() => import('@/features/contacts/pages/contacts-page'), { initialOpenAddContact: true }),
-      },
-    ],
-  },
+  ...contactsRoutes,
   {
     path: 'companies',
     handle: crumb('Companies'),

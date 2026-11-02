@@ -10,5 +10,6 @@ export type {
 export { USER_ROLES } from './types';
 export { displayName, hasValidSession, logout, readSessionUser } from './api/session';
 export { useSessionUser } from './hooks/use-session-user';
+export { useUserLookup, useUsers } from './hooks/use-users';
 export { RequireAuth } from './components/require-auth';
 export { authRoutes } from './routes';

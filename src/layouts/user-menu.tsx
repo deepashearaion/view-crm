@@ -13,15 +13,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { displayName, logout, useSessionUser } from '@/features/auth';
+import { initials } from '@/lib/format';
 import { paths } from '@/routes/paths';
-
-function initials(name: string): string {
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part.charAt(0).toUpperCase())
-    .join('');
-}
 
 export function UserMenu() {
   const user = useSessionUser();

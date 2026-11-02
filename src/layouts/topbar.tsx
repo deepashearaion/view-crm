@@ -53,12 +53,12 @@ export function Topbar() {
       <Separator orientation="vertical" className="mr-1 data-[orientation=vertical]:h-5" />
 
       <Breadcrumb className="min-w-0 flex-1">
-        <BreadcrumbList>
+        <BreadcrumbList className="flex-nowrap">
           {crumbs.map((crumb, index) => (
             <Fragment key={crumb.to}>
-              {index > 0 && <BreadcrumbSeparator />}
+              {index > 0 && <BreadcrumbSeparator className="hidden lg:block" />}
               <BreadcrumbItem
-                className={index < crumbs.length - 1 ? 'hidden sm:inline-flex' : undefined}
+                className={index < crumbs.length - 1 ? 'hidden lg:inline-flex' : undefined}
               >
                 {index === crumbs.length - 1 ? (
                   <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
@@ -75,7 +75,7 @@ export function Topbar() {
 
       <Button
         variant="outline"
-        className="hidden h-9 w-64 justify-start gap-2 text-muted-foreground md:flex"
+        className="hidden h-9 w-48 justify-start gap-2 text-muted-foreground md:flex lg:w-64"
         onClick={() => {
           setCommandOpen(true);
         }}

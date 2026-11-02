@@ -19,6 +19,30 @@ export function formatRelativeTime(value: string | Date, now: Date = new Date())
   return 'just now';
 }
 
+const dateFormatter = new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium' });
+const dateTimeFormatter = new Intl.DateTimeFormat('en-IN', {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+});
+
+function toValidDate(value: string | Date | null | undefined): Date | undefined {
+  if (!value) return undefined;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? undefined : date;
+}
+
+/** "2 Nov 2026"; empty string for missing/invalid dates. */
+export function formatDate(value: string | Date | null | undefined): string {
+  const date = toValidDate(value);
+  return date ? dateFormatter.format(date) : '';
+}
+
+/** "2 Nov 2026, 3:45 pm"; empty string for missing/invalid dates. */
+export function formatDateTime(value: string | Date | null | undefined): string {
+  const date = toValidDate(value);
+  return date ? dateTimeFormatter.format(date) : '';
+}
+
 const inrFormatter = new Intl.NumberFormat('en-IN', {
   style: 'currency',
   currency: 'INR',
@@ -28,4 +52,16 @@ const inrFormatter = new Intl.NumberFormat('en-IN', {
 /** ₹4,18,638.00 */
 export function formatCurrency(value: number): string {
   return inrFormatter.format(value);
+}
+
+/** "Priya Sharma" → "PS". */
+export function initials(name: string): string {
+  return (
+    name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part.charAt(0).toUpperCase())
+      .join('') || '?'
+  );
 }

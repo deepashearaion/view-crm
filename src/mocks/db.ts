@@ -1,10 +1,26 @@
+import type { User } from '@/features/auth';
 import type { RepAlert } from '@/features/tasks';
+
+import { seedContacts } from './seed/contacts';
 
 const minutesAgo = (minutes: number): string =>
   new Date(Date.now() - minutes * 60_000).toISOString();
 
+/** Ids match the legacy owner map so real backend data resolves to the same names. */
+const users: User[] = [
+  { id: '1', name: 'Arun', email: 'arun@dealconverter.com', role: 'admin' },
+  { id: '2', name: 'Priya Sharma', email: 'priya@dealconverter.com', role: 'manager' },
+  { id: '3', name: 'Rajesh Kumar', email: 'rajesh@dealconverter.com', role: 'rep' },
+  { id: '4', name: 'Kanishka C', email: 'kanishka@dealconverter.com', role: 'rep' },
+  { id: '7', name: 'Self', email: 'self@dealconverter.com', role: 'rep' },
+  { id: '8', name: 'Kani', email: 'kani@dealconverter.com', role: 'rep' },
+  { id: '14', name: 'Dev User', email: 'dev@dealconverter.com', role: 'rep' },
+];
+
 /** In-memory data store backing the mock API. Resets on page reload. */
 export const db = {
+  users,
+  contacts: seedContacts(),
   alerts: [
     {
       id: 'alt_001',
@@ -38,3 +54,7 @@ export const db = {
     },
   ] satisfies RepAlert[] as RepAlert[],
 };
+
+let nextId = 5000;
+/** Monotonic ids for records created through the mock API. */
+export const newId = (): number => ++nextId;
