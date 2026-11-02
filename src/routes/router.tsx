@@ -102,7 +102,7 @@ const dashboardRoutes: RouteObject[] = [
   {
     path: 'invoices',
     handle: crumb('Invoices'),
-    lazy: legacyPage(() => import('@/pages/Invoice')),
+    lazy: legacyPage(() => import('@/features/onboarding/pages/invoices-page')),
   },
   ...productsRoutes,
 
