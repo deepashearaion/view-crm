@@ -6,6 +6,7 @@ import './handlers/auth';
 import './handlers/companies';
 import './handlers/contacts';
 import './handlers/deals';
+import './handlers/products';
 import './handlers/tasks';
 import './handlers/users';
 

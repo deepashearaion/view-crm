@@ -14,6 +14,7 @@ import { companiesRoutes } from '@/features/companies';
 import { contactsRoutes } from '@/features/contacts';
 import { dealsRoutes } from '@/features/deals';
 import { importRoutes } from '@/features/import';
+import { productsRoutes } from '@/features/products';
 import { tasksRoutes } from '@/features/tasks';
 import { AppShell } from '@/layouts/app-shell';
 import { crumb } from '@/types';
@@ -103,11 +104,7 @@ const dashboardRoutes: RouteObject[] = [
     handle: crumb('Invoices'),
     lazy: legacyPage(() => import('@/pages/Invoice')),
   },
-  {
-    path: 'products',
-    handle: crumb('Products & services'),
-    lazy: legacyPage(() => import('@/features/products/pages/products-page')),
-  },
+  ...productsRoutes,
 
   // Reports
   { path: 'reports', handle: crumb('Reports'), lazy: legacyPage(() => import('@/pages/Reports')) },
