@@ -12,6 +12,7 @@ import { RouteError } from '@/components/feedback/route-error';
 import { authRoutes, hasValidSession, RequireAuth } from '@/features/auth';
 import { companiesRoutes } from '@/features/companies';
 import { contactsRoutes } from '@/features/contacts';
+import { tasksRoutes } from '@/features/tasks';
 import { AppShell } from '@/layouts/app-shell';
 import { crumb } from '@/types';
 
@@ -87,7 +88,7 @@ const dashboardRoutes: RouteObject[] = [
 
   // Deals
   { path: 'deals', handle: crumb('Pipeline'), lazy: legacyPage(() => import('@/pages/Deals')) },
-  { path: 'tasks', handle: crumb('Tasks'), lazy: legacyPage(() => import('@/features/tasks/pages/tasks-page')) },
+  ...tasksRoutes,
   {
     path: 'quotations',
     handle: crumb('Quotations'),

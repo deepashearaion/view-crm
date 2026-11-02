@@ -5,6 +5,7 @@ import './handlers/alerts';
 import './handlers/auth';
 import './handlers/companies';
 import './handlers/contacts';
+import './handlers/tasks';
 import './handlers/users';
 
 /** Serves requests from the in-memory mock db with the same shapes as the REST API. */

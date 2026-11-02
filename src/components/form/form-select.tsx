@@ -55,7 +55,7 @@ export function FormSelect<TValues extends FieldValues>({
             <Select
               name={field.name}
               disabled={disabled}
-              value={value === '' ? (allowEmpty ? NONE : '') : value}
+              value={value}
               onValueChange={(next) => {
                 field.onChange(next === NONE ? '' : next);
               }}
