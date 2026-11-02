@@ -1,3 +1,4 @@
+// @ts-nocheck -- moved for history; rewritten in the next commit
 import React, { useState, useRef, useEffect } from 'react';
 import {
     LayoutGrid,
@@ -27,7 +28,7 @@ import {
     Columns3,
     X
 } from 'lucide-react';
-import './Reports.css';
+import '@/pages/Reports.css';
 
 const modulesList = [
     { id: 'all', name: 'All', icon: LayoutGrid, subtitle: 'Active' },

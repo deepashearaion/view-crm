@@ -1,18 +1,19 @@
+// @ts-nocheck -- moved for history; rewritten in the next commit
 import React, { useState, useEffect } from 'react';
-import './Home.css';
+import '@/pages/Home.css';
 import { TrendingUp, RefreshCw, ChevronDown, SlidersHorizontal } from 'lucide-react';
-import KPICard from '../components/dashboard/KPICard';
-import DateFilter from '../components/dashboard/DateFilter';
-import OwnerFilter from '../components/dashboard/OwnerFilter';
-import ContactLeadChart from '../components/dashboard/ContactLeadChart';
-import ARRMRRChart from '../components/dashboard/ARRMRRChart';
-import CallAnalytics from '../components/dashboard/CallAnalytics';
-import TaskAnalytics from '../components/dashboard/TaskAnalytics';
-import EmailStats from '../components/dashboard/EmailStats';
-import MeetingDashboard from '../components/dashboard/MeetingDashboard';
-import TBasedCallAnalytics from '../components/dashboard/TBasedCallAnalytics';
-import { getValidToken, DEFAULT_DEV_TOKEN } from '../utils/auth';
-import { apiUrl } from '../utils/api';
+import KPICard from '@/components/dashboard/KPICard';
+import DateFilter from '@/components/dashboard/DateFilter';
+import OwnerFilter from '@/components/dashboard/OwnerFilter';
+import ContactLeadChart from '@/components/dashboard/ContactLeadChart';
+import ARRMRRChart from '@/components/dashboard/ARRMRRChart';
+import CallAnalytics from '@/components/dashboard/CallAnalytics';
+import TaskAnalytics from '@/components/dashboard/TaskAnalytics';
+import EmailStats from '@/components/dashboard/EmailStats';
+import MeetingDashboard from '@/components/dashboard/MeetingDashboard';
+import TBasedCallAnalytics from '@/components/dashboard/TBasedCallAnalytics';
+import { getValidToken, DEFAULT_DEV_TOKEN } from '@/utils/auth';
+import { apiUrl } from '@/utils/api';
 
 const Home = ({ setCurrentPage }) => {
     const [salesData, setSalesData] = useState({

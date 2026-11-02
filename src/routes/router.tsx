@@ -51,7 +51,7 @@ function legacyPage(
 
 const dashboardRoutes: RouteObject[] = [
   { index: true, element: <Navigate to={paths.home} replace /> },
-  { path: 'home', handle: crumb('Home'), lazy: legacyPage(() => import('@/pages/Home')) },
+  { path: 'home', handle: crumb('Home'), lazy: legacyPage(() => import('@/features/dashboard/pages/dashboard-page')) },
 
   // Leads
   {
@@ -105,7 +105,7 @@ const dashboardRoutes: RouteObject[] = [
   ...productsRoutes,
 
   // Reports
-  { path: 'reports', handle: crumb('Reports'), lazy: legacyPage(() => import('@/pages/Reports')) },
+  { path: 'reports', handle: crumb('Reports'), lazy: legacyPage(() => import('@/features/reports/pages/reports-page')) },
 
   // Workspace extras
   ...extrasRoutes,
