@@ -1,20 +1,21 @@
 import type { ComponentType } from 'react';
-import { createBrowserRouter, Navigate, Outlet, type RouteObject } from 'react-router-dom';
+import {
+  createBrowserRouter,
+  Navigate,
+  Outlet,
+  redirect,
+  type RouteObject,
+} from 'react-router-dom';
 
 import { PageSkeleton } from '@/components/feedback/page-skeleton';
 import { RouteError } from '@/components/feedback/route-error';
+import { authRoutes, hasValidSession, RequireAuth } from '@/features/auth';
 import { AppShell } from '@/layouts/app-shell';
+import { crumb } from '@/types';
 
 import { readImportTarget, useLegacyNavigate, type LegacyNavigate } from './legacy';
 import { ModulePlaceholder } from './module-placeholder';
 import { paths } from './paths';
-import { ProtectedRoute } from './protected-route';
-
-export interface RouteHandle {
-  crumb?: string;
-}
-
-const crumb = (label: string): RouteHandle => ({ crumb: label });
 
 interface LegacyPageProps {
   setCurrentPage: LegacyNavigate;
@@ -38,11 +39,6 @@ function legacyPage(
     }
     return { Component: LegacyRoute };
   };
-}
-
-/** Lazily mounts a legacy page that takes no props (auth pages). */
-function legacyStandalone(load: () => Promise<{ default: unknown }>): RouteObject['lazy'] {
-  return async () => ({ Component: (await load()).default as ComponentType });
 }
 
 const dashboardRoutes: RouteObject[] = [
@@ -182,24 +178,18 @@ export const router = createBrowserRouter([
     errorElement: <RouteError />,
     hydrateFallbackElement: <PageSkeleton />,
     children: [
-      { path: '/', element: <Navigate to={paths.signIn} replace /> },
-      { path: paths.signIn, lazy: legacyStandalone(() => import('@/features/auth/pages/sign-in-page')) },
-      { path: paths.signUp, lazy: legacyStandalone(() => import('@/features/auth/pages/sign-up-page')) },
       {
-        path: paths.forgotPassword,
-        lazy: legacyStandalone(() => import('@/features/auth/pages/forgot-password-page')),
+        path: '/',
+        loader: () => redirect(hasValidSession() ? paths.dashboard : paths.signIn),
       },
-      {
-        path: paths.resetPassword,
-        lazy: legacyStandalone(() => import('@/features/auth/pages/forgot-password-page')),
-      },
+      ...authRoutes,
       {
         path: paths.dashboard,
         handle: crumb('Dashboard'),
         element: (
-          <ProtectedRoute>
+          <RequireAuth>
             <AppShell />
-          </ProtectedRoute>
+          </RequireAuth>
         ),
         children: [{ errorElement: <RouteError />, children: dashboardRoutes }],
       },

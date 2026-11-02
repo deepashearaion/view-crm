@@ -1,4 +1,4 @@
-import { http, setAuthToken } from '@/services';
+import { getAuthToken, http, setAuthToken } from '@/services';
 
 import { sessionUserSchema } from '../schemas';
 import type { SessionUser } from '../types';
@@ -16,6 +16,39 @@ export function readSessionUser(): SessionUser | null {
   }
 }
 
+export function saveSession(token: string, user: SessionUser): void {
+  setAuthToken(token);
+  localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+}
+
+export function clearSession(): void {
+  setAuthToken(null);
+  localStorage.removeItem(CURRENT_USER_KEY);
+}
+
+/** Reads `exp` (seconds) from a JWT payload; undefined for non-JWT tokens. */
+function tokenExpiry(token: string): number | undefined {
+  const payload = token.split('.')[1];
+  if (!payload) return undefined;
+  try {
+    const decoded: unknown = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+    if (typeof decoded === 'object' && decoded !== null && 'exp' in decoded) {
+      return typeof decoded.exp === 'number' ? decoded.exp : undefined;
+    }
+  } catch {
+    // Opaque token: the backend decides validity.
+  }
+  return undefined;
+}
+
+/** True when a token is stored and, if it is a JWT, not expired. */
+export function hasValidSession(now: number = Date.now()): boolean {
+  const token = getAuthToken();
+  if (!token) return false;
+  const exp = tokenExpiry(token);
+  return exp === undefined || exp * 1000 > now;
+}
+
 export function displayName(user: SessionUser | null): string {
   const name = user?.name?.trim();
   if (name) return name;
@@ -31,7 +64,6 @@ export async function logout(): Promise<void> {
   } catch (error) {
     console.warn('Backend logout failed; clearing local session anyway.', error);
   } finally {
-    setAuthToken(null);
-    localStorage.removeItem(CURRENT_USER_KEY);
+    clearSession();
   }
 }

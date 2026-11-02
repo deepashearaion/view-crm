@@ -1,76 +1,80 @@
-// @ts-nocheck -- moved for history; rewritten in the next commit
-import React from 'react';
-import '@/pages/Auth/Auth.css';
-import { CheckCircle2 } from 'lucide-react';
+import { Bot, MessageCircle, Send, Users } from 'lucide-react';
+import type { ReactNode } from 'react';
 
-const AuthLeftPanel = () => {
-    return (
-        <div className="auth-left">
-            <div className="auth-logo">
-                <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M70 30C58.9543 30 50 38.9543 50 50C50 61.0457 58.9543 70 70 70C81.0457 70 90 61.0457 90 50C90 38.9543 81.0457 30 70 30Z" stroke="#1E29FF" strokeWidth="12" />
-                    <path d="M30 30C18.9543 30 10 38.9543 10 50C10 61.0457 18.9543 70 30 70C36.9189 70 42.997 66.4952 46.464 61" stroke="#1E29FF" strokeWidth="12" strokeLinecap="round" />
-                </svg>
-                <span>DealConverter</span>
-            </div>
+const highlights = [
+  { icon: Bot, title: 'AI-powered', detail: 'Smarter insights' },
+  { icon: Users, title: 'CRM', detail: 'Organize leads' },
+  { icon: MessageCircle, title: 'WhatsApp API', detail: 'Real-time chats' },
+  { icon: Send, title: 'Insta automation', detail: 'Auto DM' },
+] as const;
 
-            <div className="auth-hero-text">
-                <h1>The real definition<br />for <span className="highlight">powerful CRM</span></h1>
-            </div>
+interface AuthLayoutProps {
+  title: string;
+  description?: ReactNode;
+  children: ReactNode;
+  footer?: ReactNode;
+}
 
-            <div className="auth-hero-sub">
-                AI + CRM + WAPI +<br />Insta Automation
-            </div>
-
-            <div className="auth-hero-desc">
-                One platform to manage leads, automate conversations, and grow your business.
-            </div>
-
-            <div className="auth-features">
-                <div className="feature-box">
-                    <div style={{ color: '#1E29FF', marginBottom: '8px' }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
-                    </div>
-                    <h4>AI-Powered</h4>
-                    <p>Smarter Insights</p>
-                </div>
-                <div className="feature-box">
-                    <div style={{ color: '#10B981', marginBottom: '8px' }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
-                    </div>
-                    <h4>CRM</h4>
-                    <p>Organize Leads</p>
-                </div>
-                <div className="feature-box">
-                    <div style={{ color: '#22c55e', marginBottom: '8px' }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" /></svg>
-                    </div>
-                    <h4>WhatsApp API</h4>
-                    <p>Real-time Chats</p>
-                </div>
-                <div className="feature-box">
-                    <div style={{ color: '#db2777', marginBottom: '8px' }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" y1="6.5" x2="17.51" y2="6.5" /></svg>
-                    </div>
-                    <h4>Insta Automation</h4>
-                    <p>Auto DM</p>
-                </div>
-            </div>
-
-            <div className="auth-footer-stats">
-                <div className="check"><CheckCircle2 size={14} /></div>
-                Trusted by <strong>2500+</strong> Businesses
-            </div>
-
-            <div className="footer-links">
-                <p>© 2025 Rytzu SaaS Technologies Private Limited. All Rights Reserved.</p>
-                <div style={{ marginTop: '0.5rem' }}>
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Terms of Service</a>
-                </div>
-            </div>
+/** Split-screen layout shared by sign-in, sign-up and password reset. */
+export function AuthLayout({ title, description, children, footer }: AuthLayoutProps) {
+  return (
+    <div className="grid min-h-svh bg-background lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+      <aside className="relative hidden flex-col justify-between overflow-hidden bg-primary p-10 text-primary-foreground lg:flex">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-32 -right-32 size-96 rounded-full bg-primary-foreground/10 blur-3xl"
+        />
+        <div className="flex items-center gap-2 font-heading text-lg font-semibold">
+          <span className="flex size-9 items-center justify-center rounded-lg bg-primary-foreground text-sm font-bold text-primary">
+            DC
+          </span>
+          DealConverter
         </div>
-    );
-};
 
-export default AuthLeftPanel;
+        <div className="relative space-y-8">
+          <h2 className="max-w-md font-heading text-4xl leading-tight font-semibold tracking-tight text-balance">
+            The real definition for a powerful CRM
+          </h2>
+          <ul className="grid max-w-md grid-cols-2 gap-4">
+            {highlights.map(({ icon: Icon, title: label, detail }) => (
+              <li
+                key={label}
+                className="flex items-start gap-3 rounded-xl bg-primary-foreground/10 p-3"
+              >
+                <Icon aria-hidden className="mt-0.5 size-5 shrink-0" />
+                <span>
+                  <span className="block text-sm font-semibold">{label}</span>
+                  <span className="block text-xs opacity-80">{detail}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="text-sm opacity-90">
+            Trusted by <strong>2500+</strong> businesses
+          </p>
+        </div>
+
+        <p className="text-xs opacity-70">
+          © {new Date().getFullYear()} Rytzu SaaS Technologies Private Limited. All rights reserved.
+        </p>
+      </aside>
+
+      <main className="flex items-center justify-center px-4 py-10 sm:px-8">
+        <div className="w-full max-w-sm space-y-6">
+          <div className="space-y-1.5">
+            <div className="mb-6 flex items-center gap-2 font-heading font-semibold lg:hidden">
+              <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-xs font-bold text-primary-foreground">
+                DC
+              </span>
+              DealConverter
+            </div>
+            <h1 className="font-heading text-2xl font-semibold tracking-tight">{title}</h1>
+            {description && <p className="text-sm text-muted-foreground">{description}</p>}
+          </div>
+          {children}
+          {footer && <div className="text-center text-sm text-muted-foreground">{footer}</div>}
+        </div>
+      </main>
+    </div>
+  );
+}

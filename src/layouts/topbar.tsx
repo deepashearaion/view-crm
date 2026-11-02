@@ -15,7 +15,7 @@ import { Kbd, KbdGroup } from '@/components/ui/kbd';
 import { Separator } from '@/components/ui/separator';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useUiStore } from '@/lib/ui-store';
-import type { RouteHandle } from '@/routes/router';
+import type { RouteHandle } from '@/types';
 
 import { AlertsMenu } from './alerts-menu';
 import { ThemeToggle } from './theme-toggle';
