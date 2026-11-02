@@ -1,6 +1,7 @@
+// @ts-nocheck -- moved for history; rewritten in the next commit
 import React, { useState, useRef } from 'react';
 import { ArrowLeft, Check, Download, Info, FileSpreadsheet } from 'lucide-react';
-import './BulkImport.css';
+import '@/pages/BulkImport.css';
 
 // Exact Cloud Upload SVG Icon from Screenshot
 const CloudUploadIcon = () => (

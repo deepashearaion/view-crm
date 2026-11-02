@@ -68,7 +68,7 @@ const dashboardRoutes: RouteObject[] = [
     path: 'import',
     handle: crumb('Bulk import'),
     lazy: legacyPage(
-      () => import('@/pages/BulkImport'),
+      () => import('@/features/import/pages/import-page'),
       () => ({ defaultTarget: readImportTarget() }),
     ),
   },
