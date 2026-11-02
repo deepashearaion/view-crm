@@ -1,6 +1,7 @@
 import type { User } from '@/features/auth';
 import type { RepAlert } from '@/features/tasks';
 
+import { seedCompanies, seedCustomFields } from './seed/companies';
 import { seedContacts } from './seed/contacts';
 
 const minutesAgo = (minutes: number): string =>
@@ -21,6 +22,8 @@ const users: User[] = [
 export const db = {
   users,
   contacts: seedContacts(),
+  companies: seedCompanies(),
+  companyFields: [...seedCustomFields],
   alerts: [
     {
       id: 'alt_001',

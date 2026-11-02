@@ -3,6 +3,7 @@ import type { HttpAdapter, HttpRequest } from '@/types';
 import { dispatch, hasRoute } from './router';
 import './handlers/alerts';
 import './handlers/auth';
+import './handlers/companies';
 import './handlers/contacts';
 import './handlers/users';
 

@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { FieldGroup, FieldLegend, FieldSet } from '@/components/ui/field';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useUsers } from '@/features/auth';
+import { useCompanies } from '@/features/companies';
 import { formatCurrency } from '@/lib/format';
 
 import {
@@ -138,6 +139,11 @@ function RemainingAmount({ control }: { control: Control<ContactFormValues> }) {
 export function ContactForm({ control }: { control: Control<ContactFormValues> }) {
   const { data: users = [] } = useUsers();
   const ownerOptions: SelectOption[] = users.map((user) => ({ value: user.id, label: user.name }));
+  const { data: companies = [] } = useCompanies();
+  const companyOptions: SelectOption[] = companies.map((company) => ({
+    value: company.id,
+    label: company.name,
+  }));
 
   return (
     <FieldGroup className="gap-8">
@@ -158,7 +164,7 @@ export function ContactForm({ control }: { control: Control<ContactFormValues> }
             label="Email"
             type="email"
             autoComplete="off"
-            className="sm:col-span-2"
+            fieldClassName="sm:col-span-2"
           />
           <FormSelect
             control={control}
@@ -179,7 +185,7 @@ export function ContactForm({ control }: { control: Control<ContactFormValues> }
             label="Alternate mobile"
             inputMode="tel"
             placeholder="Optional"
-            className="sm:col-span-2"
+            fieldClassName="sm:col-span-2"
           />
         </div>
       </FieldSet>
@@ -220,7 +226,14 @@ export function ContactForm({ control }: { control: Control<ContactFormValues> }
               <option key={destination} value={destination} />
             ))}
           </datalist>
-          <FormInput control={control} name="companyId" label="Company ID" inputMode="numeric" />
+          <FormSelect
+            control={control}
+            name="companyId"
+            label="Company"
+            options={companyOptions}
+            allowEmpty
+            placeholder="No company"
+          />
         </div>
         <FormTextarea control={control} name="notes" label="Notes" rows={3} />
       </FieldSet>

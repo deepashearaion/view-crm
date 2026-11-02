@@ -12,6 +12,8 @@ interface FormInputProps<TValues extends FieldValues> extends Omit<
   name: FieldPath<TValues>;
   label: ReactNode;
   description?: ReactNode;
+  /** Classes for the field wrapper (layout, e.g. `sm:col-span-2`). `className` styles the input. */
+  fieldClassName?: string;
   /** Renders a custom control instead of <Input>; receives the field props. */
   render?: (field: ComponentProps<'input'> & { 'aria-invalid': boolean }) => ReactNode;
 }
@@ -24,6 +26,7 @@ export function FormInput<TValues extends FieldValues>({
   description,
   render,
   id,
+  fieldClassName,
   ...inputProps
 }: FormInputProps<TValues>) {
   const inputId = id ?? `field-${name}`;
@@ -41,7 +44,7 @@ export function FormInput<TValues extends FieldValues>({
           'aria-describedby': description ? `${inputId}-description` : undefined,
         };
         return (
-          <Field data-invalid={fieldState.invalid}>
+          <Field data-invalid={fieldState.invalid} className={fieldClassName}>
             <FieldLabel htmlFor={inputId}>{label}</FieldLabel>
             {render ? render(props) : <Input {...props} />}
             {description && (

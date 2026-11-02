@@ -10,6 +10,7 @@ import {
 import { PageSkeleton } from '@/components/feedback/page-skeleton';
 import { RouteError } from '@/components/feedback/route-error';
 import { authRoutes, hasValidSession, RequireAuth } from '@/features/auth';
+import { companiesRoutes } from '@/features/companies';
 import { contactsRoutes } from '@/features/contacts';
 import { AppShell } from '@/layouts/app-shell';
 import { crumb } from '@/types';
@@ -60,18 +61,7 @@ const dashboardRoutes: RouteObject[] = [
     ),
   },
   ...contactsRoutes,
-  {
-    path: 'companies',
-    handle: crumb('Companies'),
-    children: [
-      { index: true, lazy: legacyPage(() => import('@/features/companies/pages/companies-page')) },
-      {
-        path: 'new',
-        handle: crumb('New company'),
-        lazy: legacyPage(() => import('@/features/companies/pages/companies-page'), { initialOpenAddCompany: true }),
-      },
-    ],
-  },
+  ...companiesRoutes,
   {
     path: 'import',
     handle: crumb('Bulk import'),

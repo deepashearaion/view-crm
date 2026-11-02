@@ -1,6 +1,6 @@
 import { ChevronDown, Download, Plus, Trash2, Upload, UserRoundPlus, Users } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import { DataTable, DataTableFacetedFilter, type FacetOption } from '@/components/data/data-table';
@@ -18,13 +18,15 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSessionUser, useUserLookup, useUsers } from '@/features/auth';
+import { useCompanyLookup } from '@/features/companies';
+import { useRecordSheetState } from '@/hooks/use-record-sheet-state';
 import { downloadCsv, toCsv, type CsvColumn } from '@/lib/csv';
 import { isWithinPreset, type DatePreset } from '@/lib/date-range';
 import { formatDateTime } from '@/lib/format';
 import { paths } from '@/routes/paths';
 
 import { getContactColumns } from '../components/contact-columns';
-import { ContactSheet, type ContactSheetState } from '../components/contact-sheet';
+import { ContactSheet } from '../components/contact-sheet';
 import { LEAD_SOURCES, LEAD_STATUSES, leadStatusById } from '../constants';
 import { useBulkUpdateContacts, useContacts, useDeleteContacts } from '../hooks/use-contacts';
 import type { Contact } from '../types';
@@ -42,11 +44,11 @@ type Scope = 'all' | 'mine';
 
 export default function ContactsPage({ createOnMount = false }: { createOnMount?: boolean }) {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
   const sessionUser = useSessionUser();
   const { data: contacts = [], isPending, error, refetch } = useContacts();
   const { data: userList = [] } = useUsers();
   const users = useUserLookup();
+  const companies = useCompanyLookup();
   const bulkUpdate = useBulkUpdateContacts();
   const deleteContacts = useDeleteContacts();
 
@@ -55,36 +57,11 @@ export default function ContactsPage({ createOnMount = false }: { createOnMount?
   const [datePreset, setDatePreset] = useState<DatePreset>('all_time');
   const [pendingDelete, setPendingDelete] = useState<Contact[] | null>(null);
 
-  // Sheet state lives in the URL so a contact can be linked to directly.
-  const selectedId = searchParams.get('contact');
-  const sheetState: ContactSheetState = createOnMount
-    ? { mode: 'create' }
-    : selectedId
-      ? { mode: searchParams.get('mode') === 'edit' ? 'edit' : 'view', id: selectedId }
-      : { mode: 'closed' };
-
-  const setSheetState = useCallback(
-    (next: ContactSheetState) => {
-      if (createOnMount && next.mode !== 'create') {
-        void navigate(
-          next.mode === 'closed' ? paths.contacts : `${paths.contacts}?contact=${next.id}`,
-          { replace: true },
-        );
-        return;
-      }
-      setSearchParams(
-        (params) => {
-          params.delete('contact');
-          params.delete('mode');
-          if (next.mode === 'view' || next.mode === 'edit') params.set('contact', next.id);
-          if (next.mode === 'edit') params.set('mode', 'edit');
-          return params;
-        },
-        { replace: next.mode !== 'closed' && sheetState.mode !== 'closed' },
-      );
-    },
-    [createOnMount, navigate, setSearchParams, sheetState.mode],
-  );
+  const [sheetState, setSheetState] = useRecordSheetState({
+    param: 'contact',
+    createOnMount,
+    listPath: paths.contacts,
+  });
 
   const myId = sessionUser?.id === undefined ? null : String(sessionUser.id);
   const scoped = useMemo(
@@ -101,6 +78,7 @@ export default function ContactsPage({ createOnMount = false }: { createOnMount?
     () =>
       getContactColumns({
         users,
+        companies,
         onView: (contact) => {
           setSheetState({ mode: 'view', id: contact.id });
         },
@@ -111,7 +89,7 @@ export default function ContactsPage({ createOnMount = false }: { createOnMount?
           setPendingDelete([contact]);
         },
       }),
-    [users, setSheetState],
+    [users, companies, setSheetState],
   );
 
   const ownerFacets: FacetOption[] = userList.map((user) => ({ value: user.id, label: user.name }));
@@ -127,7 +105,10 @@ export default function ContactsPage({ createOnMount = false }: { createOnMount?
       { header: 'Lead owner', value: (c) => (c.leadOwnerId ? users.get(c.leadOwnerId)?.name : '') },
       { header: 'Source', value: (c) => c.source },
       { header: 'Destination', value: (c) => c.destination },
-      { header: 'Company ID', value: (c) => c.companyId },
+      {
+        header: 'Company',
+        value: (c) => (c.companyId === null ? '' : companies.get(String(c.companyId))?.name),
+      },
       { header: 'Notes', value: (c) => c.notes },
       { header: 'Created', value: (c) => formatDateTime(c.createdAt) },
     ];
@@ -227,7 +208,7 @@ export default function ContactsPage({ createOnMount = false }: { createOnMount?
         error={error}
         onRetry={() => void refetch()}
         initialSorting={[{ id: 'createdAt', desc: true }]}
-        defaultHidden={['email', 'alternateMobile', 'companyId', 'notes', 'updatedAt']}
+        defaultHidden={['email', 'alternateMobile', 'company', 'notes', 'updatedAt']}
         onRowClick={(contact) => {
           setSheetState({ mode: 'view', id: contact.id });
         }}

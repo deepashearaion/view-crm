@@ -20,6 +20,8 @@ import {
 } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSessionUser, useUserLookup } from '@/features/auth';
+import { useCompanyLookup } from '@/features/companies';
+import type { RecordSheetState } from '@/hooks/use-record-sheet-state';
 import { formatDateTime } from '@/lib/format';
 import { errorMessage } from '@/services';
 
@@ -36,8 +38,7 @@ import type { Contact, ContactFormOutput, ContactFormValues } from '../types';
 import { ContactForm } from './contact-form';
 import { LeadStatusBadge } from './lead-status-badge';
 
-export type ContactSheetState =
-  { mode: 'closed' } | { mode: 'create' } | { mode: 'view' | 'edit'; id: string };
+export type ContactSheetState = RecordSheetState;
 
 interface ContactSheetProps {
   state: ContactSheetState;
@@ -63,6 +64,7 @@ function Detail({ label, children }: { label: string; children: ReactNode }) {
 
 function ContactDetails({ contact }: { contact: Contact }) {
   const users = useUserLookup();
+  const companies = useCompanyLookup();
   const trip = Object.entries(contact.trip ?? {}).filter(([, value]) => Boolean(value));
   return (
     <div className="space-y-6">
@@ -93,7 +95,11 @@ function ContactDetails({ contact }: { contact: Contact }) {
         </Detail>
         <Detail label="Source">{contact.source}</Detail>
         <Detail label="Destination">{contact.destination}</Detail>
-        <Detail label="Company ID">{contact.companyId ?? ''}</Detail>
+        <Detail label="Company">
+          {contact.companyId === null
+            ? ''
+            : (companies.get(String(contact.companyId))?.name ?? `#${String(contact.companyId)}`)}
+        </Detail>
         <Detail label="Created">{formatDateTime(contact.createdAt)}</Detail>
         <Detail label="Modified">{formatDateTime(contact.updatedAt)}</Detail>
       </dl>

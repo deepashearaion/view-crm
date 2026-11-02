@@ -8,6 +8,7 @@ import {
 } from '@/components/data/data-table';
 import { UserChip } from '@/components/data/user-chip';
 import type { User } from '@/features/auth';
+import type { Company } from '@/features/companies';
 import { formatDate } from '@/lib/format';
 
 import { leadStatusById } from '../constants';
@@ -17,6 +18,7 @@ import { LeadStatusBadge } from './lead-status-badge';
 
 interface ColumnOptions {
   users: Map<string, User>;
+  companies: Map<string, Company>;
   onView: (contact: Contact) => void;
   onEdit: (contact: Contact) => void;
   onDelete: (contact: Contact) => void;
@@ -24,6 +26,7 @@ interface ColumnOptions {
 
 export function getContactColumns({
   users,
+  companies,
   onView,
   onEdit,
   onDelete,
@@ -110,13 +113,15 @@ export function getContactColumns({
         getValue<string>() || <span className="text-muted-foreground">—</span>,
     },
     {
-      id: 'companyId',
-      accessorKey: 'companyId',
-      meta: { label: 'Company ID' },
-      header: 'Company ID',
-      enableSorting: false,
+      id: 'company',
+      accessorFn: (contact) =>
+        contact.companyId === null
+          ? ''
+          : (companies.get(String(contact.companyId))?.name ?? `#${String(contact.companyId)}`),
+      meta: { label: 'Company' },
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Company" />,
       cell: ({ getValue }) =>
-        getValue<number | null>() ?? <span className="text-muted-foreground">—</span>,
+        getValue<string>() || <span className="text-muted-foreground">—</span>,
     },
     {
       id: 'notes',
