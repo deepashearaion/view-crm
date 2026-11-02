@@ -183,15 +183,15 @@ export const router = createBrowserRouter([
     hydrateFallbackElement: <PageSkeleton />,
     children: [
       { path: '/', element: <Navigate to={paths.signIn} replace /> },
-      { path: paths.signIn, lazy: legacyStandalone(() => import('@/pages/Auth/SignIn')) },
-      { path: paths.signUp, lazy: legacyStandalone(() => import('@/pages/Auth/SignUp')) },
+      { path: paths.signIn, lazy: legacyStandalone(() => import('@/features/auth/pages/sign-in-page')) },
+      { path: paths.signUp, lazy: legacyStandalone(() => import('@/features/auth/pages/sign-up-page')) },
       {
         path: paths.forgotPassword,
-        lazy: legacyStandalone(() => import('@/pages/Auth/ForgotPassword')),
+        lazy: legacyStandalone(() => import('@/features/auth/pages/forgot-password-page')),
       },
       {
         path: paths.resetPassword,
-        lazy: legacyStandalone(() => import('@/pages/Auth/ForgotPassword')),
+        lazy: legacyStandalone(() => import('@/features/auth/pages/forgot-password-page')),
       },
       {
         path: paths.dashboard,

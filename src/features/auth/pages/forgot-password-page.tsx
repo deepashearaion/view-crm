@@ -1,8 +1,9 @@
+// @ts-nocheck -- moved for history; rewritten in the next commit
 import React, { useState, useEffect } from 'react';
-import { apiUrl } from '../../utils/api';
+import { apiUrl } from '@/utils/api';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, KeyRound, CheckCircle2, ShieldCheck } from 'lucide-react';
-import './Auth.css';
+import '@/pages/Auth/Auth.css';
 
 const ForgotPassword = () => {
     const navigate = useNavigate();

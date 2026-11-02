@@ -1,9 +1,10 @@
+// @ts-nocheck -- moved for history; rewritten in the next commit
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
-import AuthLeftPanel from './AuthLeftPanel';
-import './Auth.css';
-import { apiUrl } from '../../utils/api';
+import AuthLeftPanel from '../components/auth-layout';
+import '@/pages/Auth/Auth.css';
+import { apiUrl } from '@/utils/api';
 
 const SignUp = () => {
     const navigate = useNavigate();

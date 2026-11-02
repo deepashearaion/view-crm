@@ -1,5 +1,6 @@
+// @ts-nocheck -- moved for history; rewritten in the next commit
 import React from 'react';
-import './Auth.css';
+import '@/pages/Auth/Auth.css';
 import { CheckCircle2 } from 'lucide-react';
 
 const AuthLeftPanel = () => {
