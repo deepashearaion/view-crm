@@ -1,5 +1,6 @@
+// @ts-nocheck -- moved for history; rewritten in the next commit
 import React, { useState, useRef } from 'react';
-import './ProductsServices.css';
+import '@/pages/ProductsServices.css';
 import {
     Plus,
     Search,
