@@ -1,5 +1,6 @@
+// @ts-nocheck -- moved for history; rewritten in the next commit
 import React, { useState, useRef, useEffect } from 'react';
-import './Deals.css';
+import '@/pages/Deals.css';
 import {
     RefreshCw,
     RotateCcw,
@@ -32,7 +33,7 @@ import {
     Bookmark,
     Lock
 } from 'lucide-react';
-import OwnerFilter from '../components/dashboard/OwnerFilter';
+import OwnerFilter from '@/components/dashboard/OwnerFilter';
 
 const initialDeals = [
     { id: 1, title: 'Manali group tour', owner: 'Sahil', value: '126600.00', date: '03/04/2026', initial: 'A', stage: 'Closed Won' },

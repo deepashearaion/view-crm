@@ -1,3 +1,4 @@
+// @ts-nocheck -- moved for history; rewritten in the next commit
 import React from 'react';
 import { PlusCircle, CheckCircle2 } from 'lucide-react';
 

@@ -87,12 +87,12 @@ const dashboardRoutes: RouteObject[] = [
   },
 
   // Deals
-  { path: 'deals', handle: crumb('Pipeline'), lazy: legacyPage(() => import('@/pages/Deals')) },
+  { path: 'deals', handle: crumb('Pipeline'), lazy: legacyPage(() => import('@/features/deals/pages/pipeline-page')) },
   ...tasksRoutes,
   {
     path: 'quotations',
     handle: crumb('Quotations'),
-    lazy: legacyPage(() => import('@/pages/Quotation')),
+    lazy: legacyPage(() => import('@/features/deals/pages/quotations-page')),
   },
 
   // Onboarding
