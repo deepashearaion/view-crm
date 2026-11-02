@@ -1,3 +1,4 @@
+// @ts-nocheck -- moved for history; rewritten in the next commit
 import React, { useState, useRef, useEffect } from 'react';
 import {
     Clock,
@@ -23,7 +24,7 @@ import {
     Columns,
     ArrowLeft
 } from 'lucide-react';
-import './Attendance.css';
+import '@/pages/Attendance.css';
 
 const summaryFilterOptions = [
     { label: 'All Time', icon: Infinity },

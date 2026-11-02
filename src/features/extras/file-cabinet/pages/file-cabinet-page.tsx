@@ -1,3 +1,4 @@
+// @ts-nocheck -- moved for history; rewritten in the next commit
 import React, { useState, useRef, useEffect } from 'react';
 import {
     Star,
@@ -28,7 +29,7 @@ import {
     Trash2,
     Download
 } from 'lucide-react';
-import './FileCabinet.css';
+import '@/pages/FileCabinet.css';
 
 const initialCategories = [
     {

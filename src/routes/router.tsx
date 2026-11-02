@@ -110,17 +110,17 @@ const dashboardRoutes: RouteObject[] = [
   {
     path: 'attendance',
     handle: crumb('Attendance'),
-    lazy: legacyPage(() => import('@/pages/Attendance')),
+    lazy: legacyPage(() => import('@/features/extras/attendance/pages/attendance-page')),
   },
   {
     path: 'files',
     handle: crumb('File cabinet'),
-    lazy: legacyPage(() => import('@/pages/FileCabinet')),
+    lazy: legacyPage(() => import('@/features/extras/file-cabinet/pages/file-cabinet-page')),
   },
   {
     path: 'call-recordings',
     handle: crumb('Call recordings'),
-    lazy: legacyPage(() => import('@/pages/CallRecordings')),
+    lazy: legacyPage(() => import('@/features/extras/call-recordings/pages/call-recordings-page')),
   },
 
   {

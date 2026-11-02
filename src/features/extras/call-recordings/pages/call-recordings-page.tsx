@@ -1,5 +1,6 @@
+// @ts-nocheck -- moved for history; rewritten in the next commit
 import React, { useState } from 'react';
-import './CallRecordings.css';
+import '@/pages/CallRecordings.css';
 import {
     ArrowLeft,
     RotateCw,
