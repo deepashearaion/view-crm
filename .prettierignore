@@ -1,0 +1,9 @@
+dist
+node_modules
+package-lock.json
+# Legacy JS pages are rewritten (not reformatted) during Phase 2.
+src/pages
+src/components/dashboard
+src/mockData
+src/utils
+src/styles/legacy.css

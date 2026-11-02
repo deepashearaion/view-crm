@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
   --primary-blue: #1E29FF;
@@ -10,7 +9,7 @@
   --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --success-color: #10B981;
   --danger-color: #EF4444;
-  --font-family: 'Inter', sans-serif;
+  --font-family: 'Geist Variable', sans-serif;
 }
 
 * {

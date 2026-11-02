@@ -1,0 +1,208 @@
+import type { ComponentType } from 'react';
+import { createBrowserRouter, Navigate, Outlet, type RouteObject } from 'react-router-dom';
+
+import { PageSkeleton } from '@/components/feedback/page-skeleton';
+import { RouteError } from '@/components/feedback/route-error';
+import { AppShell } from '@/layouts/app-shell';
+
+import { readImportTarget, useLegacyNavigate, type LegacyNavigate } from './legacy';
+import { ModulePlaceholder } from './module-placeholder';
+import { paths } from './paths';
+import { ProtectedRoute } from './protected-route';
+
+export interface RouteHandle {
+  crumb?: string;
+}
+
+const crumb = (label: string): RouteHandle => ({ crumb: label });
+
+interface LegacyPageProps {
+  setCurrentPage: LegacyNavigate;
+  [prop: string]: unknown;
+}
+
+/**
+ * Lazily mounts an untyped legacy .jsx page inside the new shell, wiring its
+ * `setCurrentPage` prop to the router. Removed as each page migrates in Phase 2.
+ */
+function legacyPage(
+  load: () => Promise<{ default: unknown }>,
+  props: Record<string, unknown> | (() => Record<string, unknown>) = {},
+): RouteObject['lazy'] {
+  return async () => {
+    const Page = (await load()).default as ComponentType<LegacyPageProps>;
+    function LegacyRoute() {
+      const setCurrentPage = useLegacyNavigate();
+      const extra = typeof props === 'function' ? props() : props;
+      return <Page setCurrentPage={setCurrentPage} {...extra} />;
+    }
+    return { Component: LegacyRoute };
+  };
+}
+
+/** Lazily mounts a legacy page that takes no props (auth pages). */
+function legacyStandalone(load: () => Promise<{ default: unknown }>): RouteObject['lazy'] {
+  return async () => ({ Component: (await load()).default as ComponentType });
+}
+
+const dashboardRoutes: RouteObject[] = [
+  { index: true, element: <Navigate to={paths.home} replace /> },
+  { path: 'home', handle: crumb('Home'), lazy: legacyPage(() => import('@/pages/Home')) },
+
+  // Leads
+  {
+    path: 'leads',
+    handle: crumb('Leads'),
+    element: (
+      <ModulePlaceholder
+        title="Leads"
+        description="Captured from WhatsApp, web forms and email, then scored and routed by AI."
+        phase={3}
+        workflow="ai"
+      />
+    ),
+  },
+  {
+    path: 'contacts',
+    handle: crumb('Contacts'),
+    children: [
+      { index: true, lazy: legacyPage(() => import('@/pages/Contacts')) },
+      {
+        path: 'new',
+        handle: crumb('New contact'),
+        lazy: legacyPage(() => import('@/pages/Contacts'), { initialOpenAddContact: true }),
+      },
+    ],
+  },
+  {
+    path: 'companies',
+    handle: crumb('Companies'),
+    children: [
+      { index: true, lazy: legacyPage(() => import('@/pages/Companies')) },
+      {
+        path: 'new',
+        handle: crumb('New company'),
+        lazy: legacyPage(() => import('@/pages/Companies'), { initialOpenAddCompany: true }),
+      },
+    ],
+  },
+  {
+    path: 'import',
+    handle: crumb('Bulk import'),
+    lazy: legacyPage(
+      () => import('@/pages/BulkImport'),
+      () => ({ defaultTarget: readImportTarget() }),
+    ),
+  },
+
+  // Nurture
+  {
+    path: 'nurture',
+    handle: crumb('Sequences'),
+    element: (
+      <ModulePlaceholder
+        title="Nurture sequences"
+        description="Automatic email and WhatsApp cadences; replies re-score the lead."
+        phase={4}
+        workflow="ai"
+      />
+    ),
+  },
+
+  // Deals
+  { path: 'deals', handle: crumb('Pipeline'), lazy: legacyPage(() => import('@/pages/Deals')) },
+  { path: 'tasks', handle: crumb('Tasks'), lazy: legacyPage(() => import('@/pages/Activities')) },
+  {
+    path: 'quotations',
+    handle: crumb('Quotations'),
+    lazy: legacyPage(() => import('@/pages/Quotation')),
+  },
+
+  // Onboarding
+  {
+    path: 'onboarding',
+    handle: crumb('Onboarding'),
+    element: (
+      <ModulePlaceholder
+        title="Onboarding"
+        description="Won deals automatically receive a welcome message and invoice."
+        phase={5}
+        workflow="ai"
+      />
+    ),
+  },
+  {
+    path: 'invoices',
+    handle: crumb('Invoices'),
+    lazy: legacyPage(() => import('@/pages/Invoice')),
+  },
+  {
+    path: 'products',
+    handle: crumb('Products & services'),
+    lazy: legacyPage(() => import('@/pages/ProductsServices')),
+  },
+
+  // Reports
+  { path: 'reports', handle: crumb('Reports'), lazy: legacyPage(() => import('@/pages/Reports')) },
+
+  // Workspace extras
+  {
+    path: 'attendance',
+    handle: crumb('Attendance'),
+    lazy: legacyPage(() => import('@/pages/Attendance')),
+  },
+  {
+    path: 'files',
+    handle: crumb('File cabinet'),
+    lazy: legacyPage(() => import('@/pages/FileCabinet')),
+  },
+  {
+    path: 'call-recordings',
+    handle: crumb('Call recordings'),
+    lazy: legacyPage(() => import('@/pages/CallRecordings')),
+  },
+
+  {
+    path: 'automation',
+    handle: crumb('Automation'),
+    element: (
+      <ModulePlaceholder
+        title="Automation"
+        description="Scoring rules, owner routing and default nurture cadences."
+        phase={5}
+        workflow="ai"
+      />
+    ),
+  },
+];
+
+export const router = createBrowserRouter([
+  {
+    element: <Outlet />,
+    errorElement: <RouteError />,
+    hydrateFallbackElement: <PageSkeleton />,
+    children: [
+      { path: '/', element: <Navigate to={paths.signIn} replace /> },
+      { path: paths.signIn, lazy: legacyStandalone(() => import('@/pages/Auth/SignIn')) },
+      { path: paths.signUp, lazy: legacyStandalone(() => import('@/pages/Auth/SignUp')) },
+      {
+        path: paths.forgotPassword,
+        lazy: legacyStandalone(() => import('@/pages/Auth/ForgotPassword')),
+      },
+      {
+        path: paths.resetPassword,
+        lazy: legacyStandalone(() => import('@/pages/Auth/ForgotPassword')),
+      },
+      {
+        path: paths.dashboard,
+        handle: crumb('Dashboard'),
+        element: (
+          <ProtectedRoute>
+            <AppShell />
+          </ProtectedRoute>
+        ),
+        children: [{ errorElement: <RouteError />, children: dashboardRoutes }],
+      },
+    ],
+  },
+]);
