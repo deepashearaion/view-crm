@@ -11,7 +11,7 @@ import { fetchAdapter } from './fetch-adapter';
 export type ApiMode = 'real' | 'mock' | 'hybrid';
 
 /** Routes the Go backend implements today. Used only in hybrid mode. */
-const BACKEND_ROUTES = ['/api/auth/', '/api/contacts', '/api/dashboard/sales', '/api/profile'];
+const BACKEND_ROUTES = ['/api/v1/', '/api/auth/', '/api/contacts', '/api/profile'];
 
 const hybridAdapter: HttpAdapter = (request) =>
   BACKEND_ROUTES.some((prefix) => request.path.startsWith(prefix)) || !mockHandles(request)

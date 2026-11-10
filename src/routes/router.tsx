@@ -9,12 +9,15 @@ import {
 import { PageSkeleton } from '@/components/feedback/page-skeleton';
 import { RouteError } from '@/components/feedback/route-error';
 import { authRoutes, hasValidSession, RequireAuth } from '@/features/auth';
+import { automationRoutes } from '@/features/automation';
 import { companiesRoutes } from '@/features/companies';
 import { contactsRoutes } from '@/features/contacts';
 import { dashboardRoutes } from '@/features/dashboard';
 import { dealsRoutes } from '@/features/deals';
 import { extrasRoutes } from '@/features/extras';
 import { importRoutes } from '@/features/import';
+import { leadsRoutes } from '@/features/leads';
+import { nurtureRoutes, unsubscribeRoutes } from '@/features/nurture';
 import { onboardingRoutes } from '@/features/onboarding';
 import { productsRoutes } from '@/features/products';
 import { reportsRoutes } from '@/features/reports';
@@ -22,7 +25,6 @@ import { tasksRoutes } from '@/features/tasks';
 import { AppShell } from '@/layouts/app-shell';
 import { crumb } from '@/types';
 
-import { ModulePlaceholder } from './module-placeholder';
 import { paths } from './paths';
 
 /** Children of /dashboard, grouped by workflow stage. */
@@ -31,53 +33,19 @@ const appRoutes: RouteObject[] = [
   ...dashboardRoutes,
 
   // Leads
-  {
-    path: 'leads',
-    handle: crumb('Leads'),
-    element: (
-      <ModulePlaceholder
-        title="Leads"
-        description="Captured from WhatsApp, web forms and email, then scored and routed by AI."
-        phase={3}
-        workflow="ai"
-      />
-    ),
-  },
+  ...leadsRoutes,
   ...contactsRoutes,
   ...companiesRoutes,
   ...importRoutes,
 
   // Nurture
-  {
-    path: 'nurture',
-    handle: crumb('Sequences'),
-    element: (
-      <ModulePlaceholder
-        title="Nurture sequences"
-        description="Automatic email and WhatsApp cadences; replies re-score the lead."
-        phase={4}
-        workflow="ai"
-      />
-    ),
-  },
+  ...nurtureRoutes,
 
   // Deals
   ...dealsRoutes,
   ...tasksRoutes,
 
   // Onboarding
-  {
-    path: 'onboarding',
-    handle: crumb('Onboarding'),
-    element: (
-      <ModulePlaceholder
-        title="Onboarding"
-        description="Won deals automatically receive a welcome message and invoice."
-        phase={5}
-        workflow="ai"
-      />
-    ),
-  },
   ...onboardingRoutes,
   ...productsRoutes,
 
@@ -87,18 +55,7 @@ const appRoutes: RouteObject[] = [
   // Workspace extras
   ...extrasRoutes,
 
-  {
-    path: 'automation',
-    handle: crumb('Automation'),
-    element: (
-      <ModulePlaceholder
-        title="Automation"
-        description="Scoring rules, owner routing and default nurture cadences."
-        phase={5}
-        workflow="ai"
-      />
-    ),
-  },
+  ...automationRoutes,
 ];
 
 export const router = createBrowserRouter([
@@ -111,7 +68,19 @@ export const router = createBrowserRouter([
         path: '/',
         loader: () => redirect(hasValidSession() ? paths.dashboard : paths.signIn),
       },
+      // Paths the backend puts in emails and notification links (no /dashboard prefix).
+      { path: '/reports', loader: () => redirect(paths.reports) },
+      {
+        path: '/contacts/:id',
+        loader: ({ params }) => redirect(`${paths.contacts}/${params.id ?? ''}`),
+      },
+      {
+        path: '/tasks/:id',
+        loader: ({ params }) => redirect(`${paths.tasks}/${params.id ?? ''}`),
+      },
       ...authRoutes,
+      // Public: the link in nurture email footers.
+      ...unsubscribeRoutes,
       {
         path: paths.dashboard,
         handle: crumb('Dashboard'),

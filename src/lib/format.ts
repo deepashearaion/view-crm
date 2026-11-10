@@ -76,3 +76,39 @@ export function initials(name: string): string {
 export function plural(count: number, singular: string, pluralForm = `${singular}s`): string {
   return `${count.toLocaleString('en-IN')} ${count === 1 ? singular : pluralForm}`;
 }
+
+/** The API stores money as integer paise. ₹1,500.00 → 150000. */
+export function rupeesToPaise(rupees: number): number {
+  return Math.round(rupees * 100);
+}
+
+export function paiseToRupees(paise: number): number {
+  return paise / 100;
+}
+
+/** 150000 paise → "₹1,500" (paise shown only when present). */
+export function formatPaise(paise: number): string {
+  return formatCurrency(paiseToRupees(paise));
+}
+
+/** GST basis points → percent: 1800 → 18. */
+export function bpToPercent(bp: number): number {
+  return bp / 100;
+}
+
+const istDay = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Asia/Kolkata',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
+
+/** The IST calendar day of an instant, as the API's `YYYY-MM-DD`. */
+export function toIstDate(value: Date): string {
+  return istDay.format(value);
+}
+
+/** The IST month of an instant, as the API's `YYYY-MM`. */
+export function toIstMonth(value: Date): string {
+  return toIstDate(value).slice(0, 7);
+}

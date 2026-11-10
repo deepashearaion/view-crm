@@ -17,7 +17,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useSessionUser, useUserLookup, useUsers } from '@/features/auth';
+import {
+  permissions,
+  useSessionRole,
+  useSessionUser,
+  useUserLookup,
+  useUsers,
+} from '@/features/auth';
 import { useCompanyLookup } from '@/features/companies';
 import { useRecordSheetState } from '@/hooks/use-record-sheet-state';
 import { downloadCsv, toCsv, type CsvColumn } from '@/lib/csv';
@@ -27,13 +33,28 @@ import { paths } from '@/routes/paths';
 
 import { getContactColumns } from '../components/contact-columns';
 import { ContactSheet } from '../components/contact-sheet';
-import { LEAD_SOURCES, LEAD_STATUSES, leadStatusById } from '../constants';
+import {
+  LEAD_SOURCES,
+  LEAD_STATUSES,
+  leadStatusById,
+  LIFECYCLE_STAGES,
+  lifecycleStageById,
+  TEMPERATURES,
+} from '../constants';
 import { useBulkUpdateContacts, useContacts, useDeleteContacts } from '../hooks/use-contacts';
 import type { Contact } from '../types';
 
 const statusFacets: FacetOption[] = LEAD_STATUSES.map((status) => ({
   value: String(status.id),
   label: status.label,
+}));
+const lifecycleFacets: FacetOption[] = LIFECYCLE_STAGES.map((stage) => ({
+  value: stage.id,
+  label: stage.label,
+}));
+const temperatureFacets: FacetOption[] = TEMPERATURES.map((temperature) => ({
+  value: temperature.id,
+  label: temperature.label,
 }));
 const sourceFacets: FacetOption[] = LEAD_SOURCES.map((source) => ({
   value: source,
@@ -45,6 +66,9 @@ type Scope = 'all' | 'mine';
 export default function ContactsPage({ createOnMount = false }: { createOnMount?: boolean }) {
   const navigate = useNavigate();
   const sessionUser = useSessionUser();
+  const role = useSessionRole();
+  const canEdit = permissions.canEdit(role);
+  const canReassign = permissions.canReassign(role);
   const { data: contacts = [], isPending, error, refetch } = useContacts();
   const { data: userList = [] } = useUsers();
   const users = useUserLookup();
@@ -59,7 +83,8 @@ export default function ContactsPage({ createOnMount = false }: { createOnMount?
 
   const [sheetState, setSheetState] = useRecordSheetState({
     param: 'contact',
-    createOnMount,
+    // Viewers can't create: /contacts/new just shows the list.
+    createOnMount: createOnMount && canEdit,
     listPath: paths.contacts,
   });
 
@@ -88,8 +113,9 @@ export default function ContactsPage({ createOnMount = false }: { createOnMount?
         onDelete: (contact) => {
           setPendingDelete([contact]);
         },
+        canEdit,
       }),
-    [users, companies, setSheetState],
+    [users, companies, setSheetState, canEdit],
   );
 
   const ownerFacets: FacetOption[] = userList.map((user) => ({ value: user.id, label: user.name }));
@@ -102,6 +128,10 @@ export default function ContactsPage({ createOnMount = false }: { createOnMount?
       { header: 'Mobile', value: (c) => c.mobile },
       { header: 'Alternate mobile', value: (c) => c.alternateMobile },
       { header: 'Lead status', value: (c) => leadStatusById(c.leadStatusId)?.label },
+      { header: 'Lifecycle stage', value: (c) => lifecycleStageById(c.lifecycleStage)?.label },
+      { header: 'Temperature', value: (c) => c.temperature ?? '' },
+      { header: 'Score', value: (c) => (c.score === null ? '' : String(c.score)) },
+      { header: 'Opted out', value: (c) => (c.optedOutAt ? formatDateTime(c.optedOutAt) : '') },
       { header: 'Lead owner', value: (c) => (c.leadOwnerId ? users.get(c.leadOwnerId)?.name : '') },
       { header: 'Source', value: (c) => c.source },
       { header: 'Destination', value: (c) => c.destination },
@@ -151,12 +181,14 @@ export default function ContactsPage({ createOnMount = false }: { createOnMount?
         description="Everyone you’re talking to: leads, customers and partners."
         actions={
           <>
-            <Button variant="outline" asChild>
-              <Link to={`${paths.import}?target=contacts`}>
-                <Upload aria-hidden />
-                Import
-              </Link>
-            </Button>
+            {canEdit && (
+              <Button variant="outline" asChild>
+                <Link to={`${paths.import}?target=contacts`}>
+                  <Upload aria-hidden />
+                  Import
+                </Link>
+              </Button>
+            )}
             <Button
               variant="outline"
               disabled={scoped.length === 0}
@@ -167,14 +199,16 @@ export default function ContactsPage({ createOnMount = false }: { createOnMount?
               <Download aria-hidden />
               Export
             </Button>
-            <Button
-              onClick={() => {
-                void navigate(paths.contactsNew);
-              }}
-            >
-              <Plus aria-hidden />
-              New contact
-            </Button>
+            {canEdit && (
+              <Button
+                onClick={() => {
+                  void navigate(paths.contactsNew);
+                }}
+              >
+                <Plus aria-hidden />
+                New contact
+              </Button>
+            )}
           </>
         }
       />
@@ -226,6 +260,16 @@ export default function ContactsPage({ createOnMount = false }: { createOnMount?
               options={statusFacets}
             />
             <DataTableFacetedFilter
+              column={table.getColumn('lifecycle')}
+              title="Stage"
+              options={lifecycleFacets}
+            />
+            <DataTableFacetedFilter
+              column={table.getColumn('temperature')}
+              title="Temperature"
+              options={temperatureFacets}
+            />
+            <DataTableFacetedFilter
               column={table.getColumn('owner')}
               title="Owner"
               options={ownerFacets}
@@ -239,46 +283,50 @@ export default function ContactsPage({ createOnMount = false }: { createOnMount?
         )}
         bulkActions={(rows, clear) => (
           <>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" disabled={bulkUpdate.isPending}>
-                  Set status
-                  <ChevronDown aria-hidden />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                {LEAD_STATUSES.map((status) => (
-                  <DropdownMenuItem
-                    key={status.id}
-                    onSelect={() => {
-                      updateMany(rows, { lead_status_id: status.id }, 'Updated', clear);
-                    }}
-                  >
-                    {status.label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" disabled={bulkUpdate.isPending}>
-                  Assign owner
-                  <ChevronDown aria-hidden />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                {userList.map((user) => (
-                  <DropdownMenuItem
-                    key={user.id}
-                    onSelect={() => {
-                      updateMany(rows, { lead_owner_id: Number(user.id) }, 'Reassigned', clear);
-                    }}
-                  >
-                    {user.name}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {canEdit && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" disabled={bulkUpdate.isPending}>
+                    Set status
+                    <ChevronDown aria-hidden />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  {LEAD_STATUSES.map((status) => (
+                    <DropdownMenuItem
+                      key={status.id}
+                      onSelect={() => {
+                        updateMany(rows, { lead_status_id: status.id }, 'Updated', clear);
+                      }}
+                    >
+                      {status.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+            {canReassign && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" disabled={bulkUpdate.isPending}>
+                    Assign owner
+                    <ChevronDown aria-hidden />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  {userList.map((user) => (
+                    <DropdownMenuItem
+                      key={user.id}
+                      onSelect={() => {
+                        updateMany(rows, { lead_owner_id: Number(user.id) }, 'Reassigned', clear);
+                      }}
+                    >
+                      {user.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
             <Button
               variant="outline"
               size="sm"
@@ -289,42 +337,50 @@ export default function ContactsPage({ createOnMount = false }: { createOnMount?
               <Download aria-hidden />
               Export
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-              onClick={() => {
-                setPendingDelete(rows);
-              }}
-            >
-              <Trash2 aria-hidden />
-              Delete
-            </Button>
+            {canEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                onClick={() => {
+                  setPendingDelete(rows);
+                }}
+              >
+                <Trash2 aria-hidden />
+                Delete
+              </Button>
+            )}
           </>
         )}
         emptyState={
           <EmptyState
             icon={Users}
             title="No contacts yet"
-            description="Add your first contact or import a spreadsheet to get started."
+            description={
+              canEdit
+                ? 'Add your first contact or import a spreadsheet to get started.'
+                : 'Contacts your team adds will show up here.'
+            }
             className="border-none"
             actions={
-              <>
-                <Button variant="outline" asChild>
-                  <Link to={`${paths.import}?target=contacts`}>
-                    <Upload aria-hidden />
-                    Import
-                  </Link>
-                </Button>
-                <Button
-                  onClick={() => {
-                    void navigate(paths.contactsNew);
-                  }}
-                >
-                  <Plus aria-hidden />
-                  New contact
-                </Button>
-              </>
+              canEdit && (
+                <>
+                  <Button variant="outline" asChild>
+                    <Link to={`${paths.import}?target=contacts`}>
+                      <Upload aria-hidden />
+                      Import
+                    </Link>
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      void navigate(paths.contactsNew);
+                    }}
+                  >
+                    <Plus aria-hidden />
+                    New contact
+                  </Button>
+                </>
+              )
             }
           />
         }

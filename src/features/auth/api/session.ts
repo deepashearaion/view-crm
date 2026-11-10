@@ -1,6 +1,6 @@
-import { getAuthToken, http, setAuthToken } from '@/services';
+import { getAuthToken, http, onSessionExpired, setAuthToken } from '@/services';
 
-import { sessionUserSchema } from '../schemas';
+import { sessionUserSchema, tokenClaimsSchema } from '../schemas';
 import type { SessionUser } from '../types';
 
 const CURRENT_USER_KEY = 'currentUser';
@@ -26,27 +26,25 @@ export function clearSession(): void {
   localStorage.removeItem(CURRENT_USER_KEY);
 }
 
-/** Reads `exp` (seconds) from a JWT payload; undefined for non-JWT tokens. */
-function tokenExpiry(token: string): number | undefined {
-  const payload = token.split('.')[1];
-  if (!payload) return undefined;
+/** Decodes the JWT payload (`user_id`, `org_id`, `role`, `exp`); empty for opaque tokens. */
+export function readTokenClaims(token: string | null = getAuthToken()) {
+  const payload = token?.split('.')[1];
+  if (!payload) return {};
   try {
     const decoded: unknown = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
-    if (typeof decoded === 'object' && decoded !== null && 'exp' in decoded) {
-      return typeof decoded.exp === 'number' ? decoded.exp : undefined;
-    }
+    const parsed = tokenClaimsSchema.safeParse(decoded);
+    return parsed.success ? parsed.data : {};
   } catch {
-    // Opaque token: the backend decides validity.
+    return {};
   }
-  return undefined;
 }
 
-/** True when a token is stored and, if it is a JWT, not expired. */
-export function hasValidSession(now: number = Date.now()): boolean {
-  const token = getAuthToken();
-  if (!token) return false;
-  const exp = tokenExpiry(token);
-  return exp === undefined || exp * 1000 > now;
+/**
+ * True when an access token is stored. An expired token still counts: the first API call gets
+ * a 401, refreshes with the httpOnly cookie and retries; if that fails the session ends.
+ */
+export function hasValidSession(): boolean {
+  return getAuthToken() !== null;
 }
 
 export function displayName(user: SessionUser | null): string {
@@ -66,4 +64,14 @@ export async function logout(): Promise<void> {
   } finally {
     clearSession();
   }
+}
+
+/** When a token refresh fails, drop the session and go to sign in (returning here after). */
+export function installSessionExpiryHandler(signInPath: string): void {
+  onSessionExpired(() => {
+    clearSession();
+    if (window.location.pathname.startsWith(signInPath)) return;
+    const here = `${window.location.pathname}${window.location.search}`;
+    window.location.assign(`${signInPath}?redirect=${encodeURIComponent(here)}`);
+  });
 }

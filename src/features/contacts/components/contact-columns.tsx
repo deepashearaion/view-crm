@@ -11,10 +11,14 @@ import type { User } from '@/features/auth';
 import type { Company } from '@/features/companies';
 import { formatDate } from '@/lib/format';
 
-import { leadStatusById } from '../constants';
+import { leadStatusById, LIFECYCLE_STAGES } from '../constants';
 import type { Contact } from '../types';
 
+import { LifecycleStageBadge, OptedOutBadge, TemperatureBadge } from './contact-badges';
 import { LeadStatusBadge } from './lead-status-badge';
+
+const TEMPERATURE_ORDER = { hot: 3, warm: 2, cold: 1 } as const;
+const stageOrder = (stage: string) => LIFECYCLE_STAGES.findIndex((entry) => entry.id === stage);
 
 interface ColumnOptions {
   users: Map<string, User>;
@@ -22,6 +26,8 @@ interface ColumnOptions {
   onView: (contact: Contact) => void;
   onEdit: (contact: Contact) => void;
   onDelete: (contact: Contact) => void;
+  /** False for viewers: hides Edit and Delete. */
+  canEdit: boolean;
 }
 
 export function getContactColumns({
@@ -30,6 +36,7 @@ export function getContactColumns({
   onView,
   onEdit,
   onDelete,
+  canEdit,
 }: ColumnOptions): ColumnDef<Contact>[] {
   return [
     {
@@ -40,7 +47,10 @@ export function getContactColumns({
       header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
       cell: ({ row }) => (
         <div className="min-w-0">
-          <p className="truncate font-medium">{row.original.fullName}</p>
+          <p className="flex items-center gap-1.5 font-medium">
+            <span className="truncate">{row.original.fullName}</span>
+            <OptedOutBadge optedOutAt={row.original.optedOutAt} />
+          </p>
           {row.original.email && (
             <p className="truncate text-xs text-muted-foreground">{row.original.email}</p>
           )}
@@ -78,6 +88,28 @@ export function getContactColumns({
         ),
       header: ({ column }) => <DataTableColumnHeader column={column} title="Lead status" />,
       cell: ({ row }) => <LeadStatusBadge statusId={row.original.leadStatusId} />,
+    },
+    {
+      id: 'lifecycle',
+      accessorKey: 'lifecycleStage',
+      meta: { label: 'Lifecycle stage' },
+      filterFn: facetFilterFn,
+      sortingFn: (a, b) =>
+        stageOrder(a.original.lifecycleStage) - stageOrder(b.original.lifecycleStage),
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Stage" />,
+      cell: ({ row }) => <LifecycleStageBadge stage={row.original.lifecycleStage} />,
+    },
+    {
+      id: 'temperature',
+      accessorFn: (contact) => contact.temperature ?? '',
+      meta: { label: 'Lead score' },
+      filterFn: facetFilterFn,
+      sortingFn: (a, b) =>
+        (a.original.temperature ? TEMPERATURE_ORDER[a.original.temperature] : 0) -
+          (b.original.temperature ? TEMPERATURE_ORDER[b.original.temperature] : 0) ||
+        (a.original.score ?? -1) - (b.original.score ?? -1),
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Score" />,
+      cell: ({ row }) => <TemperatureBadge contact={row.original} />,
     },
     {
       id: 'owner',
@@ -166,22 +198,26 @@ export function getContactColumns({
                 onView(row.original);
               },
             },
-            {
-              label: 'Edit',
-              icon: Pencil,
-              onSelect: () => {
-                onEdit(row.original);
-              },
-            },
-            {
-              label: 'Delete',
-              icon: Trash2,
-              destructive: true,
-              separatorBefore: true,
-              onSelect: () => {
-                onDelete(row.original);
-              },
-            },
+            ...(canEdit
+              ? [
+                  {
+                    label: 'Edit',
+                    icon: Pencil,
+                    onSelect: () => {
+                      onEdit(row.original);
+                    },
+                  },
+                  {
+                    label: 'Delete',
+                    icon: Trash2,
+                    destructive: true,
+                    separatorBefore: true,
+                    onSelect: () => {
+                      onDelete(row.original);
+                    },
+                  },
+                ]
+              : []),
           ]}
         />
       ),

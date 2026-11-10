@@ -141,7 +141,7 @@ function ResetPasswordForm({ token }: { token: string }) {
             control={form.control}
             name="password"
             label="New password"
-            description="At least 6 characters."
+            description="8 to 72 characters."
             autoComplete="new-password"
             autoFocus
             render={(field) => <PasswordInput {...field} />}

@@ -6,7 +6,7 @@ import { mock, mockError } from '../router';
 function fakeToken(userId: number): string {
   const encode = (value: object) => btoa(JSON.stringify(value)).replace(/=+$/, '');
   const exp = Math.floor(Date.now() / 1000) + 8 * 60 * 60;
-  return `${encode({ alg: 'none', typ: 'JWT' })}.${encode({ user_id: userId, exp })}.mock`;
+  return `${encode({ alg: 'none', typ: 'JWT' })}.${encode({ user_id: userId, org_id: 1, role: 'admin', exp })}.mock`;
 }
 
 function bodyField(body: unknown, key: string): string {

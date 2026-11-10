@@ -11,32 +11,65 @@ import { EmptyState } from '@/components/feedback/empty-state';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useUserLookup, useUsers } from '@/features/auth';
-import { useCompanyLookup } from '@/features/companies';
+import { permissions, useSessionRole, useUserLookup, useUsers } from '@/features/auth';
 import { useContacts } from '@/features/contacts';
 import { useRecordSheetState } from '@/hooks/use-record-sheet-state';
 import { paths } from '@/routes/paths';
+import { errorMessage } from '@/services';
 
 import { taskStatus } from '../api/tasks';
 import { getTaskColumns } from '../components/task-columns';
 import { TaskSheet } from '../components/task-sheet';
-import { TASK_STATUSES, TASK_TYPES } from '../constants';
-import { useDeleteTasks, useTasks, useToggleTaskComplete } from '../hooks/use-tasks';
-import type { Task, TaskStatus } from '../types';
+import { TASK_PRIORITIES, TASK_TYPES } from '../constants';
+import { useDeleteTasks, useSetTaskStatus, useTasks } from '../hooks/use-tasks';
+import type { Task, TaskDisplayStatus, TaskStatus } from '../types';
 
-type Tab = TaskStatus | 'all';
+/** Status filter: "open" groups overdue, upcoming and undated open tasks. */
+type Tab = 'open' | 'overdue' | 'upcoming' | 'done' | 'cancelled' | 'all';
+
+const TABS: { value: Tab; label: string }[] = [
+  { value: 'open', label: 'Open' },
+  { value: 'overdue', label: 'Overdue' },
+  { value: 'upcoming', label: 'Upcoming' },
+  { value: 'done', label: 'Done' },
+  { value: 'cancelled', label: 'Cancelled' },
+  { value: 'all', label: 'All' },
+];
+
+const STATUS_TOASTS: Record<TaskStatus, string> = {
+  done: 'Task completed.',
+  open: 'Task reopened.',
+  cancelled: 'Task cancelled.',
+};
+
+function inTab(status: TaskDisplayStatus, tab: Tab): boolean {
+  if (tab === 'all') return true;
+  if (tab === 'open')
+    return status === 'overdue' || status === 'upcoming' || status === 'no_due_date';
+  return status === tab;
+}
+
+const EMPTY_TITLES: Record<Tab, string> = {
+  open: 'No open tasks',
+  overdue: 'Nothing overdue',
+  upcoming: 'Nothing coming up',
+  done: 'No completed tasks yet',
+  cancelled: 'No cancelled tasks',
+  all: 'No tasks here',
+};
 
 export default function TasksPage({ createOnMount = false }: { createOnMount?: boolean }) {
   const navigate = useNavigate();
+  const role = useSessionRole();
+  const canEdit = permissions.canEdit(role);
   const { data: tasks = [], isPending, error, refetch } = useTasks();
   const { data: userList = [] } = useUsers();
   const users = useUserLookup();
-  const companies = useCompanyLookup();
   const { data: contacts = [] } = useContacts();
-  const toggle = useToggleTaskComplete();
+  const setStatus = useSetTaskStatus();
   const deleteTasks = useDeleteTasks();
 
-  const [tab, setTab] = useState<Tab>('upcoming');
+  const [tab, setTab] = useState<Tab>('open');
   const [search, setSearch] = useState('');
   const [pendingDelete, setPendingDelete] = useState<Task[] | null>(null);
   const [sheetState, setSheetState] = useRecordSheetState({
@@ -52,35 +85,37 @@ export default function TasksPage({ createOnMount = false }: { createOnMount?: b
 
   const counts = useMemo(() => {
     const result: Record<Tab, number> = {
-      all: tasks.length,
+      open: 0,
       overdue: 0,
       upcoming: 0,
-      completed: 0,
+      done: 0,
+      cancelled: 0,
+      all: 0,
     };
-    for (const task of tasks) result[taskStatus(task)]++;
+    for (const task of tasks) {
+      const status = taskStatus(task);
+      for (const { value } of TABS) if (inTab(status, value)) result[value]++;
+    }
     return result;
   }, [tasks]);
 
-  const visible = useMemo(
-    () => (tab === 'all' ? tasks : tasks.filter((task) => taskStatus(task) === tab)),
-    [tasks, tab],
-  );
+  const visible = useMemo(() => tasks.filter((task) => inTab(taskStatus(task), tab)), [tasks, tab]);
 
   const columns = useMemo(
     () =>
       getTaskColumns({
         users,
+        canEdit,
         contactName: (id) => (id ? contactNames.get(id) : undefined),
-        companyName: (id) => (id ? companies.get(id)?.name : undefined),
-        onToggle: (task, completed) => {
-          toggle.mutate(
-            { id: task.id, completed },
+        onSetStatus: (task, status) => {
+          setStatus.mutate(
+            { id: task.id, status },
             {
               onSuccess: () => {
-                toast.success(completed ? 'Task completed.' : 'Task reopened.');
+                toast.success(STATUS_TOASTS[status]);
               },
-              onError: () => {
-                toast.error('Couldn’t update the task.');
+              onError: (mutationError) => {
+                toast.error(errorMessage(mutationError, 'Couldn’t update the task.'));
               },
             },
           );
@@ -92,23 +127,25 @@ export default function TasksPage({ createOnMount = false }: { createOnMount?: b
           setPendingDelete([task]);
         },
       }),
-    [users, contactNames, companies, toggle, setSheetState],
+    [users, canEdit, contactNames, setStatus, setSheetState],
   );
 
   return (
     <div className="mx-auto w-full max-w-[1600px] space-y-6 p-4 sm:p-6">
       <PageHeader
         title="Tasks"
-        description="Follow-ups, meetings and quotations, including tasks created automatically for hot leads."
+        description="Follow-ups, calls and meetings, including tasks created automatically for hot leads."
         actions={
-          <Button
-            onClick={() => {
-              void navigate(`${paths.tasks}/new`);
-            }}
-          >
-            <Plus aria-hidden />
-            New task
-          </Button>
+          canEdit && (
+            <Button
+              onClick={() => {
+                void navigate(`${paths.tasks}/new`);
+              }}
+            >
+              <Plus aria-hidden />
+              New task
+            </Button>
+          )
         }
       />
 
@@ -119,7 +156,7 @@ export default function TasksPage({ createOnMount = false }: { createOnMount?: b
         }}
       >
         <TabsList>
-          {[...TASK_STATUSES, { value: 'all', label: 'All' } as const].map((status) => (
+          {TABS.map((status) => (
             <TabsTrigger key={status.value} value={status.value} className="gap-2">
               {status.label}
               <Badge
@@ -145,8 +182,8 @@ export default function TasksPage({ createOnMount = false }: { createOnMount?: b
         isLoading={isPending}
         error={error}
         onRetry={() => void refetch()}
-        initialSorting={[{ id: 'dueAt', desc: tab === 'completed' }]}
-        defaultHidden={['type', 'description']}
+        initialSorting={[{ id: 'dueAt', desc: tab === 'done' || tab === 'cancelled' }]}
+        defaultHidden={['type', 'status', 'description']}
         onRowClick={(task) => {
           setSheetState({ mode: 'edit', id: task.id });
         }}
@@ -163,39 +200,47 @@ export default function TasksPage({ createOnMount = false }: { createOnMount?: b
               }))}
             />
             <DataTableFacetedFilter
-              column={table.getColumn('owner')}
+              column={table.getColumn('priority')}
+              title="Priority"
+              options={TASK_PRIORITIES.map((priority) => ({
+                value: priority.value,
+                label: priority.label,
+              }))}
+            />
+            <DataTableFacetedFilter
+              column={table.getColumn('assignee')}
               title="Assigned to"
               options={userList.map((user) => ({ value: user.id, label: user.name }))}
             />
           </>
         )}
-        bulkActions={(rows) => (
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-            onClick={() => {
-              setPendingDelete(rows);
-            }}
-          >
-            <Trash2 aria-hidden />
-            Delete
-          </Button>
-        )}
+        bulkActions={
+          canEdit
+            ? (rows) => (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  onClick={() => {
+                    setPendingDelete(rows);
+                  }}
+                >
+                  <Trash2 aria-hidden />
+                  Delete
+                </Button>
+              )
+            : undefined
+        }
         emptyState={
           <EmptyState
             icon={ListChecks}
-            title={
-              tab === 'overdue'
-                ? 'Nothing overdue'
-                : tab === 'completed'
-                  ? 'No completed tasks yet'
-                  : 'No tasks here'
-            }
+            title={EMPTY_TITLES[tab]}
             description={
               tab === 'overdue'
                 ? 'Nice work, you’re on top of your follow-ups.'
-                : 'Create a task to plan your next follow-up.'
+                : canEdit
+                  ? 'Create a task to plan your next follow-up.'
+                  : 'Tasks your team creates will show up here.'
             }
             className="border-none"
           />

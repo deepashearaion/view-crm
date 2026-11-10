@@ -34,6 +34,8 @@ export interface NavItem {
 
 export interface NavGroup {
   label: string;
+  /** Icon for the collapsed rail; defaults to the first item's icon. */
+  icon?: LucideIcon;
   items: NavItem[];
 }
 
@@ -47,6 +49,7 @@ export const navGroups: NavGroup[] = [
   },
   {
     label: 'Leads',
+    icon: Users,
     items: [
       {
         title: 'Leads',
@@ -106,6 +109,7 @@ export const navGroups: NavGroup[] = [
   },
   {
     label: 'Workspace',
+    icon: FolderOpen,
     items: [
       { title: 'Attendance', to: paths.attendance, icon: CalendarCheck },
       { title: 'File cabinet', to: paths.files, icon: FolderOpen, keywords: ['documents'] },
@@ -133,3 +137,7 @@ export const allNavItems: NavItem[] = [
   ...navGroups.flatMap((group) => group.items),
   ...settingsNav,
 ];
+
+export function isItemActive(item: NavItem, pathname: string) {
+  return pathname === item.to || pathname.startsWith(`${item.to}/`);
+}

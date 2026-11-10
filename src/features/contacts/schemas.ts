@@ -24,12 +24,12 @@ const optionalAmount = z
   })
   .optional();
 
-const tenDigits = (label: string) =>
+const optionalTenDigits = (label: string) =>
   z
     .string()
     .trim()
     .transform((value) => value.replace(/\D/g, ''))
-    .refine((digits) => digits.length === 10, {
+    .refine((digits) => digits === '' || digits.length === 10, {
       message: `${label} must be exactly 10 digits.`,
     });
 
@@ -62,14 +62,8 @@ export const contactFormSchema = z
     lastName: z.string().trim(),
     email: z.union([z.literal(''), z.email('Please enter a valid email address.')]),
     countryCode: z.string().min(1),
-    mobile: tenDigits('Mobile number'),
-    alternateMobile: z
-      .string()
-      .trim()
-      .transform((value) => value.replace(/\D/g, ''))
-      .refine((digits) => digits === '' || digits.length === 10, {
-        message: 'Alternate mobile must be exactly 10 digits.',
-      }),
+    mobile: optionalTenDigits('Mobile number'),
+    alternateMobile: optionalTenDigits('Alternate mobile'),
     companyId: z
       .string()
       .trim()
@@ -83,6 +77,11 @@ export const contactFormSchema = z
     notes: z.string().trim().max(2000, 'Notes can be at most 2000 characters.'),
     trip: contactTripSchema,
   })
+  // POST /api/v1/leads needs first_name plus an email or a mobile number.
+  .refine((values) => values.email !== '' || values.mobile !== '', {
+    message: 'Enter an email or a mobile number.',
+    path: ['mobile'],
+  })
   .refine(
     (values) =>
       !values.trip.advanceAmount ||
@@ -90,3 +89,18 @@ export const contactFormSchema = z
       Number(values.trip.advanceAmount) <= Number(values.trip.totalAmount),
     { message: 'Advance cannot exceed the total amount.', path: ['trip', 'advanceAmount'] },
   );
+
+export const ACTIVITY_LOG_KINDS = ['note', 'call', 'email'] as const;
+
+/** Log a note / call / email on a contact's timeline. */
+export const activityFormSchema = z
+  .object({
+    kind: z.enum(ACTIVITY_LOG_KINDS),
+    direction: z.union([z.enum(['inbound', 'outbound']), z.literal('')]),
+    summary: z.string().trim().max(200, 'Summary can be at most 200 characters.'),
+    body: z.string().trim().max(5000, 'Details can be at most 5000 characters.'),
+  })
+  .refine((values) => values.summary !== '' || values.body !== '', {
+    message: 'Write a summary or some details.',
+    path: ['body'],
+  });

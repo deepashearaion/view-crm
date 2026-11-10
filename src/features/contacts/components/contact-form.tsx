@@ -136,7 +136,15 @@ function RemainingAmount({ control }: { control: Control<ContactFormValues> }) {
   );
 }
 
-export function ContactForm({ control }: { control: Control<ContactFormValues> }) {
+interface ContactFormProps {
+  control: Control<ContactFormValues>;
+  /** Owners, admins and managers may pick the owner; reps own what they create. */
+  canReassign: boolean;
+  /** New contacts without an owner are routed by the assignment rules. */
+  isCreate: boolean;
+}
+
+export function ContactForm({ control, canReassign, isCreate }: ContactFormProps) {
   const { data: users = [] } = useUsers();
   const ownerOptions: SelectOption[] = users.map((user) => ({ value: user.id, label: user.name }));
   const { data: companies = [] } = useCompanies();
@@ -178,6 +186,7 @@ export function ContactForm({ control }: { control: Control<ContactFormValues> }
             label="Mobile"
             inputMode="tel"
             placeholder="10-digit number"
+            description="An email or a mobile number is required."
           />
           <FormInput
             control={control}
@@ -199,14 +208,19 @@ export function ContactForm({ control }: { control: Control<ContactFormValues> }
             label="Lead status"
             options={statusOptions}
           />
-          <FormSelect
-            control={control}
-            name="leadOwnerId"
-            label="Lead owner"
-            options={ownerOptions}
-            allowEmpty
-            placeholder="Unassigned"
-          />
+          {canReassign && (
+            <FormSelect
+              control={control}
+              name="leadOwnerId"
+              label="Lead owner"
+              options={ownerOptions}
+              allowEmpty
+              placeholder={isCreate ? 'Auto-assign' : 'Unassigned'}
+              description={
+                isCreate ? 'Leave empty to route the lead with the assignment rules.' : undefined
+              }
+            />
+          )}
           <FormSelect
             control={control}
             name="source"

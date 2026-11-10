@@ -26,9 +26,9 @@ export function AuthLayout({ title, description, children, footer }: AuthLayoutP
         />
         <div className="flex items-center gap-2 font-heading text-lg font-semibold">
           <span className="flex size-9 items-center justify-center rounded-lg bg-primary-foreground text-sm font-bold text-primary">
-            DC
+            C
           </span>
-          DealConverter
+          Climetavere
         </div>
 
         <div className="relative space-y-8">
@@ -55,7 +55,7 @@ export function AuthLayout({ title, description, children, footer }: AuthLayoutP
         </div>
 
         <p className="text-xs opacity-70">
-          © {new Date().getFullYear()} Rytzu SaaS Technologies Private Limited. All rights reserved.
+          © {new Date().getFullYear()} Climetaverse . All rights reserved.
         </p>
       </aside>
 
@@ -64,9 +64,9 @@ export function AuthLayout({ title, description, children, footer }: AuthLayoutP
           <div className="space-y-1.5">
             <div className="mb-6 flex items-center gap-2 font-heading font-semibold lg:hidden">
               <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-xs font-bold text-primary-foreground">
-                DC
+                C
               </span>
-              DealConverter
+              Climetavere
             </div>
             <h1 className="font-heading text-2xl font-semibold tracking-tight">{title}</h1>
             {description && <p className="text-sm text-muted-foreground">{description}</p>}

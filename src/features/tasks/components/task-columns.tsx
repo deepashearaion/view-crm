@@ -1,10 +1,11 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import { Circle, CircleCheck, Pencil, Trash2 } from 'lucide-react';
+import { Ban, Circle, CircleCheck, Eye, Pencil, RotateCcw, Trash2 } from 'lucide-react';
 
 import {
   DataTableColumnHeader,
   DataTableRowActions,
   facetFilterFn,
+  type RowAction,
 } from '@/components/data/data-table';
 import { UserChip } from '@/components/data/user-chip';
 import { WorkflowBadge } from '@/components/feedback/workflow-badge';
@@ -12,17 +13,23 @@ import type { User } from '@/features/auth';
 import { formatDateTime, formatRelativeTime } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
-import { taskStatus } from '../api/tasks';
-import { taskTypeByValue } from '../constants';
-import type { Task } from '../types';
+import { isAutomatedTask, taskStatus } from '../api/tasks';
+import { TASK_PRIORITIES, TASK_ORIGIN_LABELS, taskTypeByValue } from '../constants';
+import type { Task, TaskStatus } from '../types';
+import { TaskPriorityBadge } from './task-priority-badge';
+import { TaskStatusBadge } from './task-status-badge';
 
 const dash = <span className="text-muted-foreground">—</span>;
+const priorityRank = new Map<string, number>(
+  TASK_PRIORITIES.map((priority, index) => [priority.value, index]),
+);
 
 interface ColumnOptions {
   users: Map<string, User>;
   contactName: (id: string | null) => string | undefined;
-  companyName: (id: string | null) => string | undefined;
-  onToggle: (task: Task, completed: boolean) => void;
+  /** False for viewers: hides every action that changes a task. */
+  canEdit: boolean;
+  onSetStatus: (task: Task, status: TaskStatus) => void;
   onEdit: (task: Task) => void;
   onDelete: (task: Task) => void;
 }
@@ -30,8 +37,8 @@ interface ColumnOptions {
 export function getTaskColumns({
   users,
   contactName,
-  companyName,
-  onToggle,
+  canEdit,
+  onSetStatus,
   onEdit,
   onDelete,
 }: ColumnOptions): ColumnDef<Task>[] {
@@ -43,15 +50,24 @@ export function getTaskColumns({
       meta: { className: 'w-10' },
       header: () => <span className="sr-only">Done</span>,
       cell: ({ row }) => {
-        const done = Boolean(row.original.completedAt);
+        const { status, title } = row.original;
+        const done = status === 'done';
+        if (status === 'cancelled')
+          return (
+            <span className="flex size-7 items-center justify-center text-muted-foreground">
+              <Ban aria-label="Cancelled" className="size-4" />
+            </span>
+          );
         return (
           <button
             type="button"
             aria-pressed={done}
-            aria-label={`Mark “${row.original.title}” as ${done ? 'not done' : 'done'}`}
-            className="flex size-7 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-success focus-visible:outline-2 focus-visible:outline-ring"
-            onClick={() => {
-              onToggle(row.original, !done);
+            aria-label={`Mark “${title}” as ${done ? 'not done' : 'done'}`}
+            disabled={!canEdit}
+            className="flex size-7 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-success focus-visible:outline-2 focus-visible:outline-ring disabled:pointer-events-none"
+            onClick={(event) => {
+              event.stopPropagation();
+              onSetStatus(row.original, done ? 'open' : 'done');
             }}
           >
             {done ? (
@@ -71,7 +87,7 @@ export function getTaskColumns({
       header: ({ column }) => <DataTableColumnHeader column={column} title="Task" />,
       cell: ({ row }) => {
         const type = taskTypeByValue(row.original.type);
-        const done = Boolean(row.original.completedAt);
+        const closed = row.original.status !== 'open';
         return (
           <div className="flex min-w-0 items-start gap-2.5">
             {type && (
@@ -81,13 +97,22 @@ export function getTaskColumns({
             )}
             <div className="min-w-0">
               <p
-                className={cn('truncate font-medium', done && 'text-muted-foreground line-through')}
+                className={cn(
+                  'truncate font-medium',
+                  closed && 'text-muted-foreground line-through',
+                )}
               >
                 {row.original.title}
               </p>
               <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 {type?.label}
-                {row.original.origin === 'automation' && <WorkflowBadge kind="ai" label="Auto" />}
+                {isAutomatedTask(row.original) && (
+                  <WorkflowBadge
+                    kind="ai"
+                    label="Auto"
+                    title={`Created by the workflow: ${TASK_ORIGIN_LABELS[row.original.origin]}`}
+                  />
+                )}
               </p>
             </div>
           </div>
@@ -103,22 +128,41 @@ export function getTaskColumns({
       cell: ({ row }) => taskTypeByValue(row.original.type)?.label,
     },
     {
+      id: 'priority',
+      accessorKey: 'priority',
+      meta: { label: 'Priority' },
+      filterFn: facetFilterFn,
+      sortingFn: (a, b) =>
+        (priorityRank.get(a.original.priority) ?? 0) - (priorityRank.get(b.original.priority) ?? 0),
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Priority" />,
+      cell: ({ row }) => <TaskPriorityBadge priority={row.original.priority} />,
+    },
+    {
+      id: 'status',
+      accessorFn: (task) => taskStatus(task),
+      meta: { label: 'Status' },
+      enableSorting: false,
+      header: 'Status',
+      cell: ({ row }) => <TaskStatusBadge status={taskStatus(row.original)} />,
+    },
+    {
       id: 'dueAt',
-      accessorKey: 'dueAt',
+      accessorFn: (task) => (task.dueAt ? new Date(task.dueAt) : undefined),
       meta: { label: 'Due', className: 'whitespace-nowrap' },
       sortingFn: 'datetime',
+      sortUndefined: 'last',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Due" />,
       cell: ({ row }) => {
+        const { dueAt } = row.original;
+        if (!dueAt) return dash;
         const status = taskStatus(row.original);
         return (
           <div>
             <p className={cn(status === 'overdue' && 'font-medium text-destructive')}>
-              {formatDateTime(row.original.dueAt)}
+              {formatDateTime(dueAt)}
             </p>
-            {status !== 'completed' && (
-              <p className="text-xs text-muted-foreground">
-                {formatRelativeTime(row.original.dueAt)}
-              </p>
+            {(status === 'overdue' || status === 'upcoming') && (
+              <p className="text-xs text-muted-foreground">{formatRelativeTime(dueAt)}</p>
             )}
           </div>
         );
@@ -132,21 +176,12 @@ export function getTaskColumns({
       cell: ({ getValue }) => getValue<string>() || dash,
     },
     {
-      id: 'company',
-      accessorFn: (task) => companyName(task.companyId) ?? '',
-      meta: { label: 'Company' },
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Company" />,
-      cell: ({ getValue }) => getValue<string>() || dash,
-    },
-    {
-      id: 'owner',
-      accessorFn: (task) => task.ownerId ?? '',
+      id: 'assignee',
+      accessorFn: (task) => task.assigneeId,
       meta: { label: 'Assigned to' },
       filterFn: facetFilterFn,
       header: ({ column }) => <DataTableColumnHeader column={column} title="Assigned to" />,
-      cell: ({ row }) => (
-        <UserChip name={row.original.ownerId ? users.get(row.original.ownerId)?.name : undefined} />
-      ),
+      cell: ({ row }) => <UserChip name={users.get(row.original.assigneeId)?.name} />,
     },
     {
       id: 'description',
@@ -164,29 +199,56 @@ export function getTaskColumns({
       enableSorting: false,
       meta: { className: 'w-12 text-right' },
       header: () => <span className="sr-only">Actions</span>,
-      cell: ({ row }) => (
-        <DataTableRowActions
-          label={`Actions for ${row.original.title}`}
-          actions={[
-            {
-              label: 'Edit',
-              icon: Pencil,
-              onSelect: () => {
-                onEdit(row.original);
-              },
+      cell: ({ row }) => {
+        const task = row.original;
+        const actions: RowAction[] = [
+          {
+            label: canEdit ? 'Edit' : 'View',
+            icon: canEdit ? Pencil : Eye,
+            onSelect: () => {
+              onEdit(task);
             },
-            {
-              label: 'Delete',
-              icon: Trash2,
-              destructive: true,
-              separatorBefore: true,
-              onSelect: () => {
-                onDelete(row.original);
+          },
+        ];
+        if (canEdit) {
+          if (task.status === 'open') {
+            actions.push(
+              {
+                label: 'Mark done',
+                icon: CircleCheck,
+                onSelect: () => {
+                  onSetStatus(task, 'done');
+                },
               },
+              {
+                label: 'Cancel task',
+                icon: Ban,
+                onSelect: () => {
+                  onSetStatus(task, 'cancelled');
+                },
+              },
+            );
+          } else {
+            actions.push({
+              label: 'Reopen',
+              icon: RotateCcw,
+              onSelect: () => {
+                onSetStatus(task, 'open');
+              },
+            });
+          }
+          actions.push({
+            label: 'Delete',
+            icon: Trash2,
+            destructive: true,
+            separatorBefore: true,
+            onSelect: () => {
+              onDelete(task);
             },
-          ]}
-        />
-      ),
+          });
+        }
+        return <DataTableRowActions label={`Actions for ${task.title}`} actions={actions} />;
+      },
     },
   ];
 }

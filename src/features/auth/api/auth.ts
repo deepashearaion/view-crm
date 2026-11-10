@@ -9,16 +9,20 @@ import type {
   SignInValues,
 } from '../types';
 
-import { saveSession } from './session';
+import { readTokenClaims, saveSession } from './session';
 
+/** POST /api/auth/login → token (+ refresh cookie). Role and org come from the JWT. */
 export async function signIn(values: SignInValues): Promise<SessionUser> {
   const parsed = loginResponseSchema.safeParse(await http.post<unknown>('/api/auth/login', values));
   if (!parsed.success) throw new Error('Unexpected response from the server. Please try again.');
   const response = parsed.data;
+  const claims = readTokenClaims(response.token);
   const user: SessionUser = {
-    id: response.user_id,
+    id: response.user_id ?? claims.user_id,
     email: values.email,
     name: response.name ?? values.email.split('@')[0],
+    role: claims.role,
+    orgId: claims.org_id,
   };
   saveSession(response.token, user);
   return user;

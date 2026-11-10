@@ -1,2 +1,2 @@
-export type { SalesDashboard, SalesDashboardDto } from './types';
+export { ChartCard } from './components/chart-card';
 export { dashboardRoutes } from './routes';

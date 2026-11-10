@@ -101,8 +101,38 @@ export const ARRANGEMENT_OPTIONS = ['Yes', 'No', 'In Progress', 'Pending', 'Conf
 export const QUOTE_SHARED_OPTIONS = ['Yes', 'No', 'Shared', 'Draft', 'Pending'] as const;
 export const YES_NO = ['Yes', 'No'] as const;
 
+/** Lifecycle stages from the v1 API, in funnel order. */
+export const LIFECYCLE_STAGES = [
+  { id: 'lead', label: 'Lead', variant: 'outline' },
+  { id: 'mql', label: 'MQL', variant: 'decision' },
+  { id: 'sql', label: 'SQL', variant: 'human' },
+  { id: 'opportunity', label: 'Opportunity', variant: 'ai' },
+  { id: 'customer', label: 'Customer', variant: 'secondary' },
+  { id: 'lost', label: 'Lost', variant: 'destructive' },
+] as const;
+
+export function lifecycleStageById(id: string | null | undefined) {
+  return LIFECYCLE_STAGES.find((stage) => stage.id === id);
+}
+
+export const TEMPERATURES = [
+  { id: 'hot', label: 'Hot' },
+  { id: 'warm', label: 'Warm' },
+  { id: 'cold', label: 'Cold' },
+] as const;
+
+export function temperatureLabel(temperature: string | null | undefined): string {
+  return TEMPERATURES.find((entry) => entry.id === temperature)?.label ?? 'Not scored';
+}
+
+/** Contacts list is a client-side table: page through the cursor API up to this many rows. */
+export const CONTACTS_PAGE_SIZE = 200;
+export const CONTACTS_MAX_ROWS = 5000;
+export const TIMELINE_PAGE_SIZE = 20;
+
 export const contactKeys = {
   all: ['contacts'] as const,
   list: () => [...contactKeys.all, 'list'] as const,
   detail: (id: string) => [...contactKeys.all, 'detail', id] as const,
+  timeline: (id: string) => [...contactKeys.all, 'timeline', id] as const,
 };

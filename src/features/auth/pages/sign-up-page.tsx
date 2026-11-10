@@ -22,12 +22,17 @@ export default function SignUpPage() {
   const signUp = useSignUp();
   const form = useForm<SignUpValues>({
     resolver: zodResolver(signUpSchema),
-    defaultValues: { name: '', email: '', password: '', confirmPassword: '' },
+    defaultValues: { name: '', organizationName: '', email: '', password: '', confirmPassword: '' },
   });
 
-  const onSubmit = form.handleSubmit(({ name, email, password }) => {
+  const onSubmit = form.handleSubmit(({ name, organizationName, email, password }) => {
     signUp.mutate(
-      { name, email, password },
+      {
+        name,
+        email,
+        password,
+        ...(organizationName ? { organization_name: organizationName } : {}),
+      },
       {
         onSuccess: () => {
           toast.success('Account created. Please sign in.');
@@ -40,7 +45,7 @@ export default function SignUpPage() {
   return (
     <AuthLayout
       title="Create your account"
-      description="Start converting more deals with DealConverter."
+      description="Start converting more deals with Climetavere."
       footer={
         <>
           Already have an account?{' '}
@@ -69,6 +74,15 @@ export default function SignUpPage() {
           />
           <FormInput
             control={form.control}
+            name="organizationName"
+            label="Organization name"
+            description="Optional. You become the owner of this new workspace."
+            autoComplete="organization"
+            placeholder="Your company"
+            className="h-10"
+          />
+          <FormInput
+            control={form.control}
             name="email"
             label="Email address"
             type="email"
@@ -80,7 +94,7 @@ export default function SignUpPage() {
             control={form.control}
             name="password"
             label="Password"
-            description="At least 6 characters."
+            description="8 to 72 characters."
             autoComplete="new-password"
             render={(field) => <PasswordInput {...field} />}
           />

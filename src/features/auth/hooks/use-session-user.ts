@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react';
 
-import { readSessionUser } from '../api/session';
-import type { SessionUser } from '../types';
+import { readSessionUser, readTokenClaims } from '../api/session';
+import type { SessionUser, UserRole } from '../types';
 
 function subscribe(onChange: () => void): () => void {
   window.addEventListener('storage', onChange);
@@ -25,4 +25,10 @@ function getSnapshot(): SessionUser | null {
 /** Signed-in user from localStorage, kept in sync across tabs. */
 export function useSessionUser(): SessionUser | null {
   return useSyncExternalStore(subscribe, getSnapshot);
+}
+
+/** Signed-in user's role: from the stored session, else from the JWT. */
+export function useSessionRole(): UserRole | undefined {
+  const user = useSessionUser();
+  return user?.role ?? readTokenClaims().role;
 }

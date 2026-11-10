@@ -41,7 +41,7 @@ export default function SignInPage() {
   return (
     <AuthLayout
       title="Welcome back"
-      description="Sign in to continue to DealConverter CRM."
+      description="Sign in to continue to Climetavere CRM."
       footer={
         <>
           Don’t have an account?{' '}
