@@ -18,6 +18,7 @@ const FEATURES = [
   'onboarding',
   'reports',
   'automation',
+  'settings',
   'import',
   'extras',
   'products',

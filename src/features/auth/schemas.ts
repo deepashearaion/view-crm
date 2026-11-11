@@ -1,14 +1,10 @@
 import { z } from 'zod';
 
-import { USER_ROLES } from './types';
-
 /** User persisted in localStorage under `currentUser` after sign-in. */
 export const sessionUserSchema = z.object({
   id: z.union([z.number(), z.string()]).optional(),
   email: z.string().optional(),
   name: z.string().optional(),
-  /** From the JWT; used only to hide controls (the server enforces every rule). */
-  role: z.enum(USER_ROLES).optional(),
   orgId: z.union([z.number(), z.string()]).optional(),
 });
 
@@ -68,6 +64,5 @@ export const loginResponseSchema = z.object({
 export const tokenClaimsSchema = z.object({
   user_id: z.union([z.number(), z.string()]).optional(),
   org_id: z.union([z.number(), z.string()]).optional(),
-  role: z.enum(USER_ROLES).optional(),
   exp: z.number().optional(),
 });

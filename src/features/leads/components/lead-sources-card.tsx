@@ -38,7 +38,7 @@ function ChannelList() {
   );
 }
 
-/** Sources and score thresholds; managers and above only (reps get 403 on these endpoints). */
+/** Sources and score thresholds; needs settings.view (these endpoints 403 otherwise). */
 function ManagedSources() {
   const sources = useLeadSources();
   const settings = useLeadSettings();
@@ -103,7 +103,7 @@ function ManagedSources() {
   );
 }
 
-export function LeadSourcesCard({ canManageSettings }: { canManageSettings: boolean }) {
+export function LeadSourcesCard({ canViewSettings }: { canViewSettings: boolean }) {
   return (
     <Card className="gap-4">
       <CardHeader>
@@ -112,7 +112,7 @@ export function LeadSourcesCard({ canManageSettings }: { canManageSettings: bool
           Every channel feeds this inbox. New leads are de-duplicated, scored and routed to an owner
           automatically.
         </CardDescription>
-        {canManageSettings && (
+        {canViewSettings && (
           <CardAction>
             <Button variant="outline" size="sm" asChild>
               <Link to={paths.automation}>
@@ -126,7 +126,7 @@ export function LeadSourcesCard({ canManageSettings }: { canManageSettings: bool
       </CardHeader>
       <CardContent className="space-y-4">
         <ChannelList />
-        {canManageSettings && <ManagedSources />}
+        {canViewSettings && <ManagedSources />}
       </CardContent>
     </Card>
   );

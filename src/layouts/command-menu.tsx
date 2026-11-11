@@ -13,8 +13,10 @@ import {
 } from '@/components/ui/command';
 import { useTheme } from '@/hooks/use-theme';
 import { useUiStore } from '@/lib/ui-store';
-import { navGroups, settingsNav } from '@/routes/nav';
+
 import { paths } from '@/routes/paths';
+
+import { useVisibleNav } from './use-visible-nav';
 
 const quickActions = [
   { label: 'New contact', to: paths.contactsNew, icon: UserPlus },
@@ -28,6 +30,7 @@ export function CommandMenu() {
   const setOpen = useUiStore((state) => state.setCommandOpen);
   const navigate = useNavigate();
   const { resolvedTheme, setTheme } = useTheme();
+  const { groups: navGroups, settings: settingsNav } = useVisibleNav();
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {

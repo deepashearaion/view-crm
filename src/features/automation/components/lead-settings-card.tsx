@@ -17,7 +17,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useUsers } from '@/features/auth';
+import { useAccess, useUsers } from '@/features/auth';
 import { formatRelativeTime } from '@/lib/format';
 import { applyProblem, errorMessage } from '@/services';
 
@@ -63,6 +63,7 @@ const FIELD_MAP = {
 /** Hot/warm thresholds, hot-lead follow-up time and the fallback owner. */
 export function LeadSettingsCard() {
   const { data: settings, isPending, error, refetch } = useLeadSettings();
+  const canEdit = useAccess().can('settings', 'edit');
   const { data: users = [] } = useUsers();
   const update = useUpdateLeadSettings();
 
@@ -147,7 +148,10 @@ export function LeadSettingsCard() {
                 {errorMessage(update.error, 'Couldn’t save lead settings.')}
               </InlineAlert>
             )}
-            <div className="grid items-start gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <fieldset
+              disabled={!canEdit}
+              className="grid items-start gap-4 sm:grid-cols-2 xl:grid-cols-4"
+            >
               <FormInput
                 control={form.control}
                 name="hotThreshold"
@@ -183,7 +187,7 @@ export function LeadSettingsCard() {
                 placeholder="None"
                 description="Gets leads that no routing rule matches."
               />
-            </div>
+            </fieldset>
           </form>
         )}
       </CardContent>
@@ -192,22 +196,24 @@ export function LeadSettingsCard() {
           <span className="text-xs text-muted-foreground">
             Updated {formatRelativeTime(settings.updatedAt)}
           </span>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="ghost"
-              disabled={!form.formState.isDirty || update.isPending}
-              onClick={() => {
-                form.reset(toFormValues(settings));
-                update.reset();
-              }}
-            >
-              Reset
-            </Button>
-            <Button type="submit" form={FORM_ID} disabled={update.isPending}>
-              {update.isPending ? 'Saving…' : 'Save settings'}
-            </Button>
-          </div>
+          {canEdit && (
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={!form.formState.isDirty || update.isPending}
+                onClick={() => {
+                  form.reset(toFormValues(settings));
+                  update.reset();
+                }}
+              >
+                Reset
+              </Button>
+              <Button type="submit" form={FORM_ID} disabled={update.isPending}>
+                {update.isPending ? 'Saving…' : 'Save settings'}
+              </Button>
+            </div>
+          )}
         </CardFooter>
       )}
     </Card>

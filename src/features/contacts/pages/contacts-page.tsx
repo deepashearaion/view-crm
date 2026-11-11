@@ -17,13 +17,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  permissions,
-  useSessionRole,
-  useSessionUser,
-  useUserLookup,
-  useUsers,
-} from '@/features/auth';
+import { useAccess, useSessionUser, useUserLookup, useUsers } from '@/features/auth';
 import { useCompanyLookup } from '@/features/companies';
 import { useRecordSheetState } from '@/hooks/use-record-sheet-state';
 import { downloadCsv, toCsv, type CsvColumn } from '@/lib/csv';
@@ -66,9 +60,11 @@ type Scope = 'all' | 'mine';
 export default function ContactsPage({ createOnMount = false }: { createOnMount?: boolean }) {
   const navigate = useNavigate();
   const sessionUser = useSessionUser();
-  const role = useSessionRole();
-  const canEdit = permissions.canEdit(role);
-  const canReassign = permissions.canReassign(role);
+  const access = useAccess();
+  const canCreate = access.can('contacts', 'create');
+  const canEdit = access.can('contacts', 'edit');
+  const canDelete = access.can('contacts', 'delete');
+  const canReassign = access.canAll('contacts', 'edit');
   const { data: contacts = [], isPending, error, refetch } = useContacts();
   const { data: userList = [] } = useUsers();
   const users = useUserLookup();
@@ -83,8 +79,8 @@ export default function ContactsPage({ createOnMount = false }: { createOnMount?
 
   const [sheetState, setSheetState] = useRecordSheetState({
     param: 'contact',
-    // Viewers can't create: /contacts/new just shows the list.
-    createOnMount: createOnMount && canEdit,
+    // Without contacts.create, /contacts/new just shows the list.
+    createOnMount: createOnMount && canCreate,
     listPath: paths.contacts,
   });
 
@@ -114,8 +110,9 @@ export default function ContactsPage({ createOnMount = false }: { createOnMount?
           setPendingDelete([contact]);
         },
         canEdit,
+        canDelete,
       }),
-    [users, companies, setSheetState, canEdit],
+    [users, companies, setSheetState, canEdit, canDelete],
   );
 
   const ownerFacets: FacetOption[] = userList.map((user) => ({ value: user.id, label: user.name }));
@@ -181,7 +178,7 @@ export default function ContactsPage({ createOnMount = false }: { createOnMount?
         description="Everyone you’re talking to: leads, customers and partners."
         actions={
           <>
-            {canEdit && (
+            {canCreate && (
               <Button variant="outline" asChild>
                 <Link to={`${paths.import}?target=contacts`}>
                   <Upload aria-hidden />
@@ -199,7 +196,7 @@ export default function ContactsPage({ createOnMount = false }: { createOnMount?
               <Download aria-hidden />
               Export
             </Button>
-            {canEdit && (
+            {canCreate && (
               <Button
                 onClick={() => {
                   void navigate(paths.contactsNew);
@@ -337,7 +334,7 @@ export default function ContactsPage({ createOnMount = false }: { createOnMount?
               <Download aria-hidden />
               Export
             </Button>
-            {canEdit && (
+            {canDelete && (
               <Button
                 variant="outline"
                 size="sm"
@@ -357,13 +354,13 @@ export default function ContactsPage({ createOnMount = false }: { createOnMount?
             icon={Users}
             title="No contacts yet"
             description={
-              canEdit
+              canCreate
                 ? 'Add your first contact or import a spreadsheet to get started.'
                 : 'Contacts your team adds will show up here.'
             }
             className="border-none"
             actions={
-              canEdit && (
+              canCreate && (
                 <>
                   <Button variant="outline" asChild>
                     <Link to={`${paths.import}?target=contacts`}>

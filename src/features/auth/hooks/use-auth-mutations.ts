@@ -1,9 +1,16 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { requestPasswordReset, resetPassword, signIn, signUp } from '../api/auth';
 
 export function useSignIn() {
-  return useMutation({ mutationFn: signIn });
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: signIn,
+    // Drop anything cached for a previous user (permissions, records).
+    onSuccess: () => {
+      queryClient.clear();
+    },
+  });
 }
 
 export function useSignUp() {

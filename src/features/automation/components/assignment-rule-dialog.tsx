@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/dialog';
 import { FieldError, FieldLegend, FieldSet } from '@/components/ui/field';
 import { Skeleton } from '@/components/ui/skeleton';
-import { USER_ROLE_LABELS, useUsers } from '@/features/auth';
+import { useUsers } from '@/features/auth';
 import { cn } from '@/lib/utils';
 import { applyProblem, errorMessage } from '@/services';
 
@@ -193,9 +193,7 @@ export function AssignmentRuleDialog({
                                 }}
                               />
                               <span className="min-w-0 flex-1 truncate">{user.name}</span>
-                              <span className="text-xs text-muted-foreground">
-                                {USER_ROLE_LABELS[user.role]}
-                              </span>
+                              <span className="text-xs text-muted-foreground">{user.roleName}</span>
                             </label>
                           </li>
                         );

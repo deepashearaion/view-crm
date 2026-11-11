@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { permissions, useSessionRole, useUserLookup, useUsers } from '@/features/auth';
+import { useAccess, useUserLookup, useUsers } from '@/features/auth';
 import { useContacts } from '@/features/contacts';
 import { formatPaise, plural, toIstDate, toIstMonth } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -60,10 +60,11 @@ function announceMove(deal: Deal, stage: DealStage) {
 }
 
 export default function PipelinePage() {
-  const role = useSessionRole();
-  const canEdit = permissions.canEdit(role);
-  const canReassign = permissions.canReassign(role);
-  const canManageStages = permissions.canManageSettings(role);
+  const access = useAccess();
+  const canCreate = access.can('deals', 'create');
+  const canEdit = access.can('deals', 'edit');
+  const canDelete = access.can('deals', 'delete');
+  const canManageStages = access.can('settings', 'edit');
 
   const { data: deals = [], isPending: dealsPending, error } = useDeals();
   const { data: stages = [], isPending: stagesPending } = useDealStages();
@@ -217,7 +218,7 @@ export default function PipelinePage() {
                 Stages
               </Button>
             )}
-            {canEdit && (
+            {canCreate && (
               <Button
                 disabled={!stages.some((stage) => stage.kind === 'open')}
                 onClick={() => {
@@ -369,6 +370,7 @@ export default function PipelinePage() {
                         stages={stages}
                         today={today}
                         canEdit={canEdit}
+                        canDelete={canDelete}
                         dragging={dragging?.id === deal.id}
                         ownerName={deal.ownerId ? users.get(deal.ownerId)?.name : undefined}
                         contactName={deal.contactId ? contactNames.get(deal.contactId) : undefined}
@@ -388,7 +390,7 @@ export default function PipelinePage() {
                         No deals in this stage
                       </p>
                     )}
-                    {canEdit && stage.kind === 'open' && (
+                    {canCreate && stage.kind === 'open' && (
                       <Button
                         variant="ghost"
                         size="sm"
@@ -413,8 +415,13 @@ export default function PipelinePage() {
       <DealSheet
         state={sheetState}
         stages={stages}
-        canEdit={canEdit}
-        canReassign={canReassign}
+        canEdit={sheetState.mode === 'create' ? canCreate : canEdit}
+        canDelete={canDelete}
+        canReassign={
+          sheetState.mode === 'create'
+            ? access.canAll('deals', 'create')
+            : access.canAll('deals', 'edit')
+        }
         onClose={() => {
           setSheet({ mode: 'closed' });
         }}

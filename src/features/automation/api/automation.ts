@@ -98,7 +98,7 @@ export function toAssignmentRule(dto: AssignmentRuleDto): AssignmentRule {
   };
 }
 
-// Lead settings (owner, admin, manager)
+// Lead settings (settings.view to read, settings.edit to change)
 
 export async function fetchLeadSettings(signal?: AbortSignal): Promise<LeadSettings> {
   const response = await http.get<{ settings: LeadSettingsDto }>(LEAD_SETTINGS, { signal });

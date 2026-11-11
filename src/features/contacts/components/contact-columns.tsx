@@ -26,8 +26,10 @@ interface ColumnOptions {
   onView: (contact: Contact) => void;
   onEdit: (contact: Contact) => void;
   onDelete: (contact: Contact) => void;
-  /** False for viewers: hides Edit and Delete. */
+  /** contacts.edit: shows Edit. */
   canEdit: boolean;
+  /** contacts.delete: shows Delete. */
+  canDelete: boolean;
 }
 
 export function getContactColumns({
@@ -37,6 +39,7 @@ export function getContactColumns({
   onEdit,
   onDelete,
   canEdit,
+  canDelete,
 }: ColumnOptions): ColumnDef<Contact>[] {
   return [
     {
@@ -207,6 +210,10 @@ export function getContactColumns({
                       onEdit(row.original);
                     },
                   },
+                ]
+              : []),
+            ...(canDelete
+              ? [
                   {
                     label: 'Delete',
                     icon: Trash2,

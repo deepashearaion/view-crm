@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { permissions, useSessionRole, useUserLookup, useUsers } from '@/features/auth';
+import { useAccess, useUserLookup, useUsers } from '@/features/auth';
 import {
   LIFECYCLE_STAGES,
   TEMPERATURES,
@@ -66,9 +66,11 @@ const temperatureLabel = (temperature: string) =>
 
 export default function LeadsPage() {
   const navigate = useNavigate();
-  const role = useSessionRole();
-  const canEdit = permissions.canEdit(role);
-  const canManageSettings = permissions.canManageSettings(role);
+  const access = useAccess();
+  // Leads are contacts: capturing one needs contacts.create, re-scoring/stage moves contacts.edit.
+  const canCreate = access.can('contacts', 'create');
+  const canEdit = access.can('contacts', 'edit');
+  const canViewSettings = access.can('settings', 'view');
   const { data: contacts = [], isPending, error, refetch } = useContacts();
   const { data: userList = [] } = useUsers();
   const users = useUserLookup();
@@ -173,7 +175,7 @@ export default function LeadsPage() {
         badges={<WorkflowBadge kind="ai" />}
         description="Captured from WhatsApp, web forms and email, then scored and routed by AI."
         actions={
-          canEdit && (
+          canCreate && (
             <Button
               onClick={() => {
                 setCaptureOpen(true);
@@ -277,7 +279,7 @@ export default function LeadsPage() {
             title={EMPTY_TITLES[tab]}
             description={
               tab === 'all'
-                ? canEdit
+                ? canCreate
                   ? 'Leads from WhatsApp, web forms and email land here. You can also capture one by hand.'
                   : 'Leads from WhatsApp, web forms and email will show up here.'
                 : 'Try another temperature, or switch on “All stages”.'
@@ -285,7 +287,7 @@ export default function LeadsPage() {
             className="border-none"
             actions={
               tab === 'all' &&
-              canEdit && (
+              canCreate && (
                 <Button
                   onClick={() => {
                     setCaptureOpen(true);
@@ -300,9 +302,9 @@ export default function LeadsPage() {
         }
       />
 
-      <LeadSourcesCard canManageSettings={canManageSettings} />
+      <LeadSourcesCard canViewSettings={canViewSettings} />
 
-      {canEdit && <CaptureLeadDialog open={captureOpen} onOpenChange={setCaptureOpen} />}
+      {canCreate && <CaptureLeadDialog open={captureOpen} onOpenChange={setCaptureOpen} />}
     </div>
   );
 }

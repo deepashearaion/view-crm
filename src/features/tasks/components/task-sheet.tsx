@@ -21,7 +21,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { permissions, useSessionRole, useSessionUser, useUsers } from '@/features/auth';
+import { useAccess, useSessionUser, useUsers } from '@/features/auth';
 import { useContacts } from '@/features/contacts';
 import type { RecordSheetState } from '@/hooks/use-record-sheet-state';
 import { applyProblem, errorMessage, isHttpError } from '@/services';
@@ -77,9 +77,12 @@ interface TaskSheetProps {
 /** Create / edit a task. Tasks are simple enough that "view" opens the editor directly. */
 export function TaskSheet({ state, onStateChange }: TaskSheetProps) {
   const sessionUser = useSessionUser();
-  const role = useSessionRole();
-  const canEdit = permissions.canEdit(role);
-  const canReassign = permissions.canReassign(role);
+  const access = useAccess();
+  const isCreate = state.mode === 'create';
+  // Creating needs tasks.create; changing an existing task (incl. completing it) tasks.edit.
+  const canEdit = isCreate ? access.can('tasks', 'create') : access.can('tasks', 'edit');
+  // Assigning to someone else needs org-wide create (new) or edit (existing) access.
+  const canReassign = isCreate ? access.canAll('tasks', 'create') : access.canAll('tasks', 'edit');
   const tasksQuery = useTasks();
   const { data: users = [] } = useUsers();
   const { data: contacts = [] } = useContacts();
@@ -87,7 +90,6 @@ export function TaskSheet({ state, onStateChange }: TaskSheetProps) {
   const updateTask = useUpdateTask();
   const setStatus = useSetTaskStatus();
 
-  const isCreate = state.mode === 'create';
   const taskId = state.mode === 'view' || state.mode === 'edit' ? state.id : null;
   const listTask = tasksQuery.data?.find((item) => item.id === taskId);
   // Deep links may point at a task outside the loaded list: fetch it on its own.
@@ -309,7 +311,9 @@ export function TaskSheet({ state, onStateChange }: TaskSheetProps) {
                     options={userOptions}
                     disabled={!canReassign}
                     placeholder="Me"
-                    description={canReassign ? undefined : 'Tasks you create are assigned to you.'}
+                    description={
+                      canReassign || !isCreate ? undefined : 'Tasks you create are assigned to you.'
+                    }
                   />
                   <FormSelect
                     control={form.control}

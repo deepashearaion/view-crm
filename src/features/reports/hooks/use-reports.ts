@@ -1,6 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { permissions, useSessionRole } from '@/features/auth';
+import { useAccess } from '@/features/auth';
 import { isHttpError } from '@/services';
 
 import {
@@ -16,7 +16,7 @@ import {
 import { reportKeys } from '../constants';
 import type { ReportRange, ReportSettings } from '../types';
 
-/** KPI totals for the period (owner/admin/manager/viewer: everyone; reps: their own). */
+/** KPI totals for the period (reports.view `all`: everyone; `own`: the user's own figures). */
 export function useDashboardReport(range: ReportRange) {
   return useQuery({
     queryKey: reportKeys.dashboard(range),
@@ -49,10 +49,10 @@ export function useSourcesReport(range: ReportRange) {
   });
 }
 
-/** Per-rep figures. Not fetched for reps (the API answers 403). */
+/** Per-rep figures. Needs org-wide reports.view; not fetched otherwise (the API answers 403). */
 export function useRepsReport(range: ReportRange) {
-  const role = useSessionRole();
-  const available = permissions.canSeeRepReport(role);
+  const access = useAccess();
+  const available = access.ready && access.canAll('reports', 'view');
   const query = useQuery({
     queryKey: reportKeys.reps(range),
     queryFn: ({ signal }) => fetchRepsReport(range, signal),
@@ -78,7 +78,7 @@ export function useReportSettings() {
   });
 }
 
-/** PUT /reports/settings (owner, admin, manager). Optimistic, rolled back on error. */
+/** PUT /reports/settings (settings.edit). Optimistic, rolled back on error. */
 export function useUpdateReportSettings() {
   const queryClient = useQueryClient();
   return useMutation({

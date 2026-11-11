@@ -15,7 +15,7 @@ const dash = <span className="text-muted-foreground">—</span>;
 
 interface ColumnOptions {
   contactName: (id: string) => string | undefined;
-  /** Number of steps in a sequence, when known (managers only). */
+  /** Number of steps in a sequence, when known (from the sequence list). */
   stepCount: (sequenceId: string) => number | undefined;
   users: Map<string, User>;
   canEdit: boolean;

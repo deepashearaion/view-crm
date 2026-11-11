@@ -71,7 +71,7 @@ export function taskToFormValues(task?: Task, defaultAssigneeId = ''): TaskFormV
 }
 
 interface DtoOptions {
-  /** Only managers and above may set the assignee; otherwise the API defaults it to the caller. */
+  /** Only org-wide tasks.create/edit may set the assignee; otherwise the API defaults it to the caller. */
   canReassign: boolean;
 }
 

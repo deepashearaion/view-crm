@@ -27,7 +27,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { permissions, useSessionRole } from '@/features/auth';
+import { useAccess } from '@/features/auth';
 import { useContacts } from '@/features/contacts';
 import { useDeals, type Deal } from '@/features/deals';
 import { useNurtureEnrollments, useNurtureSequences } from '@/features/nurture';
@@ -96,13 +96,17 @@ function SectionError({ error, onRetry }: { error: unknown; onRetry: () => void 
 }
 
 export default function OnboardingPage() {
-  const role = useSessionRole();
-  const canEdit = permissions.canEdit(role);
-  const canManage = permissions.canManageSettings(role);
+  const access = useAccess();
+  const canCreateInvoice = access.can('invoices', 'create');
+  const canEditInvoice = access.can('invoices', 'edit');
+  const canViewNurture = access.can('nurture', 'view');
+  // Listing a sequence's enrollments without a contact needs org-wide nurture.view.
+  const canListEnrollments = access.canAll('nurture', 'view');
+  const canCreateSequence = access.canAll('nurture', 'create');
   const dealsQuery = useDeals();
   const invoicesQuery = useAllInvoices();
   const { data: contacts = [] } = useContacts();
-  const sequencesQuery = useNurtureSequences({ enabled: canManage });
+  const sequencesQuery = useNurtureSequences({ enabled: access.ready && canViewNurture });
   const [now] = useState(() => Date.now());
 
   const welcomeSequence = useMemo(() => {
@@ -111,7 +115,7 @@ export default function OnboardingPage() {
   }, [sequencesQuery.data]);
   const enrollmentsQuery = useNurtureEnrollments(
     { sequenceId: welcomeSequence?.id, status: 'active', limit: 200 },
-    { enabled: canManage && Boolean(welcomeSequence) },
+    { enabled: canListEnrollments && Boolean(welcomeSequence) },
   );
 
   const contactNames = useMemo(
@@ -251,7 +255,8 @@ export default function OnboardingPage() {
                   deal={deal}
                   contactName={deal.contactId ? contactNames.get(deal.contactId) : undefined}
                   invoice={invoiceByDeal.get(deal.id)}
-                  canEdit={canEdit}
+                  canCreateInvoice={canCreateInvoice}
+                  canEditInvoice={canEditInvoice}
                 />
               ))}
             </ul>
@@ -312,7 +317,7 @@ export default function OnboardingPage() {
                     </span>
                     <Button variant="outline" size="sm" asChild>
                       <Link to={invoicePaths.detail(invoice.id)}>
-                        {canEdit ? 'Review' : 'View'}
+                        {canEditInvoice ? 'Review' : 'View'}
                       </Link>
                     </Button>
                   </li>
@@ -322,7 +327,7 @@ export default function OnboardingPage() {
           </CardContent>
         </Card>
 
-        {canManage && (
+        {canViewNurture && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -345,7 +350,9 @@ export default function OnboardingPage() {
             </CardHeader>
             <CardContent>
               {sequencesQuery.isPending ||
-              (welcomeSequence !== undefined && enrollmentsQuery.isPending) ? (
+              (welcomeSequence !== undefined &&
+                canListEnrollments &&
+                enrollmentsQuery.isPending) ? (
                 <ListSkeleton />
               ) : sequencesQuery.isError || enrollmentsQuery.isError ? (
                 <SectionError
@@ -362,12 +369,14 @@ export default function OnboardingPage() {
                   description="Create a nurture sequence with the “Deal won” trigger to greet new customers automatically."
                   className="border-none py-8"
                   actions={
-                    <Button variant="outline" size="sm" asChild>
-                      <Link to={paths.nurture}>
-                        <Plus aria-hidden />
-                        Set one up
-                      </Link>
-                    </Button>
+                    canCreateSequence && (
+                      <Button variant="outline" size="sm" asChild>
+                        <Link to={paths.nurture}>
+                          <Plus aria-hidden />
+                          Set one up
+                        </Link>
+                      </Button>
+                    )
                   }
                 />
               ) : (
@@ -377,7 +386,11 @@ export default function OnboardingPage() {
                       This sequence is paused, so newly won customers aren’t enrolled.
                     </p>
                   )}
-                  {(enrollmentsQuery.data ?? []).length === 0 ? (
+                  {!canListEnrollments ? (
+                    <p className="text-sm text-muted-foreground">
+                      Check which of your contacts are in it on the Enrollments tab of Nurture.
+                    </p>
+                  ) : (enrollmentsQuery.data ?? []).length === 0 ? (
                     <EmptyState
                       icon={Workflow}
                       title="No one in onboarding right now"
@@ -426,10 +439,17 @@ interface WonDealRowProps {
   deal: Deal;
   contactName?: string;
   invoice?: Invoice;
-  canEdit: boolean;
+  canCreateInvoice: boolean;
+  canEditInvoice: boolean;
 }
 
-function WonDealRow({ deal, contactName, invoice, canEdit }: WonDealRowProps) {
+function WonDealRow({
+  deal,
+  contactName,
+  invoice,
+  canCreateInvoice,
+  canEditInvoice,
+}: WonDealRowProps) {
   const state = invoiceState(invoice);
   const wonAt = deal.closedAt ?? deal.updatedAt;
   return (
@@ -448,10 +468,10 @@ function WonDealRow({ deal, contactName, invoice, canEdit }: WonDealRowProps) {
         {invoice ? (
           <Button variant={state === 'draft' ? 'default' : 'outline'} size="sm" asChild>
             <Link to={invoicePaths.detail(invoice.id)}>
-              {state === 'draft' && canEdit ? 'Review draft' : 'Open invoice'}
+              {state === 'draft' && canEditInvoice ? 'Review draft' : 'Open invoice'}
             </Link>
           </Button>
-        ) : canEdit ? (
+        ) : canCreateInvoice ? (
           <Button variant="outline" size="sm" asChild>
             <Link to={invoicePaths.createForDeal(deal.id)}>
               <Plus aria-hidden />

@@ -18,8 +18,12 @@ const dash = <span className="text-muted-foreground">—</span>;
 interface ColumnOptions {
   contactName: (id: string | null) => string | undefined;
   dealTitle: (id: string | null) => string | undefined;
-  /** False for viewers: hides every action that changes an invoice. */
+  /** invoices.edit: edit / issue drafts, send issued invoices. */
   canEdit: boolean;
+  /** invoices.delete: delete drafts. */
+  canDelete: boolean;
+  /** Org-wide invoices.delete: cancel issued invoices. */
+  canCancel: boolean;
   /** Today as YYYY-MM-DD (IST), for overdue highlighting. */
   today: string;
   onOpen: (invoice: Invoice) => void;
@@ -30,6 +34,8 @@ export function getInvoiceColumns({
   contactName,
   dealTitle,
   canEdit,
+  canDelete,
+  canCancel,
   today,
   onOpen,
   actions,
@@ -158,24 +164,23 @@ export function getInvoiceColumns({
             },
           });
           if (canEdit)
-            list.push(
-              {
-                label: 'Issue',
-                icon: FileCheck2,
-                onSelect: () => {
-                  actions.issue(invoice);
-                },
+            list.push({
+              label: 'Issue',
+              icon: FileCheck2,
+              onSelect: () => {
+                actions.issue(invoice);
               },
-              {
-                label: 'Delete',
-                icon: Trash2,
-                destructive: true,
-                separatorBefore: true,
-                onSelect: () => {
-                  actions.remove(invoice);
-                },
+            });
+          if (canDelete)
+            list.push({
+              label: 'Delete',
+              icon: Trash2,
+              destructive: true,
+              separatorBefore: true,
+              onSelect: () => {
+                actions.remove(invoice);
               },
-            );
+            });
         } else {
           list.push(
             {
@@ -194,29 +199,28 @@ export function getInvoiceColumns({
             },
           );
           if (invoice.status === 'issued' && canEdit)
-            list.push(
-              {
-                label: invoice.billToEmail
-                  ? invoice.sentAt
-                    ? 'Send again'
-                    : 'Send to customer'
-                  : 'Send (no email)',
-                icon: Send,
-                disabled: !invoice.billToEmail,
-                onSelect: () => {
-                  actions.send(invoice);
-                },
+            list.push({
+              label: invoice.billToEmail
+                ? invoice.sentAt
+                  ? 'Send again'
+                  : 'Send to customer'
+                : 'Send (no email)',
+              icon: Send,
+              disabled: !invoice.billToEmail,
+              onSelect: () => {
+                actions.send(invoice);
               },
-              {
-                label: 'Cancel invoice',
-                icon: Ban,
-                destructive: true,
-                separatorBefore: true,
-                onSelect: () => {
-                  actions.cancel(invoice);
-                },
+            });
+          if (invoice.status === 'issued' && canCancel)
+            list.push({
+              label: 'Cancel invoice',
+              icon: Ban,
+              destructive: true,
+              separatorBefore: true,
+              onSelect: () => {
+                actions.cancel(invoice);
               },
-            );
+            });
         }
         return <DataTableRowActions label={`Actions for ${name}`} actions={list} />;
       },

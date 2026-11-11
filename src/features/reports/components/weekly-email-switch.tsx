@@ -3,15 +3,14 @@ import { toast } from 'sonner';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
-import { permissions, useSessionRole } from '@/features/auth';
+import { useAccess } from '@/features/auth';
 import { errorMessage, isHttpError } from '@/services';
 
 import { useReportSettings, useUpdateReportSettings } from '../hooks/use-reports';
 
-/** "Weekly email report" toggle. Editable by owners, admins and managers; read-only otherwise. */
+/** "Weekly email report" toggle. Editable with settings.edit; read-only otherwise. */
 export function WeeklyEmailSwitch() {
-  const role = useSessionRole();
-  const canManage = permissions.canManageSettings(role);
+  const canManage = useAccess().can('settings', 'edit');
   const settings = useReportSettings();
   const update = useUpdateReportSettings();
 
@@ -39,7 +38,7 @@ export function WeeklyEmailSwitch() {
           id={id}
           checked={settings.data.weeklyEmail}
           disabled={!canManage || update.isPending}
-          title={canManage ? undefined : 'Only owners, admins and managers can change this.'}
+          title={canManage ? undefined : 'You don’t have permission to change this.'}
           onCheckedChange={(checked) => {
             update.mutate(checked, {
               onSuccess: (next) => {

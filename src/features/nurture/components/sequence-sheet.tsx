@@ -52,7 +52,7 @@ interface SequenceSheetProps {
   onStateChange: (state: RecordSheetState) => void;
 }
 
-/** Create / edit a nurture sequence and its ordered steps (owner, admin, manager). */
+/** Create / edit a nurture sequence and its ordered steps (org-wide nurture.create / nurture.edit). */
 export function SequenceSheet({ state, onStateChange }: SequenceSheetProps) {
   const isCreate = state.mode === 'create';
   const sequenceId = state.mode === 'view' || state.mode === 'edit' ? state.id : undefined;

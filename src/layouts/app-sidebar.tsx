@@ -16,10 +16,11 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
-import { isItemActive, navGroups, settingsNav, type NavItem } from '@/routes/nav';
+import { isItemActive, type NavItem } from '@/routes/nav';
 import { paths } from '@/routes/paths';
 
 import { RailItems, RailNav } from './sidebar-rail-nav';
+import { useVisibleNav } from './use-visible-nav';
 
 const legend = [
   { label: 'Automatic (AI)', className: 'bg-ai-muted border-ai/40' },
@@ -63,6 +64,7 @@ export function AppSidebar() {
   const { pathname } = useLocation();
   const { state, isMobile } = useSidebar();
   const rail = state === 'collapsed' && !isMobile;
+  const { groups: navGroups, settings: settingsNav } = useVisibleNav();
 
   return (
     <Sidebar collapsible="icon">

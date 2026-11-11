@@ -1,12 +1,22 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { meKeys } from '@/features/auth';
 import { useApplyTheme } from '@/hooks/use-theme';
 import { isHttpError } from '@/services';
 
-const queryClient = new QueryClient({
+/** A 403 may mean the user's role just changed: reload their permissions from /api/v1/me. */
+function refreshPermissionsOnForbidden(error: unknown) {
+  if (isHttpError(error) && error.status === 403) {
+    void queryClient.invalidateQueries({ queryKey: meKeys.all });
+  }
+}
+
+const queryClient: QueryClient = new QueryClient({
+  queryCache: new QueryCache({ onError: refreshPermissionsOnForbidden }),
+  mutationCache: new MutationCache({ onError: refreshPermissionsOnForbidden }),
   defaultOptions: {
     queries: {
       staleTime: 30_000,

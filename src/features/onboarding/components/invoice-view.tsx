@@ -25,8 +25,10 @@ interface InvoiceViewProps {
   invoice: Invoice;
   contactName?: string;
   dealTitle?: string;
-  /** False for viewers: hides send / cancel. */
-  canEdit: boolean;
+  /** invoices.edit: send issued invoices. */
+  canSend: boolean;
+  /** Org-wide invoices.delete: cancel issued invoices. */
+  canCancel: boolean;
   actions: InvoiceActions;
 }
 
@@ -44,7 +46,8 @@ export function InvoiceView({
   invoice,
   contactName,
   dealTitle,
-  canEdit,
+  canSend,
+  canCancel,
   actions,
 }: InvoiceViewProps) {
   const { interState } = invoice;
@@ -86,29 +89,29 @@ export function InvoiceView({
                 <Download aria-hidden />
                 Download
               </Button>
-              {canEdit && invoice.status === 'issued' && (
-                <>
-                  <Button
-                    variant="ghost"
-                    className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                    onClick={() => {
-                      actions.cancel(invoice);
-                    }}
-                  >
-                    <Ban aria-hidden />
-                    Cancel invoice
-                  </Button>
-                  <Button
-                    disabled={!invoice.billToEmail}
-                    title={invoice.billToEmail ? undefined : 'This invoice has no bill-to email.'}
-                    onClick={() => {
-                      actions.send(invoice);
-                    }}
-                  >
-                    <Send aria-hidden />
-                    {invoice.sentAt ? 'Send again' : 'Send to customer'}
-                  </Button>
-                </>
+              {canCancel && invoice.status === 'issued' && (
+                <Button
+                  variant="ghost"
+                  className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  onClick={() => {
+                    actions.cancel(invoice);
+                  }}
+                >
+                  <Ban aria-hidden />
+                  Cancel invoice
+                </Button>
+              )}
+              {canSend && invoice.status === 'issued' && (
+                <Button
+                  disabled={!invoice.billToEmail}
+                  title={invoice.billToEmail ? undefined : 'This invoice has no bill-to email.'}
+                  onClick={() => {
+                    actions.send(invoice);
+                  }}
+                >
+                  <Send aria-hidden />
+                  {invoice.sentAt ? 'Send again' : 'Send to customer'}
+                </Button>
               )}
             </>
           )
@@ -121,7 +124,7 @@ export function InvoiceView({
           {invoice.cancelReason && `: ${invoice.cancelReason}`}
         </InlineAlert>
       )}
-      {invoice.status === 'issued' && !invoice.billToEmail && canEdit && (
+      {invoice.status === 'issued' && !invoice.billToEmail && canSend && (
         <InlineAlert tone="info">
           This invoice has no bill-to email, so it can’t be emailed from here. Download the PDF and
           send it yourself.

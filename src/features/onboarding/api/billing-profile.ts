@@ -30,7 +30,7 @@ export async function fetchBillingProfile(signal?: AbortSignal): Promise<Billing
   return toBillingProfile(response.billing_profile);
 }
 
-/** PUT /api/v1/billing-profile (owner, admin, manager). Sends only the given keys. */
+/** PUT /api/v1/billing-profile (settings.edit). Sends only the given keys. */
 export async function updateBillingProfile(body: BillingProfileWriteDto): Promise<BillingProfile> {
   const response = await http.put<{ billing_profile: BillingProfileDto }>(PATH, compact(body));
   return toBillingProfile(response.billing_profile);

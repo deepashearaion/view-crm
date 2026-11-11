@@ -33,6 +33,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useAccess } from '@/features/auth';
 import { formatDate } from '@/lib/format';
 import { applyProblem, errorMessage } from '@/services';
 
@@ -174,12 +175,13 @@ function AddWhatsAppAccountDialog({
 }
 
 export function WhatsAppTab() {
+  const canEdit = useAccess().can('settings', 'edit');
   const { data: accounts = [], isPending, error, refetch } = useWhatsAppAccounts();
   const remove = useDeleteWhatsAppAccount();
   const [adding, setAdding] = useState(false);
   const [pendingRemove, setPendingRemove] = useState<WhatsAppAccount | null>(null);
 
-  const addButton = (
+  const addButton = canEdit && (
     <Button
       size="sm"
       onClick={() => {
@@ -198,7 +200,7 @@ export function WhatsAppTab() {
         <CardDescription>
           Business numbers whose incoming messages become leads and conversation history.
         </CardDescription>
-        {accounts.length > 0 && <CardAction>{addButton}</CardAction>}
+        {accounts.length > 0 && addButton && <CardAction>{addButton}</CardAction>}
       </CardHeader>
       <CardContent className="px-0">
         {isPending ? (
@@ -215,7 +217,7 @@ export function WhatsAppTab() {
             title="No WhatsApp numbers connected"
             description="Connect your WhatsApp Business number to capture leads from chats automatically."
             className="mx-4 border-none"
-            actions={addButton}
+            actions={addButton || undefined}
           />
         ) : (
           <Table>
@@ -244,19 +246,21 @@ export function WhatsAppTab() {
                     {formatDate(account.createdAt)}
                   </TableCell>
                   <TableCell className="pr-6">
-                    <div className="flex justify-end">
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label={`Remove ${account.displayPhone}`}
-                        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                        onClick={() => {
-                          setPendingRemove(account);
-                        }}
-                      >
-                        <Trash2 aria-hidden />
-                      </Button>
-                    </div>
+                    {canEdit && (
+                      <div className="flex justify-end">
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={`Remove ${account.displayPhone}`}
+                          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          onClick={() => {
+                            setPendingRemove(account);
+                          }}
+                        >
+                          <Trash2 aria-hidden />
+                        </Button>
+                      </div>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

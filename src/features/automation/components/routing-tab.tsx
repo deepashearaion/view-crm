@@ -24,7 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useUserLookup, type User } from '@/features/auth';
+import { useAccess, useUserLookup, type User } from '@/features/auth';
 import { initials } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { errorMessage } from '@/services';
@@ -82,6 +82,7 @@ function RuleUsers({ userIds, lookup }: { userIds: string[]; lookup: Map<string,
 }
 
 export function RoutingTab() {
+  const canEdit = useAccess().can('settings', 'edit');
   const { data: rules = [], isPending, error, refetch } = useAssignmentRules();
   const { data: settings } = useLeadSettings();
   const lookup = useUserLookup();
@@ -112,7 +113,7 @@ export function RoutingTab() {
     }
   };
 
-  const addButton = (
+  const addButton = canEdit && (
     <Button
       size="sm"
       onClick={() => {
@@ -133,7 +134,7 @@ export function RoutingTab() {
           matches picks the owner. Leads that match no rule go to the default owner
           {defaultOwner ? ` (${defaultOwner.name})` : ''}, set on the Scoring tab.
         </CardDescription>
-        {rules.length > 0 && <CardAction>{addButton}</CardAction>}
+        {rules.length > 0 && addButton && <CardAction>{addButton}</CardAction>}
       </CardHeader>
       <CardContent className="space-y-4 px-0">
         {settings && !settings.defaultOwnerId && rules.length > 0 && (
@@ -159,7 +160,7 @@ export function RoutingTab() {
                 : 'Add rules to assign new leads by source, channel, destination or temperature.'
             }
             className="mx-4 border-none"
-            actions={addButton}
+            actions={addButton || undefined}
           />
         ) : (
           <Table aria-busy={reordering}>
@@ -198,7 +199,7 @@ export function RoutingTab() {
                     <Switch
                       checked={rule.active}
                       aria-label={`${rule.name} active`}
-                      disabled={reordering}
+                      disabled={!canEdit || reordering}
                       onCheckedChange={(active) => {
                         updateRule.mutate(
                           { id: rule.id, body: { active } },
@@ -217,47 +218,49 @@ export function RoutingTab() {
                     />
                   </TableCell>
                   <TableCell className="pr-6">
-                    <div className="flex justify-end">
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label={`Move ${rule.name} up`}
-                        disabled={index === 0 || reordering}
-                        onClick={() => void move(index, -1)}
-                      >
-                        <ArrowUp aria-hidden />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label={`Move ${rule.name} down`}
-                        disabled={index === rules.length - 1 || reordering}
-                        onClick={() => void move(index, 1)}
-                      >
-                        <ArrowDown aria-hidden />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label={`Edit ${rule.name}`}
-                        onClick={() => {
-                          setDialog({ open: true, rule });
-                        }}
-                      >
-                        <Pencil aria-hidden />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label={`Delete ${rule.name}`}
-                        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                        onClick={() => {
-                          setPendingDelete(rule);
-                        }}
-                      >
-                        <Trash2 aria-hidden />
-                      </Button>
-                    </div>
+                    {canEdit && (
+                      <div className="flex justify-end">
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={`Move ${rule.name} up`}
+                          disabled={index === 0 || reordering}
+                          onClick={() => void move(index, -1)}
+                        >
+                          <ArrowUp aria-hidden />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={`Move ${rule.name} down`}
+                          disabled={index === rules.length - 1 || reordering}
+                          onClick={() => void move(index, 1)}
+                        >
+                          <ArrowDown aria-hidden />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={`Edit ${rule.name}`}
+                          onClick={() => {
+                            setDialog({ open: true, rule });
+                          }}
+                        >
+                          <Pencil aria-hidden />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={`Delete ${rule.name}`}
+                          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          onClick={() => {
+                            setPendingDelete(rule);
+                          }}
+                        >
+                          <Trash2 aria-hidden />
+                        </Button>
+                      </div>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

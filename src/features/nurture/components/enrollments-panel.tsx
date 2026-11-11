@@ -28,10 +28,11 @@ const PAGE_LIMIT = 200;
 const ALL = '__all__';
 
 interface EnrollmentsPanelProps {
-  /** Known sequences (managers); empty for roles that can't list them. */
+  /** Known sequences, for the sequence filter and step counts. */
   sequences: NurtureSequence[];
-  /** Reps may only list enrollments of one contact at a time. */
+  /** With nurture.view scope `own`, enrollments can only be listed one contact at a time. */
   requireContact: boolean;
+  /** nurture.edit: stop enrollments. */
   canEdit: boolean;
 }
 

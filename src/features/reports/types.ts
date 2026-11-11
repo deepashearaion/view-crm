@@ -1,5 +1,3 @@
-import type { UserRole } from '@/features/auth';
-
 // ---- DTOs: /api/v1/reports/* (section 9 of the API contract) ----
 
 export interface CountDto {
@@ -64,11 +62,12 @@ export interface SourceRowDto {
   won_paise: number;
 }
 
-/** GET /api/v1/reports/reps → { reps }. 403 for reps. */
+/** GET /api/v1/reports/reps → { reps }. Needs reports.view `all` (403 otherwise). */
 export interface RepRowDto {
   user_id: number;
   name: string;
-  role: UserRole;
+  /** Role name (custom roles). */
+  role: string;
   leads_assigned: number;
   open_deals: CountDto;
   won: CountDto;
@@ -164,7 +163,8 @@ export interface SourceReportRow {
 export interface RepReportRow {
   userId: string;
   name: string;
-  role: UserRole;
+  /** Role name (custom roles). */
+  role: string;
   leadsAssigned: number;
   openDeals: ReportCount;
   won: ReportCount;

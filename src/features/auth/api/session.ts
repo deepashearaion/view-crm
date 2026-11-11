@@ -26,7 +26,7 @@ export function clearSession(): void {
   localStorage.removeItem(CURRENT_USER_KEY);
 }
 
-/** Decodes the JWT payload (`user_id`, `org_id`, `role`, `exp`); empty for opaque tokens. */
+/** Decodes the JWT payload (`user_id`, `org_id`, `exp`); empty for opaque tokens. The role is not in it: use /api/v1/me. */
 export function readTokenClaims(token: string | null = getAuthToken()) {
   const payload = token?.split('.')[1];
   if (!payload) return {};

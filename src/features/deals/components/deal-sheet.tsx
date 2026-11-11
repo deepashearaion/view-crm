@@ -63,9 +63,11 @@ export type DealSheetState =
 interface DealSheetProps {
   state: DealSheetState;
   stages: DealStage[];
-  /** False for viewers: the sheet is read-only. */
+  /** deals.create (new deal) or deals.edit (existing deal); false makes the sheet read-only. */
   canEdit: boolean;
-  /** Owner select is shown only to roles that can reassign. */
+  /** deals.delete: shows Delete for an existing deal. */
+  canDelete: boolean;
+  /** Owner select: org-wide deals.create (new deal) or deals.edit (existing deal). */
   canReassign: boolean;
   onClose: () => void;
   /** Called after a successful create or update. */
@@ -102,6 +104,7 @@ export function DealSheet({
   state,
   stages,
   canEdit,
+  canDelete,
   canReassign,
   onClose,
   onSaved,
@@ -409,7 +412,7 @@ export function DealSheet({
           </div>
         </ScrollArea>
         <SheetFooter className="flex-row justify-between gap-2 border-t p-4">
-          {editing && canEdit ? (
+          {editing && canDelete ? (
             <Button
               variant="ghost"
               className="text-destructive hover:bg-destructive/10 hover:text-destructive"

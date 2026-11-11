@@ -117,6 +117,8 @@ interface InvoiceEditorProps {
   onCreated: (invoice: Invoice) => void;
   onSaved: () => void;
   onDeleted: () => void;
+  /** invoices.delete: shows Delete for an existing draft. */
+  canDelete: boolean;
   actions: InvoiceActions;
 }
 
@@ -131,6 +133,7 @@ export function InvoiceEditor({
   onCreated,
   onSaved,
   onDeleted,
+  canDelete,
   actions,
 }: InvoiceEditorProps) {
   const isCreate = !invoice;
@@ -348,17 +351,19 @@ export function InvoiceEditor({
         actions={
           <>
             {invoice ? (
-              <Button
-                variant="ghost"
-                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                disabled={busy}
-                onClick={() => {
-                  actions.remove(invoice, { onDeleted });
-                }}
-              >
-                <Trash2 aria-hidden />
-                Delete
-              </Button>
+              canDelete && (
+                <Button
+                  variant="ghost"
+                  className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  disabled={busy}
+                  onClick={() => {
+                    actions.remove(invoice, { onDeleted });
+                  }}
+                >
+                  <Trash2 aria-hidden />
+                  Delete
+                </Button>
+              )
             ) : (
               <Button variant="ghost" asChild>
                 <Link to={invoicePaths.list}>

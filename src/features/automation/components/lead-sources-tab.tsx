@@ -17,6 +17,7 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
+import { useAccess } from '@/features/auth';
 import { formatDate } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { errorMessage } from '@/services';
@@ -110,10 +111,12 @@ function WebFormSetup({ source }: { source: LeadSource }) {
 
 function SourceRow({
   source,
+  canEdit,
   onRename,
   onRotate,
 }: {
   source: LeadSource;
+  canEdit: boolean;
   onRename: () => void;
   onRotate: () => void;
 }) {
@@ -137,7 +140,7 @@ function SourceRow({
         <label className="flex items-center gap-2 text-sm text-muted-foreground">
           <Switch
             checked={source.active}
-            disabled={update.isPending}
+            disabled={!canEdit || update.isPending}
             onCheckedChange={(active) => {
               update.mutate(
                 { id: source.id, body: { active } },
@@ -156,22 +159,24 @@ function SourceRow({
           />
           Active
         </label>
-        <div className="flex">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label={`Rename ${source.name}`}
-            onClick={onRename}
-          >
-            <Pencil aria-hidden />
-          </Button>
-          {source.channel === 'web_form' && (
-            <Button variant="ghost" size="sm" onClick={onRotate} title="Issue a new form URL">
-              <RefreshCw aria-hidden />
-              Rotate key
+        {canEdit && (
+          <div className="flex">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label={`Rename ${source.name}`}
+              onClick={onRename}
+            >
+              <Pencil aria-hidden />
             </Button>
-          )}
-        </div>
+            {source.channel === 'web_form' && (
+              <Button variant="ghost" size="sm" onClick={onRotate} title="Issue a new form URL">
+                <RefreshCw aria-hidden />
+                Rotate key
+              </Button>
+            )}
+          </div>
+        )}
       </div>
       {source.channel === 'web_form' && <WebFormSetup source={source} />}
     </li>
@@ -179,12 +184,13 @@ function SourceRow({
 }
 
 export function LeadSourcesTab() {
+  const canEdit = useAccess().can('settings', 'edit');
   const { data: sources = [], isPending, error, refetch } = useLeadSources();
   const rotate = useRotateLeadSourceKey();
   const [dialog, setDialog] = useState<DialogState>({ open: false });
   const [pendingRotate, setPendingRotate] = useState<LeadSource | null>(null);
 
-  const addButton = (
+  const addButton = canEdit && (
     <Button
       size="sm"
       onClick={() => {
@@ -204,7 +210,7 @@ export function LeadSourcesTab() {
           Where leads come from. Web-form sources get a public URL your website can post enquiries
           to; turn a source off to pause it.
         </CardDescription>
-        {sources.length > 0 && <CardAction>{addButton}</CardAction>}
+        {sources.length > 0 && addButton && <CardAction>{addButton}</CardAction>}
       </CardHeader>
       <CardContent>
         {isPending ? (
@@ -221,7 +227,7 @@ export function LeadSourcesTab() {
             title="No lead sources yet"
             description="Add a web form to capture enquiries from your website straight into the CRM."
             className="border-none"
-            actions={addButton}
+            actions={addButton || undefined}
           />
         ) : (
           <ul className="space-y-3">
@@ -229,6 +235,7 @@ export function LeadSourcesTab() {
               <SourceRow
                 key={source.id}
                 source={source}
+                canEdit={canEdit}
                 onRename={() => {
                   setDialog({ open: true, source });
                 }}

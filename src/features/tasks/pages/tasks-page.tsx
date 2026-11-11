@@ -11,7 +11,7 @@ import { EmptyState } from '@/components/feedback/empty-state';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { permissions, useSessionRole, useUserLookup, useUsers } from '@/features/auth';
+import { useAccess, useUserLookup, useUsers } from '@/features/auth';
 import { useContacts } from '@/features/contacts';
 import { useRecordSheetState } from '@/hooks/use-record-sheet-state';
 import { paths } from '@/routes/paths';
@@ -60,8 +60,10 @@ const EMPTY_TITLES: Record<Tab, string> = {
 
 export default function TasksPage({ createOnMount = false }: { createOnMount?: boolean }) {
   const navigate = useNavigate();
-  const role = useSessionRole();
-  const canEdit = permissions.canEdit(role);
+  const access = useAccess();
+  const canCreate = access.can('tasks', 'create');
+  const canEdit = access.can('tasks', 'edit');
+  const canDelete = access.can('tasks', 'delete');
   const { data: tasks = [], isPending, error, refetch } = useTasks();
   const { data: userList = [] } = useUsers();
   const users = useUserLookup();
@@ -74,7 +76,7 @@ export default function TasksPage({ createOnMount = false }: { createOnMount?: b
   const [pendingDelete, setPendingDelete] = useState<Task[] | null>(null);
   const [sheetState, setSheetState] = useRecordSheetState({
     param: 'task',
-    createOnMount,
+    createOnMount: createOnMount && canCreate,
     listPath: paths.tasks,
   });
 
@@ -106,6 +108,7 @@ export default function TasksPage({ createOnMount = false }: { createOnMount?: b
       getTaskColumns({
         users,
         canEdit,
+        canDelete,
         contactName: (id) => (id ? contactNames.get(id) : undefined),
         onSetStatus: (task, status) => {
           setStatus.mutate(
@@ -127,7 +130,7 @@ export default function TasksPage({ createOnMount = false }: { createOnMount?: b
           setPendingDelete([task]);
         },
       }),
-    [users, canEdit, contactNames, setStatus, setSheetState],
+    [users, canEdit, canDelete, contactNames, setStatus, setSheetState],
   );
 
   return (
@@ -136,7 +139,7 @@ export default function TasksPage({ createOnMount = false }: { createOnMount?: b
         title="Tasks"
         description="Follow-ups, calls and meetings, including tasks created automatically for hot leads."
         actions={
-          canEdit && (
+          canCreate && (
             <Button
               onClick={() => {
                 void navigate(`${paths.tasks}/new`);
@@ -215,7 +218,7 @@ export default function TasksPage({ createOnMount = false }: { createOnMount?: b
           </>
         )}
         bulkActions={
-          canEdit
+          canDelete
             ? (rows) => (
                 <Button
                   variant="outline"
@@ -238,7 +241,7 @@ export default function TasksPage({ createOnMount = false }: { createOnMount?: b
             description={
               tab === 'overdue'
                 ? 'Nice work, you’re on top of your follow-ups.'
-                : canEdit
+                : canCreate
                   ? 'Create a task to plan your next follow-up.'
                   : 'Tasks your team creates will show up here.'
             }

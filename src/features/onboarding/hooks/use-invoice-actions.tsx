@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import { ConfirmDialog } from '@/components/feedback/confirm-dialog';
-import { permissions, useSessionRole } from '@/features/auth';
+import { useAccess } from '@/features/auth';
 import { errorMessage } from '@/services';
 
 import { invoiceErrorMessage, isStaleInvoiceError } from '../api/errors';
@@ -40,9 +40,9 @@ const label = (invoice: Invoice) => invoice.number ?? 'this draft';
 export function useInvoiceActions(): { actions: InvoiceActions; dialogs: ReactNode } {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const role = useSessionRole();
-  const canEdit = permissions.canEdit(role);
-  const canManageSettings = permissions.canManageSettings(role);
+  const access = useAccess();
+  const canEdit = access.can('invoices', 'edit');
+  const canManageSettings = access.can('settings', 'edit');
   const issueInvoice = useIssueInvoice();
   const sendInvoice = useSendInvoice();
   const cancelInvoice = useCancelInvoice();

@@ -40,8 +40,10 @@ interface DealCardProps {
   contactName?: string;
   /** Today's IST date (`YYYY-MM-DD`) for overdue checks. */
   today: string;
-  /** False for viewers: no menu, no dragging. */
+  /** deals.edit: Edit / Move to in the menu, and dragging. */
   canEdit: boolean;
+  /** deals.delete: Delete in the menu. */
+  canDelete: boolean;
   dragging?: boolean;
   onOpen: (deal: Deal) => void;
   onMove: (deal: Deal, stageId: string) => void;
@@ -56,6 +58,7 @@ export function DealCard({
   contactName,
   today,
   canEdit,
+  canDelete,
   dragging = false,
   onOpen,
   onMove,
@@ -92,7 +95,7 @@ export function DealCard({
         >
           <span className="line-clamp-2 text-sm font-medium">{deal.title}</span>
         </button>
-        {canEdit && (
+        {(canEdit || canDelete) && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -105,47 +108,53 @@ export function DealCard({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem
-                onSelect={() => {
-                  onOpen(deal);
-                }}
-              >
-                <Pencil aria-hidden />
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                  <ArrowRightLeft aria-hidden />
-                  Move to
-                </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent>
-                  {stages.map((stage) => (
-                    <DropdownMenuItem
-                      key={stage.id}
-                      disabled={stage.id === deal.stageId}
-                      onSelect={() => {
-                        onMove(deal, stage.id);
-                      }}
-                    >
-                      <span
-                        aria-hidden
-                        className={cn('size-2 rounded-full', stageColorClass[stage.color].dot)}
-                      />
-                      {stage.name}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                variant="destructive"
-                onSelect={() => {
-                  onDelete(deal);
-                }}
-              >
-                <Trash2 aria-hidden />
-                Delete
-              </DropdownMenuItem>
+              {canEdit && (
+                <>
+                  <DropdownMenuItem
+                    onSelect={() => {
+                      onOpen(deal);
+                    }}
+                  >
+                    <Pencil aria-hidden />
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>
+                      <ArrowRightLeft aria-hidden />
+                      Move to
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent>
+                      {stages.map((stage) => (
+                        <DropdownMenuItem
+                          key={stage.id}
+                          disabled={stage.id === deal.stageId}
+                          onSelect={() => {
+                            onMove(deal, stage.id);
+                          }}
+                        >
+                          <span
+                            aria-hidden
+                            className={cn('size-2 rounded-full', stageColorClass[stage.color].dot)}
+                          />
+                          {stage.name}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                </>
+              )}
+              {canEdit && canDelete && <DropdownMenuSeparator />}
+              {canDelete && (
+                <DropdownMenuItem
+                  variant="destructive"
+                  onSelect={() => {
+                    onDelete(deal);
+                  }}
+                >
+                  <Trash2 aria-hidden />
+                  Delete
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         )}

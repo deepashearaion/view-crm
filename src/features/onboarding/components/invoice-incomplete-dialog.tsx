@@ -17,7 +17,7 @@ import type { IncompleteField, InvoiceIncompleteErrors } from '../types';
 interface InvoiceIncompleteDialogProps {
   errors: InvoiceIncompleteErrors | null;
   onOpenChange: (open: boolean) => void;
-  /** Hidden for viewers, who can't edit the invoice. */
+  /** Hidden without invoices.edit. */
   onFixInvoice?: () => void;
   /** Undefined when the user can't edit the billing profile. */
   onOpenBillingProfile?: () => void;
@@ -87,7 +87,7 @@ export function InvoiceIncompleteDialog({
                 </Button>
               ) : (
                 <p className="text-xs text-muted-foreground">
-                  Ask an owner, admin or manager to complete the billing profile.
+                  Ask someone who can edit settings to complete the billing profile.
                 </p>
               )}
             </section>

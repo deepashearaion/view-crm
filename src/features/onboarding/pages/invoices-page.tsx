@@ -10,7 +10,7 @@ import { WorkflowBadge } from '@/components/feedback/workflow-badge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { permissions, useSessionRole } from '@/features/auth';
+import { useAccess } from '@/features/auth';
 import { useContacts } from '@/features/contacts';
 import { useDeals } from '@/features/deals';
 import { toIstDate } from '@/lib/format';
@@ -48,8 +48,11 @@ const EMPTY: Record<Tab, { title: string; description: string }> = {
 
 export default function InvoicesPage() {
   const navigate = useNavigate();
-  const role = useSessionRole();
-  const canEdit = permissions.canEdit(role);
+  const access = useAccess();
+  const canCreate = access.can('invoices', 'create');
+  const canEdit = access.can('invoices', 'edit');
+  const canDelete = access.can('invoices', 'delete');
+  const canCancel = access.canAll('invoices', 'delete');
   const { data: invoices = [], isPending, error, refetch } = useAllInvoices();
   const { data: contacts = [] } = useContacts();
   const { data: deals = [] } = useDeals();
@@ -83,13 +86,15 @@ export default function InvoicesPage() {
         contactName: (id) => (id ? contactNames.get(id) : undefined),
         dealTitle: (id) => (id ? dealTitles.get(id) : undefined),
         canEdit,
+        canDelete,
+        canCancel,
         today: toIstDate(new Date()),
         onOpen: (invoice) => {
           void navigate(invoicePaths.detail(invoice.id));
         },
         actions,
       }),
-    [contactNames, dealTitles, canEdit, navigate, actions],
+    [contactNames, dealTitles, canEdit, canDelete, canCancel, navigate, actions],
   );
 
   return (
@@ -112,7 +117,7 @@ export default function InvoicesPage() {
                 Billing profile
               </Link>
             </Button>
-            {canEdit && (
+            {canCreate && (
               <Button asChild>
                 <Link to={invoicePaths.create}>
                   <Plus aria-hidden />
@@ -171,7 +176,7 @@ export default function InvoicesPage() {
             description={EMPTY[tab].description}
             className="border-none"
             actions={
-              canEdit &&
+              canCreate &&
               (tab === 'draft' || tab === 'all') && (
                 <Button variant="outline" asChild>
                   <Link to={invoicePaths.create}>

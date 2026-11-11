@@ -89,7 +89,7 @@ export function toNurtureEnrollment(dto: NurtureEnrollmentDto): NurtureEnrollmen
   };
 }
 
-/** GET /api/v1/nurture-sequences (owner, admin, manager). */
+/** GET /api/v1/nurture-sequences (nurture.view). */
 export async function fetchNurtureSequences(signal?: AbortSignal): Promise<NurtureSequence[]> {
   const response = await http.get<{ sequences: NurtureSequenceDto[] | null }>(SEQUENCES, {
     signal,
@@ -145,7 +145,7 @@ export async function enrollContact(
   return toNurtureEnrollment(response.enrollment);
 }
 
-/** GET /api/v1/nurture-enrollments (offset paging; reps must pass contactId). */
+/** GET /api/v1/nurture-enrollments (offset paging; nurture.view `own` must pass contactId). */
 export async function fetchNurtureEnrollments(
   filters: NurtureEnrollmentFilters = {},
   signal?: AbortSignal,

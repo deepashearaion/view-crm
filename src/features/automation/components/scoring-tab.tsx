@@ -22,6 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useAccess } from '@/features/auth';
 import { cn } from '@/lib/utils';
 import { errorMessage } from '@/services';
 
@@ -53,13 +54,14 @@ function Points({ points }: { points: number }) {
 }
 
 function ScoringRulesCard() {
+  const canEdit = useAccess().can('settings', 'edit');
   const { data: rules = [], isPending, error, refetch } = useScoringRules();
   const updateRule = useUpdateScoringRule();
   const deleteRule = useDeleteScoringRule();
   const [dialog, setDialog] = useState<DialogState>({ open: false });
   const [pendingDelete, setPendingDelete] = useState<ScoringRule | null>(null);
 
-  const addButton = (
+  const addButton = canEdit && (
     <Button
       size="sm"
       onClick={() => {
@@ -78,7 +80,7 @@ function ScoringRulesCard() {
         <CardDescription>
           Every active rule a lead matches adds (or subtracts) its points.
         </CardDescription>
-        {rules.length > 0 && <CardAction>{addButton}</CardAction>}
+        {rules.length > 0 && addButton && <CardAction>{addButton}</CardAction>}
       </CardHeader>
       <CardContent className="px-0">
         {isPending ? (
@@ -95,7 +97,7 @@ function ScoringRulesCard() {
             title="No scoring rules yet"
             description="Add rules such as “Has an email: +10” so leads are scored and hot ones are followed up quickly."
             className="mx-4 border-none"
-            actions={addButton}
+            actions={addButton || undefined}
           />
         ) : (
           <Table>
@@ -130,7 +132,9 @@ function ScoringRulesCard() {
                     <Switch
                       checked={rule.active}
                       aria-label={`${rule.name} active`}
-                      disabled={updateRule.isPending && updateRule.variables.id === rule.id}
+                      disabled={
+                        !canEdit || (updateRule.isPending && updateRule.variables.id === rule.id)
+                      }
                       onCheckedChange={(active) => {
                         updateRule.mutate(
                           { id: rule.id, body: { active } },
@@ -149,29 +153,31 @@ function ScoringRulesCard() {
                     />
                   </TableCell>
                   <TableCell className="pr-6">
-                    <div className="flex justify-end">
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label={`Edit ${rule.name}`}
-                        onClick={() => {
-                          setDialog({ open: true, rule });
-                        }}
-                      >
-                        <Pencil aria-hidden />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label={`Delete ${rule.name}`}
-                        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                        onClick={() => {
-                          setPendingDelete(rule);
-                        }}
-                      >
-                        <Trash2 aria-hidden />
-                      </Button>
-                    </div>
+                    {canEdit && (
+                      <div className="flex justify-end">
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={`Edit ${rule.name}`}
+                          onClick={() => {
+                            setDialog({ open: true, rule });
+                          }}
+                        >
+                          <Pencil aria-hidden />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={`Delete ${rule.name}`}
+                          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          onClick={() => {
+                            setPendingDelete(rule);
+                          }}
+                        >
+                          <Trash2 aria-hidden />
+                        </Button>
+                      </div>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

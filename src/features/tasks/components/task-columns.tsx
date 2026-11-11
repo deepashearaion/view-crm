@@ -27,8 +27,10 @@ const priorityRank = new Map<string, number>(
 interface ColumnOptions {
   users: Map<string, User>;
   contactName: (id: string | null) => string | undefined;
-  /** False for viewers: hides every action that changes a task. */
+  /** tasks.edit: edit, complete, cancel and reopen. */
   canEdit: boolean;
+  /** tasks.delete. */
+  canDelete: boolean;
   onSetStatus: (task: Task, status: TaskStatus) => void;
   onEdit: (task: Task) => void;
   onDelete: (task: Task) => void;
@@ -38,6 +40,7 @@ export function getTaskColumns({
   users,
   contactName,
   canEdit,
+  canDelete,
   onSetStatus,
   onEdit,
   onDelete,
@@ -237,6 +240,8 @@ export function getTaskColumns({
               },
             });
           }
+        }
+        if (canDelete) {
           actions.push({
             label: 'Delete',
             icon: Trash2,

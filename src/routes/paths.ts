@@ -37,6 +37,7 @@ export const paths = {
   callRecordings: '/dashboard/call-recordings',
 
   automation: '/dashboard/automation',
+  settings: '/dashboard/settings',
 } as const;
 
 export type AppPath = (typeof paths)[keyof typeof paths];

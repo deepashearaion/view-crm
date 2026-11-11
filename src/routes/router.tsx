@@ -21,6 +21,7 @@ import { nurtureRoutes, unsubscribeRoutes } from '@/features/nurture';
 import { onboardingRoutes } from '@/features/onboarding';
 import { productsRoutes } from '@/features/products';
 import { reportsRoutes } from '@/features/reports';
+import { settingsRoutes } from '@/features/settings';
 import { tasksRoutes } from '@/features/tasks';
 import { AppShell } from '@/layouts/app-shell';
 import { crumb } from '@/types';
@@ -56,6 +57,7 @@ const appRoutes: RouteObject[] = [
   ...extrasRoutes,
 
   ...automationRoutes,
+  ...settingsRoutes,
 ];
 
 export const router = createBrowserRouter([

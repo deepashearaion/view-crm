@@ -15,7 +15,7 @@ import { FormTextarea } from '@/components/form/form-textarea';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { permissions, useSessionRole } from '@/features/auth';
+import { useAccess } from '@/features/auth';
 import { bpToPercent, formatDateTime } from '@/lib/format';
 import { applyProblem, errorMessage } from '@/services';
 
@@ -52,8 +52,7 @@ function ProfileSkeleton() {
 }
 
 export default function BillingProfilePage() {
-  const role = useSessionRole();
-  const canManage = permissions.canManageSettings(role);
+  const canManage = useAccess().can('settings', 'edit');
   const { data: profile, isPending, error, refetch } = useBillingProfile();
   const updateProfile = useUpdateBillingProfile();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -161,7 +160,7 @@ export default function BillingProfilePage() {
         >
           {!canManage && (
             <InlineAlert tone="info">
-              Only owners, admins and managers can change the billing profile.
+              Only people who can edit settings can change the billing profile.
             </InlineAlert>
           )}
           {canManage && fixFields.length > 0 && (

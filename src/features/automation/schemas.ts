@@ -1,7 +1,5 @@
 import { z } from 'zod';
 
-import { USER_ROLES } from '@/features/auth';
-
 import { ASSIGNMENT_CRITERIA, SCORING_CRITERIA, criterionNeedsValue } from './constants';
 
 const name = (label = 'Name') =>
@@ -115,13 +113,3 @@ export const whatsAppAccountSchema = z.object({
 });
 
 export type WhatsAppAccountFormValues = z.infer<typeof whatsAppAccountSchema>;
-
-// Team
-
-export const inviteUserSchema = z.object({
-  name: name(),
-  email: z.string().trim().min(1, 'Email is required.').pipe(z.email('Enter a valid email.')),
-  role: z.enum(USER_ROLES),
-});
-
-export type InviteUserFormValues = z.infer<typeof inviteUserSchema>;

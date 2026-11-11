@@ -138,7 +138,7 @@ function RemainingAmount({ control }: { control: Control<ContactFormValues> }) {
 
 interface ContactFormProps {
   control: Control<ContactFormValues>;
-  /** Owners, admins and managers may pick the owner; reps own what they create. */
+  /** Org-wide create/edit access may pick the owner; otherwise the user owns what they create. */
   canReassign: boolean;
   /** New contacts without an owner are routed by the assignment rules. */
   isCreate: boolean;

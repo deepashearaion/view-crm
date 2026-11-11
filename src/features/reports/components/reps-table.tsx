@@ -8,7 +8,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { USER_ROLE_LABELS } from '@/features/auth';
 import { formatPaise } from '@/lib/format';
 
 import { formatNumber, formatPercent } from '../report-format';
@@ -23,7 +22,7 @@ function CountCell({ value }: { value: ReportCount }) {
   );
 }
 
-/** Per-user performance for the period. Hidden from reps. */
+/** Per-user performance for the period. Needs org-wide reports.view. */
 export function RepsTable({ rows }: { rows: RepReportRow[] }) {
   return (
     <Table>
@@ -44,7 +43,7 @@ export function RepsTable({ rows }: { rows: RepReportRow[] }) {
             <TableCell>
               <span className="flex items-center gap-2">
                 <UserChip name={row.name} />
-                <Badge variant="outline">{USER_ROLE_LABELS[row.role]}</Badge>
+                <Badge variant="outline">{row.role}</Badge>
               </span>
             </TableCell>
             <TableCell className="text-right tabular-nums">

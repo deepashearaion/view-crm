@@ -108,7 +108,7 @@ export interface NurtureEnrollment {
   finishedAt: string | null;
 }
 
-/** GET /api/v1/nurture-enrollments filters (reps must pass contactId). */
+/** GET /api/v1/nurture-enrollments filters (nurture.view `own` must pass contactId). */
 export interface NurtureEnrollmentFilters {
   contactId?: string;
   sequenceId?: string;

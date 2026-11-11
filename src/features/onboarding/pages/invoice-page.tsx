@@ -4,7 +4,7 @@ import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom'
 import { EmptyState } from '@/components/feedback/empty-state';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { permissions, useSessionRole } from '@/features/auth';
+import { useAccess } from '@/features/auth';
 import { useContacts } from '@/features/contacts';
 import { useDeals } from '@/features/deals';
 import { errorMessage, isHttpError } from '@/services';
@@ -39,8 +39,10 @@ export default function InvoicePage({ create = false }: { create?: boolean }) {
   const navigate = useNavigate();
   const { invoiceId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
-  const role = useSessionRole();
-  const canEdit = permissions.canEdit(role);
+  const access = useAccess();
+  const canCreate = access.can('invoices', 'create');
+  const canEdit = access.can('invoices', 'edit');
+  const canDelete = access.can('invoices', 'delete');
   const profileQuery = useBillingProfile();
   const invoiceQuery = useInvoice(create ? undefined : invoiceId);
   const { data: contacts = [] } = useContacts();
@@ -53,13 +55,13 @@ export default function InvoicePage({ create = false }: { create?: boolean }) {
   const profileReady = !profileQuery.isPending;
 
   if (create) {
-    if (!canEdit) {
+    if (!canCreate) {
       return (
         <div className="p-4 sm:p-6">
           <EmptyState
             icon={FileQuestion}
             title="You can’t create invoices"
-            description="Your role is read-only. Ask an admin if you need to raise invoices."
+            description="Your role doesn’t allow creating invoices. Ask an admin if you need to raise them."
             actions={
               <Button variant="outline" asChild>
                 <Link to={invoicePaths.list}>Back to invoices</Link>
@@ -81,6 +83,7 @@ export default function InvoicePage({ create = false }: { create?: boolean }) {
           }}
           onSaved={() => undefined}
           onDeleted={backToList}
+          canDelete={canDelete}
           actions={actions}
         />
         {dialogs}
@@ -143,6 +146,7 @@ export default function InvoicePage({ create = false }: { create?: boolean }) {
               );
           }}
           onDeleted={backToList}
+          canDelete={canDelete}
           actions={actions}
         />
       ) : (
@@ -150,7 +154,8 @@ export default function InvoicePage({ create = false }: { create?: boolean }) {
           invoice={invoice}
           contactName={contactName}
           dealTitle={dealTitle}
-          canEdit={canEdit}
+          canSend={canEdit}
+          canCancel={access.canAll('invoices', 'delete')}
           actions={actions}
         />
       )}

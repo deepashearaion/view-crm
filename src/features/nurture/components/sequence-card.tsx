@@ -25,6 +25,12 @@ const MAX_PREVIEW_STEPS = 6;
 interface SequenceCardProps {
   sequence: NurtureSequence;
   togglePending: boolean;
+  /** Org-wide nurture.edit: activate/deactivate and edit the sequence. */
+  canEdit: boolean;
+  /** nurture.create: enroll a contact. */
+  canEnroll: boolean;
+  /** Org-wide nurture.delete. */
+  canDelete: boolean;
   onToggleActive: (active: boolean) => void;
   onEdit: () => void;
   onEnroll: () => void;
@@ -34,6 +40,9 @@ interface SequenceCardProps {
 export function SequenceCard({
   sequence,
   togglePending,
+  canEdit,
+  canEnroll,
+  canDelete,
   onToggleActive,
   onEdit,
   onEnroll,
@@ -50,13 +59,17 @@ export function SequenceCard({
     <Card className={cn('transition-colors', !sequence.active && 'bg-muted/30')}>
       <CardHeader>
         <CardTitle className="min-w-0">
-          <button
-            type="button"
-            className="max-w-full truncate text-left underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none"
-            onClick={onEdit}
-          >
-            {sequence.name}
-          </button>
+          {canEdit ? (
+            <button
+              type="button"
+              className="max-w-full truncate text-left underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none"
+              onClick={onEdit}
+            >
+              {sequence.name}
+            </button>
+          ) : (
+            <span className="block max-w-full truncate">{sequence.name}</span>
+          )}
         </CardTitle>
         <CardDescription className="flex flex-wrap items-center gap-1.5">
           {sequence.trigger === 'manual' ? (
@@ -79,24 +92,32 @@ export function SequenceCard({
           <Switch
             id={switchId}
             checked={sequence.active}
-            disabled={togglePending}
+            disabled={!canEdit || togglePending}
             aria-label={`${sequence.active ? 'Deactivate' : 'Activate'} “${sequence.name}”`}
             onCheckedChange={onToggleActive}
           />
-          <DataTableRowActions
-            label={`Actions for ${sequence.name}`}
-            actions={[
-              { label: 'Edit', icon: Pencil, onSelect: onEdit },
-              { label: 'Enroll contact', icon: UserPlus, onSelect: onEnroll },
-              {
-                label: 'Delete',
-                icon: Trash2,
-                destructive: true,
-                separatorBefore: true,
-                onSelect: onDelete,
-              },
-            ]}
-          />
+          {(canEdit || canEnroll || canDelete) && (
+            <DataTableRowActions
+              label={`Actions for ${sequence.name}`}
+              actions={[
+                ...(canEdit ? [{ label: 'Edit', icon: Pencil, onSelect: onEdit }] : []),
+                ...(canEnroll
+                  ? [{ label: 'Enroll contact', icon: UserPlus, onSelect: onEnroll }]
+                  : []),
+                ...(canDelete
+                  ? [
+                      {
+                        label: 'Delete',
+                        icon: Trash2,
+                        destructive: true,
+                        separatorBefore: canEdit || canEnroll,
+                        onSelect: onDelete,
+                      },
+                    ]
+                  : []),
+              ]}
+            />
+          )}
         </CardAction>
       </CardHeader>
       <CardContent className="flex-1">

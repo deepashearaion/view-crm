@@ -27,7 +27,7 @@ import {
 } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { permissions, useSessionRole, useUserLookup } from '@/features/auth';
+import { useAccess, useUserLookup } from '@/features/auth';
 import { useCompanyLookup } from '@/features/companies';
 import type { RecordSheetState } from '@/hooks/use-record-sheet-state';
 import { formatDateTime } from '@/lib/format';
@@ -245,9 +245,15 @@ function toastLeadResult({ lead, contact, followUpError }: CreateLeadResult) {
 }
 
 export function ContactSheet({ state, onStateChange }: ContactSheetProps) {
-  const role = useSessionRole();
-  const canEdit = permissions.canEdit(role);
-  const canReassign = permissions.canReassign(role);
+  const access = useAccess();
+  const canCreate = access.can('contacts', 'create');
+  const canEdit = access.can('contacts', 'edit');
+  const canDelete = access.can('contacts', 'delete');
+  // Picking an owner other than yourself needs org-wide create (new) or edit (existing) access.
+  const canReassign =
+    state.mode === 'create'
+      ? access.canAll('contacts', 'create')
+      : access.canAll('contacts', 'edit');
   const contactId = state.mode === 'view' || state.mode === 'edit' ? state.id : null;
   const contactQuery = useContact(contactId);
   const contact = contactQuery.data;
@@ -261,7 +267,8 @@ export function ContactSheet({ state, onStateChange }: ContactSheetProps) {
     defaultValues: contactToFormValues(),
   });
 
-  const isEditing = (state.mode === 'edit' || state.mode === 'create') && canEdit;
+  const isEditing = (state.mode === 'edit' && canEdit) || (state.mode === 'create' && canCreate);
+  const showViewActions = !isEditing && state.mode !== 'create' && (canEdit || canDelete);
 
   // Load the record into the form whenever the sheet switches to editing/creating.
   useEffect(() => {
@@ -298,7 +305,7 @@ export function ContactSheet({ state, onStateChange }: ContactSheetProps) {
       });
     } else if (state.mode === 'edit') {
       const body = formValuesToDto(values);
-      // Reps can't reassign: leave the owner untouched.
+      // Without org-wide edit access the owner can't change: leave it untouched.
       if (!canReassign) delete body.lead_owner_id;
       updateContact.mutate(
         { id: state.id, body },
@@ -366,8 +373,8 @@ export function ContactSheet({ state, onStateChange }: ContactSheetProps) {
 
           <ScrollArea className="min-h-0 flex-1">
             <div className="p-6">
-              {state.mode === 'create' && !canEdit ? (
-                <InlineAlert>You have read-only access and can’t add contacts.</InlineAlert>
+              {state.mode === 'create' && !canCreate ? (
+                <InlineAlert>You don’t have permission to add contacts.</InlineAlert>
               ) : contactQuery.isError && state.mode !== 'create' ? (
                 <InlineAlert>
                   {errorMessage(contactQuery.error, 'Couldn’t load this contact.')}
@@ -410,7 +417,7 @@ export function ContactSheet({ state, onStateChange }: ContactSheetProps) {
             </div>
           </ScrollArea>
 
-          {canEdit && (
+          {(isEditing || showViewActions) && (
             <>
               <Separator />
               <SheetFooter className="flex-row justify-between gap-2 p-4">
@@ -435,26 +442,32 @@ export function ContactSheet({ state, onStateChange }: ContactSheetProps) {
                   </>
                 ) : (
                   <>
-                    <Button
-                      variant="ghost"
-                      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                      disabled={!contact}
-                      onClick={() => {
-                        setConfirmDelete(true);
-                      }}
-                    >
-                      <Trash2 aria-hidden />
-                      Delete
-                    </Button>
-                    <Button
-                      disabled={!contact}
-                      onClick={() => {
-                        if (contactId) onStateChange({ mode: 'edit', id: contactId });
-                      }}
-                    >
-                      <Pencil aria-hidden />
-                      Edit
-                    </Button>
+                    {canDelete ? (
+                      <Button
+                        variant="ghost"
+                        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        disabled={!contact}
+                        onClick={() => {
+                          setConfirmDelete(true);
+                        }}
+                      >
+                        <Trash2 aria-hidden />
+                        Delete
+                      </Button>
+                    ) : (
+                      <span />
+                    )}
+                    {canEdit && (
+                      <Button
+                        disabled={!contact}
+                        onClick={() => {
+                          if (contactId) onStateChange({ mode: 'edit', id: contactId });
+                        }}
+                      >
+                        <Pencil aria-hidden />
+                        Edit
+                      </Button>
+                    )}
                   </>
                 )}
               </SheetFooter>

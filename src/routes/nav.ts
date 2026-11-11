@@ -13,6 +13,7 @@ import {
   Receipt,
   Repeat,
   Rocket,
+  Settings,
   SquareKanban,
   Upload,
   Users,
@@ -20,6 +21,7 @@ import {
 } from 'lucide-react';
 
 import type { WorkflowKind } from '@/components/feedback/workflow-badge';
+import type { PermissionAction, PermissionModule } from '@/features/auth';
 
 import { paths, type AppPath } from './paths';
 
@@ -131,6 +133,12 @@ export const settingsNav: NavItem[] = [
     workflow: 'ai',
     keywords: ['scoring', 'routing', 'settings'],
   },
+  {
+    title: 'Settings',
+    to: paths.settings,
+    icon: Settings,
+    keywords: ['users', 'roles', 'permissions', 'team', 'access'],
+  },
 ];
 
 export const allNavItems: NavItem[] = [
@@ -140,4 +148,42 @@ export const allNavItems: NavItem[] = [
 
 export function isItemActive(item: NavItem, pathname: string) {
   return pathname === item.to || pathname.startsWith(`${item.to}/`);
+}
+
+type NavRequirement = readonly [PermissionModule, PermissionAction];
+
+/**
+ * Permission needed to see a menu entry (any one of them). Entries not listed are shown to
+ * everyone; modules without a backend permission (companies, products, extras) stay visible.
+ */
+const NAV_REQUIREMENTS: Partial<Record<AppPath, readonly NavRequirement[]>> = {
+  [paths.leads]: [['contacts', 'view']],
+  [paths.contacts]: [['contacts', 'view']],
+  [paths.import]: [['contacts', 'create']],
+  [paths.nurture]: [['nurture', 'view']],
+  [paths.deals]: [['deals', 'view']],
+  [paths.tasks]: [['tasks', 'view']],
+  [paths.onboarding]: [['invoices', 'view']],
+  [paths.invoices]: [['invoices', 'view']],
+  [paths.reports]: [['reports', 'view']],
+  [paths.automation]: [['settings', 'view']],
+  [paths.settings]: [
+    ['users', 'view'],
+    ['roles', 'view'],
+  ],
+};
+
+/** Menu entries the user may open; `can` comes from useAccess(). */
+export function visibleNav(can: (module: PermissionModule, action: PermissionAction) => boolean): {
+  groups: NavGroup[];
+  settings: NavItem[];
+} {
+  const allowed = (item: NavItem) =>
+    NAV_REQUIREMENTS[item.to]?.some(([module, action]) => can(module, action)) ?? true;
+  return {
+    groups: navGroups
+      .map((group) => ({ ...group, items: group.items.filter(allowed) }))
+      .filter((group) => group.items.length > 0),
+    settings: settingsNav.filter(allowed),
+  };
 }

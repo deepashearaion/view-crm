@@ -33,7 +33,7 @@ interface LeadColumnOptions {
   onOpen: (contact: Contact) => void;
   onRescore: (contact: Contact) => void;
   onSetStage: (contact: Contact, stage: LifecycleStage) => void;
-  /** False for viewers: hides re-score and stage changes. */
+  /** contacts.edit: shows re-score and stage changes. */
   canEdit: boolean;
 }
 

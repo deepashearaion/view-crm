@@ -55,7 +55,7 @@ function toRows(stages: DealStage[]): StageFormValues['stages'] {
   }));
 }
 
-/** Add, rename, reorder, guide and remove pipeline stages (owner, admin, manager). */
+/** Add, rename, reorder, guide and remove pipeline stages (settings.edit). */
 export function ManageStagesDialog({ open, onOpenChange, stages }: ManageStagesDialogProps) {
   const save = useSaveStages();
   const form = useForm<StageFormValues, unknown, StageFormOutput>({

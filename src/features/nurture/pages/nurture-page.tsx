@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { permissions, useSessionRole } from '@/features/auth';
+import { useAccess } from '@/features/auth';
 import { useRecordSheetState } from '@/hooks/use-record-sheet-state';
 import { paths } from '@/routes/paths';
 import { errorMessage } from '@/services';
@@ -34,10 +34,17 @@ const DESCRIPTION = 'Automatic email and WhatsApp cadences; replies re-score the
 
 export default function NurturePage({ createOnMount = false }: { createOnMount?: boolean }) {
   const navigate = useNavigate();
-  const role = useSessionRole();
-  const canManage = permissions.canManageSettings(role);
-  const canEdit = permissions.canEdit(role);
-  const sequencesQuery = useNurtureSequences({ enabled: canManage });
+  const access = useAccess();
+  const canView = access.can('nurture', 'view');
+  // Managing sequences needs org-wide access; enrolling and stopping work on own contacts too.
+  const canCreateSequence = access.canAll('nurture', 'create');
+  const canEditSequence = access.canAll('nurture', 'edit');
+  const canDeleteSequence = access.canAll('nurture', 'delete');
+  const canEnroll = access.can('nurture', 'create');
+  const canStop = access.can('nurture', 'edit');
+  // `own` view scope: enrollments must be listed per contact.
+  const requireContact = access.scope('nurture', 'view') === 'own';
+  const sequencesQuery = useNurtureSequences({ enabled: access.ready && canView });
   const sequences = sequencesQuery.data ?? [];
   const toggle = useUpdateNurtureSequence();
   const deleteSequence = useDeleteNurtureSequence();
@@ -47,7 +54,7 @@ export default function NurturePage({ createOnMount = false }: { createOnMount?:
   const [enrollFor, setEnrollFor] = useState<{ sequenceId?: string } | null>(null);
   const [sheetState, setSheetState] = useRecordSheetState({
     param: 'sequence',
-    createOnMount: canManage && createOnMount,
+    createOnMount: canCreateSequence && createOnMount,
     listPath: paths.nurture,
   });
 
@@ -73,7 +80,7 @@ export default function NurturePage({ createOnMount = false }: { createOnMount?:
     );
   };
 
-  if (!canManage) {
+  if (!canView) {
     return (
       <div className="mx-auto w-full max-w-[1600px] space-y-6 p-4 sm:p-6">
         <PageHeader
@@ -81,18 +88,14 @@ export default function NurturePage({ createOnMount = false }: { createOnMount?:
           badges={<WorkflowBadge kind="ai" />}
           description={DESCRIPTION}
         />
-        <EmptyState
-          icon={Lock}
-          title="Only managers can manage sequences"
-          description="Owners, admins and managers create and edit nurture sequences. You can still check which sequences your contacts are in below."
-          className="py-8"
-        />
-        <section className="space-y-3" aria-labelledby="enrollments-heading">
-          <h2 id="enrollments-heading" className="font-heading text-lg font-semibold">
-            Enrollments
-          </h2>
-          <EnrollmentsPanel sequences={[]} requireContact={role === 'rep'} canEdit={canEdit} />
-        </section>
+        {access.ready && (
+          <EmptyState
+            icon={Lock}
+            title="You don’t have access to nurture sequences"
+            description="Ask an admin if you need to see sequences or enrollments."
+            className="py-8"
+          />
+        )}
       </div>
     );
   }
@@ -105,20 +108,24 @@ export default function NurturePage({ createOnMount = false }: { createOnMount?:
         description={DESCRIPTION}
         actions={
           <>
-            <Button
-              variant="outline"
-              disabled={!sequences.length}
-              onClick={() => {
-                setEnrollFor({});
-              }}
-            >
-              <UserPlus aria-hidden />
-              Enroll contact
-            </Button>
-            <Button onClick={newSequence}>
-              <Plus aria-hidden />
-              New sequence
-            </Button>
+            {canEnroll && (
+              <Button
+                variant="outline"
+                disabled={!sequences.length}
+                onClick={() => {
+                  setEnrollFor({});
+                }}
+              >
+                <UserPlus aria-hidden />
+                Enroll contact
+              </Button>
+            )}
+            {canCreateSequence && (
+              <Button onClick={newSequence}>
+                <Plus aria-hidden />
+                New sequence
+              </Button>
+            )}
           </>
         }
       />
@@ -167,10 +174,12 @@ export default function NurturePage({ createOnMount = false }: { createOnMount?:
               title="No sequences yet"
               description="Create a cadence of emails and WhatsApp messages that runs automatically for new leads, lost or won deals, or contacts you enroll by hand."
               actions={
-                <Button onClick={newSequence}>
-                  <Plus aria-hidden />
-                  New sequence
-                </Button>
+                canCreateSequence && (
+                  <Button onClick={newSequence}>
+                    <Plus aria-hidden />
+                    New sequence
+                  </Button>
+                )
               }
             />
           ) : (
@@ -180,6 +189,9 @@ export default function NurturePage({ createOnMount = false }: { createOnMount?:
                   key={sequence.id}
                   sequence={sequence}
                   togglePending={toggle.isPending && toggle.variables.id === sequence.id}
+                  canEdit={canEditSequence}
+                  canEnroll={canEnroll}
+                  canDelete={canDeleteSequence}
                   onToggleActive={(active) => {
                     toggleActive(sequence, active);
                   }}
@@ -199,20 +211,28 @@ export default function NurturePage({ createOnMount = false }: { createOnMount?:
         </TabsContent>
 
         <TabsContent value="enrollments" className="mt-4">
-          <EnrollmentsPanel sequences={sequences} requireContact={false} canEdit={canEdit} />
+          <EnrollmentsPanel
+            sequences={sequences}
+            requireContact={requireContact}
+            canEdit={canStop}
+          />
         </TabsContent>
       </Tabs>
 
-      <SequenceSheet state={sheetState} onStateChange={setSheetState} />
+      {(canCreateSequence || canEditSequence) && (
+        <SequenceSheet state={sheetState} onStateChange={setSheetState} />
+      )}
 
-      <EnrollContactDialog
-        open={enrollFor !== null}
-        onOpenChange={(open) => {
-          if (!open) setEnrollFor(null);
-        }}
-        sequences={sequences}
-        defaultSequenceId={enrollFor?.sequenceId}
-      />
+      {canEnroll && (
+        <EnrollContactDialog
+          open={enrollFor !== null}
+          onOpenChange={(open) => {
+            if (!open) setEnrollFor(null);
+          }}
+          sequences={sequences}
+          defaultSequenceId={enrollFor?.sequenceId}
+        />
+      )}
 
       <ConfirmDialog
         open={pendingDelete !== null}
