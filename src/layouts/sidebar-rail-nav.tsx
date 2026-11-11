@@ -11,7 +11,7 @@ import { isItemActive, type NavGroup, type NavItem } from '@/routes/nav';
 const CLOSE_DELAY_MS = 120;
 
 const entryClass =
-  'group/rail flex w-full flex-col items-center gap-1 rounded-md px-1 py-1.5 text-center outline-hidden focus-visible:ring-2 focus-visible:ring-sidebar-ring';
+  'group/rail flex w-full flex-col items-center gap-0.5 rounded-md px-1 py-1 text-center outline-hidden focus-visible:ring-2 focus-visible:ring-sidebar-ring';
 
 function RailTile({
   icon: Icon,
@@ -26,7 +26,7 @@ function RailTile({
     <>
       <span
         className={cn(
-          'flex size-10 items-center justify-center rounded-lg transition-colors [&_svg]:size-5',
+          'flex size-9 items-center justify-center rounded-lg transition-colors [&_svg]:size-[1.125rem]',
           active
             ? 'bg-primary text-primary-foreground'
             : 'bg-sidebar-accent text-sidebar-foreground group-hover/rail:bg-sidebar-accent/70',
@@ -36,7 +36,7 @@ function RailTile({
       </span>
       <span
         className={cn(
-          'line-clamp-2 w-full text-[0.68rem] leading-tight break-words',
+          'w-full truncate text-[0.68rem] leading-tight',
           active ? 'font-medium text-primary' : 'text-sidebar-foreground/80',
         )}
       >
@@ -46,12 +46,30 @@ function RailTile({
   );
 }
 
-function RailLink({ item, pathname }: { item: NavItem; pathname: string }) {
+/**
+ * A direct link. `label` overrides the item title so a one-item group shows its group heading
+ * (e.g. "Overview" for Home), matching the expanded menu.
+ */
+function RailLink({
+  item,
+  pathname,
+  label = item.title,
+}: {
+  item: NavItem;
+  pathname: string;
+  label?: string;
+}) {
   const active = isItemActive(item, pathname);
   return (
     <li>
-      <Link to={item.to} aria-current={active ? 'page' : undefined} className={entryClass}>
-        <RailTile icon={item.icon} label={item.title} active={active} />
+      <Link
+        to={item.to}
+        aria-current={active ? 'page' : undefined}
+        aria-label={label === item.title ? undefined : `${label}: ${item.title}`}
+        title={label === item.title ? undefined : item.title}
+        className={entryClass}
+      >
+        <RailTile icon={item.icon} label={label} active={active} />
       </Link>
     </li>
   );
@@ -150,11 +168,11 @@ export function RailNav({
 }) {
   return (
     <nav aria-label="Main">
-      <ul className={cn('flex flex-col gap-1.5', className)}>
+      <ul className={cn('flex flex-col gap-1', className)}>
         {groups.map((group) => {
           const [only, ...rest] = group.items;
           return only && rest.length === 0 ? (
-            <RailLink key={group.label} item={only} pathname={pathname} />
+            <RailLink key={group.label} item={only} pathname={pathname} label={group.label} />
           ) : (
             <RailFlyout key={group.label} group={group} pathname={pathname} />
           );
@@ -166,7 +184,7 @@ export function RailNav({
 
 export function RailItems({ items, pathname }: { items: NavItem[]; pathname: string }) {
   return (
-    <ul className="flex flex-col gap-1.5">
+    <ul className="flex flex-col gap-1">
       {items.map((item) => (
         <RailLink key={item.to} item={item} pathname={pathname} />
       ))}

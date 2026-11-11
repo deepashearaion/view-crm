@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 import {
@@ -23,8 +24,8 @@ import { RailItems, RailNav } from './sidebar-rail-nav';
 import { useVisibleNav } from './use-visible-nav';
 
 const legend = [
-  { label: 'Automatic (AI)', className: 'bg-ai-muted border-ai/40' },
-  { label: 'Human step', className: 'bg-human-muted border-human/40' },
+  { label: 'AI', className: 'bg-ai-muted border-ai/40' },
+  { label: 'Human', className: 'bg-human-muted border-human/40' },
   { label: 'Decision', className: 'bg-decision-muted border-decision/40' },
 ] as const;
 
@@ -40,7 +41,7 @@ function NavLinkItem({ item, pathname }: { item: NavItem; pathname: string }) {
   const isActive = isItemActive(item, pathname);
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
+      <SidebarMenuButton asChild isActive={isActive} tooltip={item.title} className="h-7.5">
         <Link to={item.to} aria-current={isActive ? 'page' : undefined}>
           <item.icon aria-hidden />
           <span>{item.title}</span>
@@ -66,6 +67,14 @@ export function AppSidebar() {
   const rail = state === 'collapsed' && !isMobile;
   const { groups: navGroups, settings: settingsNav } = useVisibleNav();
 
+  // Keep the current page's entry in view when the menu is taller than the screen.
+  const contentRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    contentRef.current
+      ?.querySelector('[aria-current="page"]')
+      ?.scrollIntoView({ block: 'nearest' });
+  }, [pathname, rail]);
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -86,13 +95,17 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent className="group-data-[collapsible=icon]:overflow-y-auto">
+      {/* A visible thin scrollbar shows there is more below on short screens. */}
+      <SidebarContent
+        ref={contentRef}
+        className="[scrollbar-width:thin] [scrollbar-color:var(--sidebar-border)_transparent] group-data-[collapsible=icon]:overflow-y-auto"
+      >
         {rail ? (
-          <RailNav groups={navGroups} pathname={pathname} className="px-1.5 py-2" />
+          <RailNav groups={navGroups} pathname={pathname} className="px-1.5 py-1.5" />
         ) : (
           navGroups.map((group) => (
-            <SidebarGroup key={group.label} className="py-1">
-              <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            <SidebarGroup key={group.label} className="py-0.5">
+              <SidebarGroupLabel className="h-6">{group.label}</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   {group.items.map((item) => (
@@ -117,7 +130,7 @@ export function AppSidebar() {
         )}
         <ul
           aria-label="Workflow legend"
-          className="space-y-1 px-2 pb-1 text-xs text-muted-foreground group-data-[collapsible=icon]:hidden"
+          className="flex flex-wrap gap-x-3 gap-y-1 px-2 pb-1 text-[0.7rem] text-muted-foreground group-data-[collapsible=icon]:hidden"
         >
           {legend.map((entry) => (
             <li key={entry.label} className="flex items-center gap-2">
