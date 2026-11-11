@@ -17,9 +17,10 @@ export {
   TEMPERATURES,
   leadStatusById,
   lifecycleStageById,
+  temperatureLabel,
   contactKeys,
 } from './constants';
-export { createContact, fetchContact, toContact } from './api/contacts';
+export { createContact, fetchContact, fetchContacts, toContact } from './api/contacts';
 export { createLead, rescoreLead, leadErrorMessage } from './api/lead-intake';
 export {
   useContact,

@@ -8,6 +8,7 @@ export type {
   DealStatus,
   StageKind,
 } from './types';
-export { dealKeys } from './constants';
+export { BILLING_PERIOD_LABELS, BILLING_TYPE_LABELS, dealKeys } from './constants';
+export { fetchDeals } from './api/deals';
 export { useDealForecast, useDealStages, useDeals } from './hooks/use-deals';
 export { dealsRoutes } from './routes';
