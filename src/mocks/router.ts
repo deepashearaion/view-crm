@@ -60,10 +60,14 @@ export async function dispatch(request: HttpRequest): Promise<unknown> {
   if (!found) {
     throw new HttpError(404, `No mock for ${request.method} ${request.path}`);
   }
-  // Clone so callers can never mutate the in-memory db through a response.
-  return structuredClone(
-    found.route.handler({ params: found.params, query: request.query ?? {}, body: request.body }),
-  );
+  // Handlers may be async (persisted modules). Clone so callers can never mutate the
+  // in-memory db through a response.
+  const result: unknown = await found.route.handler({
+    params: found.params,
+    query: request.query ?? {},
+    body: request.body,
+  });
+  return structuredClone(result);
 }
 
 /** Throw from a handler to produce an HTTP error response. */

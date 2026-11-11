@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { deleteFile, fetchFiles, uploadFile } from '../api/files';
+import { deleteFile, fetchFiles, setFileContact, uploadFile } from '../api/files';
 import type { FileCategory, StoredFile } from '../types';
 
-const fileKeys = { all: ['files'] as const };
+export const fileKeys = { all: ['files'] as const };
 
 export function useFiles() {
   return useQuery({ queryKey: fileKeys.all, queryFn: ({ signal }) => fetchFiles(signal) });
@@ -12,8 +12,19 @@ export function useFiles() {
 export function useUploadFiles() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ files, category }: { files: File[]; category: FileCategory }) => {
-      const results = await Promise.allSettled(files.map((file) => uploadFile(file, category)));
+    mutationFn: async ({
+      files,
+      category,
+      contactId = null,
+    }: {
+      files: File[];
+      category: FileCategory;
+      /** Attach the uploads to this contact. */
+      contactId?: string | null;
+    }) => {
+      const results = await Promise.allSettled(
+        files.map((file) => uploadFile(file, category, contactId)),
+      );
       return {
         uploaded: results.flatMap((result) =>
           result.status === 'fulfilled' ? [result.value] : [],
@@ -25,6 +36,19 @@ export function useUploadFiles() {
     },
     onSuccess: ({ uploaded }) => {
       queryClient.setQueryData<StoredFile[]>(fileKeys.all, (files = []) => [...uploaded, ...files]);
+    },
+  });
+}
+
+export function useSetFileContact() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, contactId }: { id: string; contactId: string | null }) =>
+      setFileContact(id, contactId),
+    onSuccess: (updated) => {
+      queryClient.setQueryData<StoredFile[]>(fileKeys.all, (files) =>
+        files?.map((file) => (file.id === updated.id ? updated : file)),
+      );
     },
   });
 }

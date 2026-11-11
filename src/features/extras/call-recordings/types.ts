@@ -23,6 +23,19 @@ export interface CallDto {
   started_at: string;
   duration_seconds: number;
   recording_url: string | null;
+  /** Missing on calls from the telephony feed. */
+  notes?: string;
+}
+
+/** POST /api/calls body: a call logged by hand (e.g. from a contact). */
+export interface CallLogRequest {
+  direction: CallDirection;
+  outcome: CallOutcome;
+  phone: string;
+  contact_id: number | null;
+  started_at: string;
+  duration_seconds: number;
+  notes?: string;
 }
 
 export interface Call {
@@ -35,4 +48,5 @@ export interface Call {
   startedAt: string;
   durationSeconds: number;
   recordingUrl: string | null;
+  notes: string;
 }

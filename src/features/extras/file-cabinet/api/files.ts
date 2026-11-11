@@ -12,6 +12,8 @@ export function toStoredFile(dto: StoredFileDto): StoredFile {
     mimeType: dto.mime_type,
     category: dto.category,
     ownerId: dto.owner_id === null ? null : String(dto.owner_id),
+    contactId:
+      dto.contact_id === null || dto.contact_id === undefined ? null : String(dto.contact_id),
     url: dto.url,
     uploadedAt: dto.uploaded_at,
   };
@@ -22,11 +24,25 @@ export async function fetchFiles(signal?: AbortSignal): Promise<StoredFile[]> {
   return response.files.map(toStoredFile);
 }
 
-export async function uploadFile(file: File, category: FileCategory): Promise<StoredFile> {
+export async function uploadFile(
+  file: File,
+  category: FileCategory,
+  contactId: string | null = null,
+): Promise<StoredFile> {
   const form = new FormData();
   form.append('file', file);
   form.append('category', category);
+  if (contactId) form.append('contact_id', contactId);
   const response = await http.upload<{ file: StoredFileDto }>('/api/files', form);
+  return toStoredFile(response.file);
+}
+
+/** Links a file to a contact, or unlinks it with null. */
+export async function setFileContact(id: string, contactId: string | null): Promise<StoredFile> {
+  const response = await http.patch<{ file: StoredFileDto }>(
+    `/api/files/${encodeURIComponent(id)}`,
+    { contact_id: contactId === null ? null : Number(contactId) },
+  );
   return toStoredFile(response.file);
 }
 

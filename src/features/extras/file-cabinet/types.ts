@@ -18,6 +18,8 @@ export interface StoredFileDto {
   mime_type: string;
   category: FileCategory;
   owner_id: number | null;
+  /** The contact this file belongs to, if any. */
+  contact_id?: number | null;
   url: string | null;
   uploaded_at: string;
 }
@@ -29,6 +31,7 @@ export interface StoredFile {
   mimeType: string;
   category: FileCategory;
   ownerId: string | null;
+  contactId: string | null;
   url: string | null;
   uploadedAt: string;
 }

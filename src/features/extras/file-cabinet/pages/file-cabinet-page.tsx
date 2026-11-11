@@ -1,6 +1,17 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import { Download, FileText, FolderOpen, Image, Trash2, Upload } from 'lucide-react';
+import {
+  Download,
+  FileText,
+  FolderOpen,
+  Image,
+  Link2,
+  Trash2,
+  Upload,
+  UserRound,
+  X,
+} from 'lucide-react';
 import { useId, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import {
@@ -25,11 +36,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useUserLookup, type User } from '@/features/auth';
+import { useContacts } from '@/features/contacts';
 import { formatDateTime } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { paths } from '@/routes/paths';
+import { errorMessage } from '@/services';
+
+import { ContactPickerDialog } from '../../components/contact-picker-dialog';
 
 import { formatBytes, MAX_UPLOAD_BYTES } from '../api/files';
-import { useDeleteFile, useFiles, useUploadFiles } from '../hooks/use-files';
+import { useDeleteFile, useFiles, useSetFileContact, useUploadFiles } from '../hooks/use-files';
 import { FILE_CATEGORIES, type FileCategory, type StoredFile } from '../types';
 
 const ALL = 'all';
@@ -40,6 +56,8 @@ function categoryLabel(value: FileCategory) {
 
 function getColumns(
   users: Map<string, User>,
+  contactName: (id: string) => string,
+  onLinkContact: (file: StoredFile) => void,
   onDelete: (file: StoredFile) => void,
 ): ColumnDef<StoredFile>[] {
   return [
@@ -58,6 +76,24 @@ function getColumns(
           </div>
         );
       },
+    },
+    {
+      id: 'contact',
+      accessorFn: (file) => (file.contactId ? contactName(file.contactId) : ''),
+      meta: { label: 'Contact' },
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Contact" />,
+      cell: ({ row }) =>
+        row.original.contactId ? (
+          <Link
+            to={`${paths.contacts}/${row.original.contactId}`}
+            className="inline-flex max-w-48 items-center gap-1.5 truncate font-medium text-primary hover:underline"
+          >
+            <UserRound aria-hidden className="size-3.5 shrink-0" />
+            <span className="truncate">{contactName(row.original.contactId)}</span>
+          </Link>
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        ),
     },
     {
       id: 'category',
@@ -114,7 +150,15 @@ function getColumns(
             label={`Actions for ${row.original.name}`}
             actions={[
               {
+                label: row.original.contactId ? 'Change contact' : 'Link to contact',
+                icon: Link2,
+                onSelect: () => {
+                  onLinkContact(row.original);
+                },
+              },
+              {
                 label: 'Delete',
+                separatorBefore: true,
                 icon: Trash2,
                 destructive: true,
                 onSelect: () => {
@@ -140,6 +184,18 @@ export default function FileCabinetPage() {
   const [uploadTo, setUploadTo] = useState<FileCategory>('documents');
   const [search, setSearch] = useState('');
   const [pendingDelete, setPendingDelete] = useState<StoredFile | null>(null);
+  const { data: contacts = [] } = useContacts();
+  const setFileContact = useSetFileContact();
+  /** New uploads go to this contact (optional). */
+  const [uploadContactId, setUploadContactId] = useState<string | null>(null);
+  /** The file being linked, or 'upload' while choosing the contact for new uploads. */
+  const [picking, setPicking] = useState<StoredFile | 'upload' | null>(null);
+
+  const contactNames = useMemo(
+    () => new Map(contacts.map((contact) => [contact.id, contact.fullName])),
+    [contacts],
+  );
+  const contactName = (id: string) => contactNames.get(id) || `Contact #${id}`;
 
   const byCategory = useMemo(() => {
     const map = new Map<FileCategory, { count: number; bytes: number }>();
@@ -154,7 +210,40 @@ export default function FileCabinetPage() {
     () => (folder === ALL ? files : files.filter((file) => file.category === folder)),
     [files, folder],
   );
-  const columns = useMemo(() => getColumns(users, setPendingDelete), [users]);
+  const columns = useMemo(
+    () =>
+      getColumns(
+        users,
+        (id) => contactNames.get(id) || `Contact #${id}`,
+        setPicking,
+        setPendingDelete,
+      ),
+    [users, contactNames],
+  );
+
+  const onPickContact = (contactId: string | null) => {
+    if (picking === 'upload') {
+      setUploadContactId(contactId);
+      setPicking(null);
+      return;
+    }
+    if (!picking) return;
+    const file = picking;
+    setFileContact.mutate(
+      { id: file.id, contactId },
+      {
+        onSuccess: () => {
+          toast.success(
+            contactId
+              ? `“${file.name}” linked to ${contactName(contactId)}.`
+              : `“${file.name}” is no longer linked to a contact.`,
+          );
+          setPicking(null);
+        },
+        onError: (err) => toast.error(errorMessage(err, 'Couldn’t update the file.')),
+      },
+    );
+  };
 
   const handleFiles = (list: FileList | null) => {
     const selected = Array.from(list ?? []);
@@ -172,12 +261,14 @@ export default function FileCabinetPage() {
       return;
     }
     upload.mutate(
-      { files: selected, category: uploadTo },
+      { files: selected, category: uploadTo, contactId: uploadContactId },
       {
         onSuccess: ({ uploaded, failed }) => {
           if (uploaded.length)
             toast.success(
-              `Uploaded ${String(uploaded.length)} file${uploaded.length === 1 ? '' : 's'}.`,
+              `Uploaded ${String(uploaded.length)} file${uploaded.length === 1 ? '' : 's'}${
+                uploadContactId ? ` to ${contactName(uploadContactId)}` : ''
+              }.`,
             );
           if (failed.length) toast.error(`Couldn’t upload ${failed.join(', ')}.`);
         },
@@ -192,6 +283,33 @@ export default function FileCabinetPage() {
         description="Shared documents, images and knowledge-base articles for your team and bots."
         actions={
           <>
+            {uploadContactId ? (
+              <span className="inline-flex h-9 items-center gap-1 rounded-md border pr-1 pl-2.5 text-sm">
+                <UserRound aria-hidden className="size-3.5 text-muted-foreground" />
+                <span className="max-w-40 truncate">{contactName(uploadContactId)}</span>
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  aria-label="Don’t attach uploads to a contact"
+                  onClick={() => {
+                    setUploadContactId(null);
+                  }}
+                >
+                  <X aria-hidden />
+                </Button>
+              </span>
+            ) : (
+              <Button
+                variant="outline"
+                className="h-9"
+                onClick={() => {
+                  setPicking('upload');
+                }}
+              >
+                <Link2 aria-hidden />
+                Attach to contact
+              </Button>
+            )}
             <Select
               value={uploadTo}
               onValueChange={(value) => {
@@ -301,6 +419,30 @@ export default function FileCabinetPage() {
             }
           />
         }
+      />
+
+      <ContactPickerDialog
+        open={picking !== null}
+        onOpenChange={(open) => {
+          if (!open) setPicking(null);
+        }}
+        title={
+          picking === 'upload'
+            ? 'Attach uploads to a contact'
+            : picking?.contactId
+              ? 'Change contact'
+              : 'Link to a contact'
+        }
+        description={
+          picking === 'upload'
+            ? 'Files you upload next will appear in this contact’s Files tab.'
+            : picking
+              ? `“${picking.name}” will appear in the contact’s Files tab.`
+              : undefined
+        }
+        currentContactId={picking === 'upload' ? uploadContactId : (picking?.contactId ?? null)}
+        onSelect={onPickContact}
+        pending={setFileContact.isPending}
       />
 
       <ConfirmDialog

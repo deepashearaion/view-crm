@@ -29,6 +29,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAccess, useUserLookup } from '@/features/auth';
 import { useCompanyLookup } from '@/features/companies';
+import { ContactCallsPanel, ContactFilesPanel, useContactRecordCounts } from '@/features/extras';
 import type { RecordSheetState } from '@/hooks/use-record-sheet-state';
 import { formatDateTime } from '@/lib/format';
 import { applyProblem, errorMessage } from '@/services';
@@ -244,6 +245,48 @@ function toastLeadResult({ lead, contact, followUpError }: CreateLeadResult) {
     });
 }
 
+function TabCount({ value }: { value: number | undefined }) {
+  if (!value) return null;
+  return (
+    <span className="rounded-full bg-muted px-1.5 text-[0.7rem] leading-4 font-medium text-muted-foreground tabular-nums">
+      {value}
+    </span>
+  );
+}
+
+/** Details, activity timeline, and the contact's files and calls. */
+function ContactViewTabs({ contact, canEdit }: { contact: Contact; canEdit: boolean }) {
+  const counts = useContactRecordCounts(contact);
+  return (
+    <Tabs defaultValue="details" className="gap-4">
+      <TabsList className="max-w-full flex-wrap">
+        <TabsTrigger value="details">Details</TabsTrigger>
+        <TabsTrigger value="activity">Activity</TabsTrigger>
+        <TabsTrigger value="files" className="gap-1.5">
+          Files
+          <TabCount value={counts.files} />
+        </TabsTrigger>
+        <TabsTrigger value="calls" className="gap-1.5">
+          Calls
+          <TabCount value={counts.calls} />
+        </TabsTrigger>
+      </TabsList>
+      <TabsContent value="details">
+        <ContactDetails contact={contact} canEdit={canEdit} />
+      </TabsContent>
+      <TabsContent value="activity">
+        <ContactTimeline contactId={contact.id} canEdit={canEdit} />
+      </TabsContent>
+      <TabsContent value="files">
+        <ContactFilesPanel contact={contact} canEdit={canEdit} />
+      </TabsContent>
+      <TabsContent value="calls">
+        <ContactCallsPanel contact={contact} canEdit={canEdit} />
+      </TabsContent>
+    </Tabs>
+  );
+}
+
 export function ContactSheet({ state, onStateChange }: ContactSheetProps) {
   const access = useAccess();
   const canCreate = access.can('contacts', 'create');
@@ -395,18 +438,7 @@ export function ContactSheet({ state, onStateChange }: ContactSheetProps) {
                 </form>
               ) : contact ? (
                 // Keyed so each newly opened contact starts on Details.
-                <Tabs key={contact.id} defaultValue="details" className="gap-4">
-                  <TabsList>
-                    <TabsTrigger value="details">Details</TabsTrigger>
-                    <TabsTrigger value="activity">Activity</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="details">
-                    <ContactDetails contact={contact} canEdit={canEdit} />
-                  </TabsContent>
-                  <TabsContent value="activity">
-                    <ContactTimeline contactId={contact.id} canEdit={canEdit} />
-                  </TabsContent>
-                </Tabs>
+                <ContactViewTabs key={contact.id} contact={contact} canEdit={canEdit} />
               ) : (
                 <div className="space-y-3">
                   {Array.from({ length: 6 }, (_, index) => (

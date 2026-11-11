@@ -1,11 +1,14 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import { PhoneCall, PhoneIncoming, PhoneOutgoing, Timer } from 'lucide-react';
+import { Link2, PhoneCall, PhoneIncoming, PhoneOutgoing, Timer } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
 
 import {
   DataTable,
   DataTableColumnHeader,
   DataTableFacetedFilter,
+  DataTableRowActions,
   facetFilterFn,
 } from '@/components/data/data-table';
 import { DatePresetSelect } from '@/components/data/date-preset-select';
@@ -16,37 +19,60 @@ import { UserChip } from '@/components/data/user-chip';
 import { EmptyState } from '@/components/feedback/empty-state';
 import { Badge } from '@/components/ui/badge';
 import { useUserLookup, useUsers, type User } from '@/features/auth';
-import { useContacts } from '@/features/contacts';
+import { useContacts, type Contact } from '@/features/contacts';
 import { isWithinPreset, type DatePreset } from '@/lib/date-range';
 import { formatDateTime } from '@/lib/format';
+import { paths } from '@/routes/paths';
+import { errorMessage } from '@/services';
 
-import { formatDuration } from '../api/calls';
-import { useCalls } from '../hooks/use-calls';
+import { ContactPickerDialog } from '../../components/contact-picker-dialog';
+import { createCallContactResolver, formatDuration } from '../api/calls';
+import { useCalls, useSetCallContact } from '../hooks/use-calls';
 import { CALL_DIRECTIONS, CALL_OUTCOMES, type Call } from '../types';
+
+type ResolveContact = (call: Call) => { contact: Contact; matchedBy: 'link' | 'phone' } | undefined;
 
 function getColumns(
   users: Map<string, User>,
-  contactName: (id: string | null) => string | undefined,
+  resolve: ResolveContact,
+  onLinkContact: (call: Call) => void,
 ): ColumnDef<Call>[] {
   return [
     {
       id: 'contact',
-      accessorFn: (call) => contactName(call.contactId) ?? call.phone,
+      // Name and number are both searchable.
+      accessorFn: (call) => `${resolve(call)?.contact.fullName ?? ''} ${call.phone}`,
       meta: { label: 'Contact' },
       enableHiding: false,
       header: ({ column }) => <DataTableColumnHeader column={column} title="Contact" />,
       cell: ({ row }) => {
         const Icon = row.original.direction === 'inbound' ? PhoneIncoming : PhoneOutgoing;
+        const match = resolve(row.original);
         return (
           <div className="flex items-center gap-2.5">
-            <span className="flex size-7 items-center justify-center rounded-md bg-muted text-muted-foreground">
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
               <Icon aria-label={row.original.direction} className="size-3.5" />
             </span>
             <div className="min-w-0">
-              <p className="truncate font-medium">
-                {contactName(row.original.contactId) ?? 'Unknown caller'}
+              {match ? (
+                <Link
+                  to={`${paths.contacts}/${match.contact.id}`}
+                  className="block truncate font-medium text-primary hover:underline"
+                  title={
+                    match.matchedBy === 'phone'
+                      ? 'Matched by phone number. Open the contact.'
+                      : 'Open the contact'
+                  }
+                >
+                  {match.contact.fullName || `Contact #${match.contact.id}`}
+                </Link>
+              ) : (
+                <p className="truncate font-medium text-muted-foreground">Unknown caller</p>
+              )}
+              <p className="text-xs text-muted-foreground tabular-nums">
+                {row.original.phone}
+                {match?.matchedBy === 'phone' && ' · matched by number'}
               </p>
-              <p className="text-xs text-muted-foreground tabular-nums">{row.original.phone}</p>
             </div>
           </div>
         );
@@ -117,6 +143,27 @@ function getColumns(
           </span>
         ),
     },
+    {
+      id: 'actions',
+      enableHiding: false,
+      enableSorting: false,
+      meta: { className: 'w-12 text-right' },
+      header: () => <span className="sr-only">Actions</span>,
+      cell: ({ row }) => (
+        <DataTableRowActions
+          label={`Actions for the call on ${formatDateTime(row.original.startedAt)}`}
+          actions={[
+            {
+              label: row.original.contactId ? 'Change contact' : 'Link to contact',
+              icon: Link2,
+              onSelect: () => {
+                onLinkContact(row.original);
+              },
+            },
+          ]}
+        />
+      ),
+    },
   ];
 }
 
@@ -128,18 +175,29 @@ export default function CallRecordingsPage() {
   const [search, setSearch] = useState('');
   const [datePreset, setDatePreset] = useState<DatePreset>('all_time');
 
-  const contactNames = useMemo(
-    () => new Map(contacts.map((contact) => [contact.id, contact.fullName])),
-    [contacts],
-  );
+  const setCallContact = useSetCallContact();
+  const [linking, setLinking] = useState<Call | null>(null);
+
+  const resolve = useMemo(() => createCallContactResolver(contacts), [contacts]);
   const scoped = useMemo(
     () => calls.filter((call) => isWithinPreset(call.startedAt, datePreset)),
     [calls, datePreset],
   );
-  const columns = useMemo(
-    () => getColumns(users, (id) => (id ? contactNames.get(id) : undefined)),
-    [users, contactNames],
-  );
+  const columns = useMemo(() => getColumns(users, resolve, setLinking), [users, resolve]);
+
+  const onPickContact = (contactId: string | null) => {
+    if (!linking) return;
+    setCallContact.mutate(
+      { id: linking.id, contactId },
+      {
+        onSuccess: () => {
+          toast.success(contactId ? 'Call linked to the contact.' : 'Call unlinked.');
+          setLinking(null);
+        },
+        onError: (err) => toast.error(errorMessage(err, 'Couldn’t update the call.')),
+      },
+    );
+  };
 
   const stats = useMemo(() => {
     const connected = scoped.filter((call) => call.outcome === 'connected');
@@ -229,6 +287,22 @@ export default function CallRecordingsPage() {
             className="border-none"
           />
         }
+      />
+
+      <ContactPickerDialog
+        open={linking !== null}
+        onOpenChange={(open) => {
+          if (!open) setLinking(null);
+        }}
+        title={linking?.contactId ? 'Change contact' : 'Link to a contact'}
+        description={
+          linking
+            ? `The call with ${linking.phone} will appear in the contact’s Calls tab.`
+            : undefined
+        }
+        currentContactId={linking?.contactId ?? null}
+        onSelect={onPickContact}
+        pending={setCallContact.isPending}
       />
     </div>
   );
