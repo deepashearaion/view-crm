@@ -25,6 +25,8 @@ export function useMe() {
 export interface Access {
   /** False until /me has loaded; everything is denied meanwhile. */
   ready: boolean;
+  /** /me failed and nothing is cached: permissions are unknown, so screens can say so. */
+  failed: boolean;
   /** Allowed at any scope (`own` or `all`). */
   can: (module: PermissionModule, action: PermissionAction) => boolean;
   /** Allowed org-wide (`all`): reassign owners, manage sequences, see everyone's figures. */
@@ -37,15 +39,17 @@ export interface Access {
  * buttons; the server enforces every rule anyway.
  */
 export function useAccess(): Access {
-  const { data } = useMe();
+  const { data, isError } = useMe();
   const permissions = data?.permissions;
+  const failed = data === undefined && isError;
   return useMemo(
     () => ({
       ready: data !== undefined,
+      failed,
       can: (module, action) => can(permissions, module, action),
       canAll: (module, action) => canAll(permissions, module, action),
       scope: (module, action) => scopeOf(permissions, module, action),
     }),
-    [data, permissions],
+    [data, failed, permissions],
   );
 }

@@ -1,4 +1,4 @@
-import { Lock, ShieldCheck, Users, type LucideIcon } from 'lucide-react';
+import { AlertTriangle, Lock, ShieldCheck, Users, type LucideIcon } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 
 import { PageHeader } from '@/components/data/page-header';
@@ -52,7 +52,13 @@ export default function SettingsPage() {
         description="Who can sign in, and what each role can see and change."
       />
 
-      {!access.ready ? (
+      {access.failed ? (
+        <EmptyState
+          icon={AlertTriangle}
+          title="Couldn’t load your permissions"
+          description="Settings needs to know your role before it can show users and roles. See the message above, then retry."
+        />
+      ) : !access.ready ? (
         <SettingsSkeleton />
       ) : !tab ? (
         <EmptyState
